@@ -1,0 +1,3 @@
+[submodule "ofBBController/externalAddons/ofxAnimatable"]
+	path = ofBBController/externalAddons/ofxAnimatable
+	url = https://github.com/armadillu/ofxAnimatable
