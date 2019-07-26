@@ -1,0 +1,1 @@
+externalAddons/ofxAnimatable
