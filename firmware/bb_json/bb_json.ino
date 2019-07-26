@@ -11,6 +11,7 @@
 struct cmd {
   byte _cmd;
   long _time;
+  byte _set; 
 };
 
 const int CMD_OPEN = 0;
@@ -19,25 +20,28 @@ const int CMD_TAIL_ON = 2;
 const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
 
-long _runningTime;
+long  _runningTime;
+int   nextCmdIndex;
+int   numCmd;
+
+
 
 cmd *arrCmd;
 
 void setup() {
 
   // Initialize serial port
-  Serial.begin(9600);
+  Serial.begin(57600);
   while (!Serial) continue;
 
-
-
+  StaticJsonDocument<500> objCmd;
   
   // Allocate the JSON document
   //
   // Inside the brackets, 200 is the capacity of the memory pool in bytes.
   // Don't forget to change this value to match your JSON document.
   // Use arduinojson.org/v6/assistant to compute the capacity.
-  StaticJsonDocument<1000> doc;
+  
 
   // StaticJsonDocument<N> allocates memory on the stack, it can be
   // replaced by DynamicJsonDocument which allocates in the heap.
@@ -56,13 +60,16 @@ void setup() {
   char json[] = "["\
     "{\"cmd\":0,\"time\":0,\"set\":[0,1]},"\
     "{\"cmd\":1,\"time\":1000,\"set\":[0,1]},"\
-    "{\"cmd\":2,\"time\":1500,\"set\":[0]},"\
-    "{\"cmd\":3,\"time\":4000,\"set\":[1]},"\
-    "{\"cmd\":4,\"time\":5000,\"set\":[0,1]},"\
+    "{\"cmd\":2,\"time\":2000,\"set\":[0]},"\
+    "{\"cmd\":3,\"time\":3000,\"set\":[1]},"\
+    "{\"cmd\":4,\"time\":4000,\"set\":[1]},"\
+    "{\"cmd\":5,\"time\":5000,\"set\":[1]},"\
+    "{\"cmd\":6,\"time\":6000,\"set\":[1]},"\
+    "{\"cmd\":7,\"time\":7000,\"set\":[1]}"\
   "]";
  
   // Deserialize the JSON document
-  DeserializationError error = deserializeJson(doc, json);
+  DeserializationError error = deserializeJson(objCmd, json);
 
   // Test if parsing succeeds.
   if (error) {
@@ -71,21 +78,23 @@ void setup() {
     return;
   }
 
-  /*
   //Get the size of the JSON
-  int _cmdLength = doc.size();
+  numCmd = objCmd.size();
 
   //Create array of commands
-  arrCmd = (cmd*)malloc(sizeof(cmd) * _cmdLength);
+  arrCmd = (cmd*)malloc(sizeof(cmd) * numCmd);
 
   //Create array of cmd objects
-  for (int i=0; i<_cmdLength; i++) {
+  for (int i=0; i<numCmd; i++) {
     
-    arrCmd[i] = cmd{10*i, 2};
+    arrCmd[i] = cmd {
+      (byte)objCmd[i]["cmd"], 
+      (long)objCmd[i]["time"], 
+      (byte)objCmd[i]["set"][0]
+    };
 
-    Serial.println(arrCmd[i]._time);
+    Serial.println((byte)objCmd[i]["cmd"]);
   }
-  */
   
   // Fetch values.
   //
@@ -103,19 +112,37 @@ void setup() {
   Serial.println(latitude, 6);
   Serial.println(longitude, 6);
   */
-  
+
+
   _runningTime = millis();
-  _nextCmdIndex = 0;
+  nextCmdIndex = 0;
 
 }
 
 void loop() {
 
   // not used in this example
-  if (millis() > _runningTime + doc[_nextCmdIndex].time) {
+  if ((millis() > _runningTime + arrCmd[nextCmdIndex]._time) ) {
 
-     _nextCmdIndex++;
+    Serial.println((_runningTime + arrCmd[nextCmdIndex]._time));
+    Serial.println(millis());
+    Serial.println(nextCmdIndex);
+    Serial.println();
+ 
+    //Serial.println(arrCmd[nextCmdIndex]._cmd);
+    //Serial.println(arrCmd[nextCmdIndex]._set);
+
+    //_runningTime = millis();
+    nextCmdIndex++;
+
+    if (nextCmdIndex >= numCmd) {
+      Serial.println("DONE");
+      nextCmdIndex = 0;
+      _runningTime = millis();
+    }
+
   }
+
 
 }
 
