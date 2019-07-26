@@ -1,1 +1,2 @@
 externalAddons/ofxAnimatable
+externalAddons/ofxJson

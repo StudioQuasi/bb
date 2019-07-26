@@ -1,9 +1,12 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxAnimatableFloat.h"
+#include "ofxJSON.h"
 
 const int STATE_WAIT = 0;
-const int STATE_PLAY = 1;
+const int STATE_RECORD = 1;
+const int STATE_PLAYBACK = 2;
 
 const int CMD_MOUTH_OPEN = 0;
 const int CMD_MOUTH_CLOSE = 1;
@@ -11,18 +14,25 @@ const int CMD_TAIL_ON = 2;
 const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
 
-struct cmd {
+struct bbcmd {
 
-    int cmdID;
-    long int timecode;
+    int cmd;
+    float timecode;
+    bool b1;
+    bool b2;
     
-    cmd(
+    bbcmd(
         int _cmdID,
-        long int _timecode
+        float _timecode,
+        bool _b1,
+        bool _b2
     )
     {
-        cmdID = _cmdID;
+
+        cmd = _cmdID;
         timecode = _timecode;
+        b1 = _b1;
+        b2 = _b2;
     }
 };
 
@@ -45,19 +55,29 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
+    ofxJSONElement result;
+
+    void writeJsonFile();
+    void readJsonFile();
 
     int state;
     ofSoundPlayer   playerSound;
     long int timeCode;
     bool isPaused;
 
-    vector<cmd> arrCmds;
+    vector<bbcmd> arrCmds;
 
     ofJson stroke;
-    ofTrueTypeFont ttf;
+    ofTrueTypeFont ttf, ttf_side;
     ofPath path;
 
     string soundFileName;
     
-    float 
+    ofxAnimatableFloat animMouth;
+    bool _keyOff = true;
+    
+    string arrCmdNames[5];
+    
+    string arrStateNames[3];
+    
 };
