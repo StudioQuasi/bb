@@ -4,8 +4,11 @@
 void ofApp::setup(){
 
     state = STATE_WAIT;
-
-    soundFileName = "hallandoats_icant.mp3";
+    
+    soundFileName = "hallandoats.mp3";
+    
+    ofLog() << ofToDataPath(soundFileName);
+    
     playerSound.load(ofToDataPath(soundFileName));
     
     isPaused = false;
@@ -32,14 +35,122 @@ void ofApp::setup(){
     arrStateNames[0] = "WAIT";
     arrStateNames[1] = "RECORD";
     arrStateNames[2] = "PLAYBACK";
+    
+    nextCmdIndex = 0;
+
+    //Set up Serial
+    serial.listDevices();
+    vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
+
+    int baud = 57600;
+    serial.setup(0, baud); //open the first device
+    
+    bTailOn = false;
+    nextTail = 0;
+    
+    isFlipping = false;
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
+    
     float dt = 1.0f / 60.0f;
-
     animMouth.update(dt);
+    
+    if (state == STATE_PLAYBACK) {
+        
+        float _n = arrCmds[nextCmdIndex].timecode;
+        
+        float _t = ofGetElapsedTimef() - timeCode;
+        if (_t > _n) {
+            
+            ofLog() << _t << " " << _n;
+
+            //Handle commands
+            bool b1 = false;
+            bool b2 = false;
+
+            //Serial.println(arrCmds[nextCmdIndex].cmd);
+            //Serial.println(arrCmds[nextCmdIndex].b1);
+            arrPlayedCmds.push_back(arrCmds[nextCmdIndex]);
+            
+            
+            switch (arrCmds[nextCmdIndex].cmd) {
+                    
+                case CMD_MOUTH_OPEN:
+                    
+                    if (arrCmds[nextCmdIndex].b1)
+                        serial.writeByte('1');
+                    if (arrCmds[nextCmdIndex].b2)
+                        serial.writeByte('2');
+                    break;
+                    
+                case CMD_MOUTH_CLOSE:
+                    
+                    if (arrCmds[nextCmdIndex].b1)
+                        serial.writeByte('3');
+                    if (arrCmds[nextCmdIndex].b2)
+                        serial.writeByte('4');
+                    break;
+                    
+                    /*
+                 case CMD_TAIL_ON:
+                    
+                    if (arrCmd[nextCmdIndex].b1)
+                        runMotor(BASS_1_TAIL, BACKWARD, 255);
+                    if (arrCmd[nextCmdIndex].b2)
+                        runMotor(BASS_2_TAIL, BACKWARD, 255);
+                    break;
+                    
+                case CMD_HEAD_ON:
+                    
+                    if (arrCmd[nextCmdIndex].b1)
+                        runMotor(BASS_1_TAIL, FORWARD, 255);
+                    if (arrCmd[nextCmdIndex].b2)
+                        runMotor(BASS_2_TAIL, FORWARD, 255);
+                    break;
+                    
+                case CMD_BODY_OFF:
+                    
+                    if (arrCmd[nextCmdIndex].b1)
+                        runMotor(BASS_1_TAIL, RELEASE, 0);
+                    if (arrCmd[nextCmdIndex].b2)
+                        runMotor(BASS_2_TAIL, RELEASE, 0);
+                    break;
+                    
+                */
+            }
+        
+            nextCmdIndex++;
+        }
+    }
+    
+    if (state == STATE_RECORD) {
+        
+        if (ofGetElapsedTimef() > nextTail && isFlipping) {
+            
+            float _t = ofGetElapsedTimef() - timeCode;
+            
+            if (bTailOn) {
+                arrCmds.push_back(bbcmd(CMD_TAIL_ON, _t, true, true));
+                serial.writeByte('5');
+                serial.writeByte('6');
+                
+                nextTail = ofGetElapsedTimef() + .1;
+            }
+            else
+            {
+                arrCmds.push_back(bbcmd(CMD_BODY_OFF, _t, true, true));
+                serial.writeByte('9');
+                serial.writeByte('0');
+                
+                nextTail = ofGetElapsedTimef() + 1.2;
+            }
+            
+            
+            bTailOn = !bTailOn;
+        }
+    }
 }
 
 void ofApp::readJsonFile() {
@@ -52,15 +163,30 @@ void ofApp::readJsonFile() {
         file >> js;
         arrCmds.clear();
 
+        int _count = 0;
         for(auto & _cmd: js){
 
-            ofLog() << _cmd;
-
+            //ofLog() << _cmd;
             arrCmds.push_back(bbcmd(_cmd["cmd"],_cmd["timecode"],true,false));
-
+            _count++;
         }
-        //calculateText();
+        
+        ofLog() << "* Read " << _count;
+
     }
+    
+    //Set state to Playback
+    state = STATE_PLAYBACK;
+    
+    timeCode = ofGetElapsedTimef();
+    
+    playerSound.stop();
+    playerSound.play();
+    playerSound.setPosition(.17);
+    
+    nextCmdIndex = 0;
+    arrPlayedCmds.clear();
+
 }
 
 void ofApp::writeJsonFile() {
@@ -74,18 +200,23 @@ void ofApp::writeJsonFile() {
 
         _cmd["cmd"] = arrCmds[i].cmd;
         _cmd["timecode"] = arrCmds[i].timecode;
-        
-        _arrBB.append(Json::Value(0));
-        _arrBB.append(Json::Value(1));
+
+        if (arrCmds[i].b1)
+            _arrBB.append(Json::Value(0));
+
+        if (arrCmds[i].b2)
+            _arrBB.append(Json::Value(1));
+
         _cmd["set"] = _arrBB;
-        
+
         ofLog() << arrCmds[i].cmd << "\t" << arrCmds[i].timecode;
-        
+
         arrCommands.append(_cmd);
     }
-    
+
     ofLog() << arrCommands;
-    
+    ofLog() << "* Write " << arrCmds.size();
+
     /*
     //Write the file
     ofFile _file;
@@ -110,15 +241,16 @@ void ofApp::writeJsonFile() {
 void ofApp::draw(){
 
     ofSetColor(0);
-    ttf.drawString(soundFileName, 20, 40);
+    ttf.drawString("Billy Bass Wall", 20, 40);
+    ttf.drawString("\"" + soundFileName + "\"", 20, 90);
     
     float _t = 0;
     
-    if (state == STATE_RECORD) {
-        _t = (1.0*ofGetElapsedTimeMillis() - timeCode)/1000;
+    if (state == STATE_RECORD || state == STATE_PLAYBACK) {
+        _t = ofGetElapsedTimef() - timeCode;
     }
     
-    ttf.drawString(ofToString(_t), 20, 90);
+    ttf.drawString(ofToString(_t), 20, 140);
 
     ofPushStyle();
     switch (state) {
@@ -132,10 +264,10 @@ void ofApp::draw(){
             break;
             
         case STATE_PLAYBACK:
-            ofSetColor(0,255,0);
+            ofSetColor(50,250,50);
             break;
     }
-    ttf.drawString(arrStateNames[state], 20, 140);
+    ttf.drawString(arrStateNames[state], 20, 190);
     ofPopStyle();
     
     int _r = ofGetWidth() * (.05 + .1 * animMouth.getCurrentValue());
@@ -147,12 +279,26 @@ void ofApp::draw(){
     int _offset = 40;
     string _s = "";
 
-    for (int i=arrCmds.size()-1; i>=0; i--) {
+    if (state == STATE_RECORD)
+    {
+        for (int i=arrCmds.size()-1; i>=0; i--) {
 
-        _s = ofToString(arrCmdNames[arrCmds[i].cmd]) + "  " + ofToString(arrCmds[i].timecode);
+            _s = ofToString(arrCmdNames[arrCmds[i].cmd]) + "  " + ofToString(arrCmds[i].timecode);
 
-        ttf_side.drawString(_s, ofGetWidth()*.8, _offset);
-        _offset += 25;
+            ttf_side.drawString(_s, ofGetWidth()*.8, _offset);
+            _offset += 25;
+        }
+    }
+    
+    if (state == STATE_PLAYBACK)
+    {
+        for (int i=arrPlayedCmds.size()-1; i>=0; i--) {
+            
+            _s = ofToString(arrCmdNames[arrPlayedCmds[i].cmd]) + "  " + ofToString(arrPlayedCmds[i].timecode);
+            
+            ttf_side.drawString(_s, ofGetWidth()*.8, _offset);
+            _offset += 25;
+        }
     }
 
 }
@@ -171,7 +317,9 @@ void ofApp::keyPressed(int key){
             if (state == STATE_WAIT) {
                 
                 state = STATE_RECORD;
+                
                 playerSound.play();
+                playerSound.setPosition(.17);
 
             } else if (state == STATE_RECORD) {
                 
@@ -179,7 +327,7 @@ void ofApp::keyPressed(int key){
                 playerSound.setPaused(isPaused);
             }
 
-            timeCode = ofGetElapsedTimeMillis();
+            timeCode = ofGetElapsedTimef();
             break;
 
         case 'r':
@@ -191,16 +339,69 @@ void ofApp::keyPressed(int key){
             break;
             
         case 'j':
+        case 'k':
 
             if (state == STATE_RECORD) {
 
+                bool b1 = true;
+                bool b2 = false;
+                
+                if (key == 'k') {
+                    b2 = true;
+                }
+                
                 animMouth.animateTo(1);
                 
-                float _t = (1.0*ofGetElapsedTimeMillis() - timeCode)/1000;
-                arrCmds.push_back(bbcmd(CMD_MOUTH_OPEN,_t,true,false));
+                float _t = ofGetElapsedTimef() - timeCode;
+                
+                serial.writeByte('1');
+                if (key == 'k') {
+                    serial.writeByte('2');
+                }
+
+                arrCmds.push_back(bbcmd(CMD_MOUTH_OPEN, _t, b1, b2));
             }
             break;
 
+        case 'm':
+        case ',':
+
+            if (state == STATE_RECORD) {
+
+                bool b1 = true;
+                bool b2 = false;
+
+                if (key == ',') {
+                    b2 = true;
+                }
+
+                float _t = ofGetElapsedTimef() - timeCode;
+            
+                serial.writeByte('7');
+                if (key == ',') {
+                    serial.writeByte('8');
+                }
+            
+                arrCmds.push_back(bbcmd(CMD_HEAD_ON, _t, b1, b2));
+            }
+            break;
+
+        case '.':
+            
+            if (state == STATE_RECORD) {
+                
+                float _t = ofGetElapsedTimef() - timeCode;
+                
+                bool b1 = true;
+                bool b2 = true;
+                
+                serial.writeByte('9');
+                serial.writeByte('0');
+                
+                arrCmds.push_back(bbcmd(CMD_BODY_OFF, _t, b1, b2));
+            }
+            break;
+            
         case 'w':
 
             ofLog() << "Commands:";
@@ -212,9 +413,15 @@ void ofApp::keyPressed(int key){
             
             readJsonFile();
             break;
-    }
+            
+        case 'p':
+            
+            isFlipping = !isFlipping;
+            break;
+        }
     }
 }
+
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
@@ -224,13 +431,28 @@ void ofApp::keyReleased(int key){
     switch (key) {
 
         case 'j':
+        case 'k':
             
             if (state == STATE_RECORD) {
                 
+                bool b1 = true;
+                bool b2 = false;
+                
+                if (key == 'k') {
+                    b2 = true;
+                }
+
                 animMouth.animateTo(0);
-                float _t = (1.0*ofGetElapsedTimeMillis() - timeCode)/1000;
-                arrCmds.push_back(bbcmd(CMD_MOUTH_CLOSE, _t, true, false));
+                float _t = ofGetElapsedTimef() - timeCode;
+                arrCmds.push_back(bbcmd(CMD_MOUTH_CLOSE, _t, b1, b2));
+                
+                serial.writeByte('3');
+                if (key == 'k') {
+                    serial.writeByte('4');
+                }
             }
+            break;
+            
     }
 }
 

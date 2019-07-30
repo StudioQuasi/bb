@@ -62,10 +62,11 @@ class ofApp : public ofBaseApp{
 
     int state;
     ofSoundPlayer   playerSound;
-    long int timeCode;
+    float timeCode;
     bool isPaused;
 
     vector<bbcmd> arrCmds;
+    vector<bbcmd> arrPlayedCmds;
 
     ofJson stroke;
     ofTrueTypeFont ttf, ttf_side;
@@ -77,7 +78,13 @@ class ofApp : public ofBaseApp{
     bool _keyOff = true;
     
     string arrCmdNames[5];
-    
     string arrStateNames[3];
     
+    int nextCmdIndex;
+    ofSerial    serial;
+
+    bool bTailOn;
+    float nextTail;
+    
+    bool isFlipping;
 };

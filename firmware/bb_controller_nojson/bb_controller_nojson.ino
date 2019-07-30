@@ -67,7 +67,7 @@ Adafruit_DCMotor *_m[4];
 
 void setup() {
   
-  Serial.begin(9600);           // set up Serial library at 9600 bps
+  Serial.begin(57600);           // set up Serial library at 9600 bps
   Serial.println("Billy Bass Wall. Now playing: \"Sade\"");
 
   for (int i=0; i<4; i++) {
@@ -88,73 +88,7 @@ void setup() {
   pinMode(2, OUTPUT);
   pinMode(3, OUTPUT);
 
-  /*
-   * Set static JSON doc of commands
-   * 
-   *  CMD_OPEN = 0;
-   *  CMD_CLOSE = 1;  
-   *  CMD_TAIL_ON = 2;
-   *  CMD_HEAD_ON = 3;
-   *  CMD_BODY_OFF = 4;
-   */
-  StaticJsonDocument<1000> objCmd;
-
-  char json[] = "["\
-    "{\"cmd\":0,\"time\":0,\"set\":[true,true]},"\
-    "{\"cmd\":1,\"time\":1000,\"set\":[true,true]},"\
-    "{\"cmd\":0,\"time\":2000,\"set\":[true,false]},"\
-    "{\"cmd\":2,\"time\":3000,\"set\":[false,true]},"\
-    "{\"cmd\":4,\"time\":4000,\"set\":[false,true]},"\
-    "{\"cmd\":3,\"time\":5000,\"set\":[false,true]},"\
-    "{\"cmd\":4,\"time\":6000,\"set\":[false,true]}"\
-  "]";
-
-  /*
-   * Deserialize the JSON document
-   * 
-   * Create array of objects
-   * 
-   */
-  DeserializationError error = deserializeJson(objCmd, json);
-
-  // Test if parsing succeeds.
-  if (error) {
-    Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.c_str());
-    return;
-  }
-
-  //Get the size of the JSON
-  numCmd = objCmd.size();
-
-  //Create array of commands
-  arrCmd = (cmd*)malloc(sizeof(cmd) * numCmd);
-
-  //Create array of cmd objects
-  for (int i=0; i<numCmd; i++) {
-    
-    arrCmd[i] = cmd {
-      (byte)objCmd[i]["cmd"], 
-      (int)objCmd[i]["time"], 
-      (bool)objCmd[i]["set"][0],
-      (bool)objCmd[i]["set"][1]
-    };
-
-    Serial.println("check time");
-    Serial.println((int)objCmd[i]["time"]);
-    
-  }
-
-  //Init running time and command index
-  _runningTime = millis();
-  nextCmdIndex = 0;
-
   runState = STATE_RUN;
-
-  //Set Up LED 
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
-  
 }
 
 void printDirection(int _dir)
@@ -200,9 +134,9 @@ void printMotorIndex(int _index)
 void runMotor(int _index, int _dir, int _speed)
 {
 
-  printMotorIndex(_index);
-  printDirection(_dir);
-  Serial.println(_speed);
+  //printMotorIndex(_index);
+  //printDirection(_dir);
+  //Serial.println(_speed);
   
   _m[_index]->run(_dir);
   _m[_index]->setSpeed(_speed);  
@@ -248,9 +182,19 @@ void testLoop() {
 
 void loop() {
 
+  /*
+   if (Serial.available() > 0) {
+
+    char inChar = (char)Serial.read();
+
+    // say what you got:
+    Serial.println(inChar);
+  }
+  */
+  
   if (runState == STATE_RUN)
   {
-
+    /*
     unsigned long _n = 1*_runningTime + 1*arrCmd[nextCmdIndex]._time;
 
     Serial.print(millis());
@@ -314,13 +258,6 @@ void loop() {
             runMotor(BASS_2_TAIL, RELEASE, 0);
           break;
       }
-
-      /*
-      Serial.println((_runningTime + arrCmd[nextCmdIndex]._time));
-      Serial.println(millis());
-      Serial.println(nextCmdIndex);
-      Serial.println();
-      */
       
       nextCmdIndex++;
 
@@ -333,7 +270,10 @@ void loop() {
         runState = STATE_RUN;
       }
     }
-  
+    */
+
+   //testLoop();
+ 
   }
   else if (runState == STATE_WAIT) 
   {
@@ -394,7 +334,10 @@ void loop() {
 
 }
 
+
 void serialEvent() {
+
+  Serial.println("in");
  
   while (Serial.available()) {
 
@@ -403,7 +346,61 @@ void serialEvent() {
 
     //blink = !blink;
     //Serial.println(blink);
- 
+
+    switch (inChar) {
+
+      case '1':
+
+        Serial.println("mouth");
+        runMotor(BASS_1_MOUTH, FORWARD, 255);
+        break;
+
+      case '2':
+
+        runMotor(BASS_2_MOUTH, FORWARD, 255);
+        break;
+
+      case '3':
+
+        runMotor(BASS_1_MOUTH, RELEASE, 0);
+        break;
+
+      case '4':
+
+        runMotor(BASS_2_MOUTH, RELEASE, 0);
+        break;
+
+      case '5':
+
+        runMotor(BASS_1_TAIL, BACKWARD, 255);
+        break;
+
+      case '6':
+
+        runMotor(BASS_2_TAIL, BACKWARD, 255);
+        break;
+        
+      case '7':
+
+        runMotor(BASS_1_TAIL, FORWARD, 255);
+        break;
+        
+      case '8':
+
+        runMotor(BASS_2_TAIL, FORWARD, 255);
+        break;
+             
+      case '9':
+
+        runMotor(BASS_1_TAIL, RELEASE, 0); 
+        break;
+
+      case '0':
+
+        runMotor(BASS_2_TAIL, RELEASE, 0);
+        break;
+    }
+
     if (inChar == 'a') {
       
        digitalWrite(LED_BUILTIN, HIGH);
@@ -416,7 +413,6 @@ void serialEvent() {
        
     }    
   }
-
 }
 
 
