@@ -31,7 +31,7 @@ const int BASS_1_TAIL = 1;
 const int BASS_2_MOUTH = 2;
 const int BASS_2_TAIL = 3;
 
-const int NUM_BASS = 5;
+const int NUM_BASS = 2;
 
 //long mouthNext = 0;
 //long bodyNext = 0;
@@ -75,12 +75,17 @@ void setup() {
 
   //Create Billys 
   // Shield Point, Mouth Index, Body Index, Mouth Dir, Body Dir
+  /*
   arrBass[0] = new Bass(AFMS[2],2,1,true,true);
   arrBass[1] = new Bass(AFMS[2],4,3,false,true);
   arrBass[2] = new Bass(AFMS[0],2,1,false,false);
   arrBass[3] = new Bass(AFMS[0],4,3,false,true);
   arrBass[4] = new Bass(AFMS[1],2,1,true,false);
+  */
 
+  arrBass[0] = new Bass(AFMS[1],3,1,true,true);
+  arrBass[1] = new Bass(AFMS[1],4,2,false,true);
+  
   for (int i=0; i<3; i++) {
     AFMS[i]->begin();
   }
@@ -194,32 +199,64 @@ void serialEvent() {
 
     if (inChar == '\n') {
 
-      int _cmd = inputString[0];
+      int _cmd = inputString[0] - '0';
 
-      //Parse String
-      for (int i=1; i<inputString.length(); i++)
-      {
-        int _index = inputString[i];
-        switch (_cmd) {
+      Serial.println("done");
+      Serial.println(_cmd);
 
-          case CMD_OPEN:
-            arrBass[_index]->mouthOpen();
-            break;
-          case CMD_CLOSE:
-            arrBass[_index]->mouthClose();
-            break;
-          case CMD_TAIL_ON:
-            arrBass[_index]->bodyTail();
-            break;
-          case CMD_HEAD_ON:
-            arrBass[_index]->bodyHead();
-            break;
-          case CMD_BODY_OFF:
-            arrBass[_index]->runBody(RELEASE,255);
-            break;
-        }
+      if (inputString.length() == 1) {
+
+          //Parse String
+          for (int i=0; i<NUM_BASS; i++)
+          {
+            switch (_cmd) {
+              case CMD_OPEN:
+                arrBass[i]->mouthOpen();
+                break;
+              case CMD_CLOSE:
+                arrBass[i]->mouthClose();
+                break;
+              case CMD_TAIL_ON:
+                arrBass[i]->bodyTail();
+                break;
+              case CMD_HEAD_ON:
+                arrBass[i]->bodyHead();
+                break;
+              case CMD_BODY_OFF:
+                arrBass[i]->runBody(RELEASE,255);
+                break;
+            }
+          }
       }
+      else
+      {
 
+          //Parse String
+          for (int i=1; i<inputString.length(); i++)
+          {
+            int _index = inputString[i] - '0';
+    
+            switch (_cmd) {
+    
+              case CMD_OPEN:
+                arrBass[_index]->mouthOpen();
+                break;
+              case CMD_CLOSE:
+                arrBass[_index]->mouthClose();
+                break;
+              case CMD_TAIL_ON:
+                arrBass[_index]->bodyTail();
+                break;
+              case CMD_HEAD_ON:
+                arrBass[_index]->bodyHead();
+                break;
+              case CMD_BODY_OFF:
+                arrBass[_index]->runBody(RELEASE,255);
+                break;
+            }
+          }
+      }
+      
       inputString = "";
 
     } else {
