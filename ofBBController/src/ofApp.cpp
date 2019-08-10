@@ -22,7 +22,7 @@ void ofApp::setup(){
 
     animMouth.reset(0);
     animMouth.setCurve(LINEAR);
-    animMouth.setDuration(1);
+    animMouth.setDuration(.1);
     
     _keyOff = true;
     
@@ -62,92 +62,57 @@ void ofApp::update(){
         float _n = arrCmds[nextCmdIndex].timecode;
         
         float _t = ofGetElapsedTimef() - timeCode;
+
         if (_t > _n) {
             
             ofLog() << _t << " " << _n;
 
             //Handle commands
-            bool b1 = false;
-            bool b2 = false;
+            //bool b1 = false;
+            //bool b2 = false;
 
             //Serial.println(arrCmds[nextCmdIndex].cmd);
             //Serial.println(arrCmds[nextCmdIndex].b1);
             arrPlayedCmds.push_back(arrCmds[nextCmdIndex]);
-            
-            
-            switch (arrCmds[nextCmdIndex].cmd) {
-                    
-                case CMD_MOUTH_OPEN:
-                    
-                    if (arrCmds[nextCmdIndex].b1)
-                        serial.writeByte('1');
-                    if (arrCmds[nextCmdIndex].b2)
-                        serial.writeByte('2');
-                    break;
-                    
-                case CMD_MOUTH_CLOSE:
-                    
-                    if (arrCmds[nextCmdIndex].b1)
-                        serial.writeByte('3');
-                    if (arrCmds[nextCmdIndex].b2)
-                        serial.writeByte('4');
-                    break;
-                    
-                    /*
-                 case CMD_TAIL_ON:
-                    
-                    if (arrCmd[nextCmdIndex].b1)
-                        runMotor(BASS_1_TAIL, BACKWARD, 255);
-                    if (arrCmd[nextCmdIndex].b2)
-                        runMotor(BASS_2_TAIL, BACKWARD, 255);
-                    break;
-                    
-                case CMD_HEAD_ON:
-                    
-                    if (arrCmd[nextCmdIndex].b1)
-                        runMotor(BASS_1_TAIL, FORWARD, 255);
-                    if (arrCmd[nextCmdIndex].b2)
-                        runMotor(BASS_2_TAIL, FORWARD, 255);
-                    break;
-                    
-                case CMD_BODY_OFF:
-                    
-                    if (arrCmd[nextCmdIndex].b1)
-                        runMotor(BASS_1_TAIL, RELEASE, 0);
-                    if (arrCmd[nextCmdIndex].b2)
-                        runMotor(BASS_2_TAIL, RELEASE, 0);
-                    break;
-                    
-                */
-            }
-        
+
+            serial.writeBytes(arrCmds[nextCmdIndex].sCmd.c_str(), arrCmds[nextCmdIndex].sCmd.length());
+
             nextCmdIndex++;
+
         }
     }
-    
-    if (state == STATE_RECORD) {
+
+    if (state != STATE_PLAYBACK) {
         
         if (ofGetElapsedTimef() > nextTail && isFlipping) {
             
             float _t = ofGetElapsedTimef() - timeCode;
             
             if (bTailOn) {
-                arrCmds.push_back(bbcmd(CMD_TAIL_ON, _t, true, true));
-                serial.writeByte('5');
-                serial.writeByte('6');
+                
+                string _scmd = buildCommandString(CMD_TAIL_ON, 1);
+                
+                if (state == STATE_RECORD)
+                    arrCmds.push_back(bbcmd(CMD_TAIL_ON, _t, _scmd));
+                
+                serial.writeBytes(_scmd.c_str(), _scmd.length());
+                ofLog() << _scmd;
                 
                 nextTail = ofGetElapsedTimef() + .1;
             }
             else
             {
-                arrCmds.push_back(bbcmd(CMD_BODY_OFF, _t, true, true));
-                serial.writeByte('9');
-                serial.writeByte('0');
+                string _scmd = buildCommandString(CMD_TAIL_OFF, 1);
+                
+                if (state == STATE_RECORD)
+                    arrCmds.push_back(bbcmd(CMD_TAIL_OFF, _t, _scmd));
+                
+                serial.writeBytes(_scmd.c_str(), _scmd.length());
+                ofLog() << _scmd;
                 
                 nextTail = ofGetElapsedTimef() + 1.2;
             }
-            
-            
+
             bTailOn = !bTailOn;
         }
     }
@@ -167,7 +132,7 @@ void ofApp::readJsonFile() {
         for(auto & _cmd: js){
 
             //ofLog() << _cmd;
-            arrCmds.push_back(bbcmd(_cmd["cmd"],_cmd["timecode"],true,false));
+            arrCmds.push_back(bbcmd(_cmd["cmd"], _cmd["timecode"], _cmd["set"]));
             _count++;
         }
         
@@ -182,7 +147,7 @@ void ofApp::readJsonFile() {
     
     playerSound.stop();
     playerSound.play();
-    playerSound.setPosition(.17);
+    playerSound.setPosition(.1);
     
     nextCmdIndex = 0;
     arrPlayedCmds.clear();
@@ -201,6 +166,7 @@ void ofApp::writeJsonFile() {
         _cmd["cmd"] = arrCmds[i].cmd;
         _cmd["timecode"] = arrCmds[i].timecode;
 
+        /*
         if (arrCmds[i].b1)
             _arrBB.append(Json::Value(0));
 
@@ -208,6 +174,9 @@ void ofApp::writeJsonFile() {
             _arrBB.append(Json::Value(1));
 
         _cmd["set"] = _arrBB;
+         */
+
+        _cmd["set"] = arrCmds[i].sCmd;
 
         ofLog() << arrCmds[i].cmd << "\t" << arrCmds[i].timecode;
 
@@ -303,6 +272,24 @@ void ofApp::draw(){
 
 }
 
+string ofApp::buildCommandString(int _cmd, int _type)
+{
+    string _scmd = ofToString(_cmd);
+
+    if (_type == 0) {
+
+        _scmd += ofToString(LEAD_BASS);
+    } else if (_type == 2) {
+
+        _scmd += "1234";
+    }
+
+    _scmd += "\n";
+
+    return _scmd;
+}
+
+
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 
@@ -337,68 +324,103 @@ void ofApp::keyPressed(int key){
             arrCmds.clear();
             
             break;
-            
+
         case 'j':
         case 'k':
+        case 'l':
 
-            if (state == STATE_RECORD) {
+            if (state != STATE_PLAYBACK) {
 
-                bool b1 = true;
-                bool b2 = false;
-                
-                if (key == 'k') {
-                    b2 = true;
-                }
-                
                 animMouth.animateTo(1);
                 
                 float _t = ofGetElapsedTimef() - timeCode;
-                
-                serial.writeByte('1');
+
+                string _cmd;
+
                 if (key == 'k') {
-                    serial.writeByte('2');
+                    
+                    _lastCmd = LAST_MOUTH_ALL;
+                    _cmd = buildCommandString(CMD_MOUTH_OPEN,1);
+                } else if (key == 'j' ) {
+                    
+                    _lastCmd = LAST_MOUTH_LEAD;
+                    _cmd = buildCommandString(CMD_MOUTH_OPEN,0);
+                } else {
+
+                    _lastCmd = LAST_MOUTH_OTHERS;
+                    _cmd = buildCommandString(CMD_MOUTH_OPEN,2);
                 }
 
-                arrCmds.push_back(bbcmd(CMD_MOUTH_OPEN, _t, b1, b2));
+                serial.writeBytes(_cmd.c_str(), _cmd.length());
+
+                ofLog() << _cmd;
+    
+                if (state == STATE_RECORD)
+                    arrCmds.push_back(bbcmd(CMD_MOUTH_OPEN, _t, _cmd));
+            }
+            break;
+
+        case 'u':
+        case 'i':
+
+            if (state != STATE_PLAYBACK) {
+
+                float _t = ofGetElapsedTimef() - timeCode;
+
+                string _cmd;
+                
+                if (key == 'i')
+                    _cmd = buildCommandString(CMD_HEAD_ON,1);
+                else
+                    _cmd = buildCommandString(CMD_HEAD_ON,0);
+                
+                serial.writeBytes(_cmd.c_str(), _cmd.length());
+
+                if (state == STATE_RECORD)
+                    arrCmds.push_back(bbcmd(CMD_HEAD_ON, _t, _cmd));
+            }
+            break;
+
+        case '7':
+        case '8':
+            
+            if (state != STATE_PLAYBACK) {
+                
+                float _t = ofGetElapsedTimef() - timeCode;
+                
+                string _cmd;
+                
+                if (key == '8')
+                    _cmd = buildCommandString(CMD_TAIL_ON,1);
+                else
+                    _cmd = buildCommandString(CMD_TAIL_ON,0);
+                
+                serial.writeBytes(_cmd.c_str(), _cmd.length());
+                
+                if (state == STATE_RECORD)
+                    arrCmds.push_back(bbcmd(CMD_TAIL_ON, _t, _cmd));
             }
             break;
 
         case 'm':
         case ',':
-
-            if (state == STATE_RECORD) {
-
-                bool b1 = true;
-                bool b2 = false;
-
-                if (key == ',') {
-                    b2 = true;
-                }
-
-                float _t = ofGetElapsedTimef() - timeCode;
             
-                serial.writeByte('7');
-                if (key == ',') {
-                    serial.writeByte('8');
-                }
-            
-                arrCmds.push_back(bbcmd(CMD_HEAD_ON, _t, b1, b2));
-            }
-            break;
-
-        case '.':
-            
-            if (state == STATE_RECORD) {
+            if (state != STATE_PLAYBACK) {
                 
                 float _t = ofGetElapsedTimef() - timeCode;
                 
-                bool b1 = true;
-                bool b2 = true;
+                string _cmd;
+
+                if (key == ',')
+                    _cmd = buildCommandString(CMD_BODY_OFF,1);
+                else
+                    _cmd = buildCommandString(CMD_BODY_OFF,0);
                 
-                serial.writeByte('9');
-                serial.writeByte('0');
+                serial.writeBytes(_cmd.c_str(), _cmd.length());
                 
-                arrCmds.push_back(bbcmd(CMD_BODY_OFF, _t, b1, b2));
+                if (state == STATE_RECORD)
+                    arrCmds.push_back(bbcmd(CMD_BODY_OFF, _t, _cmd));
+
             }
             break;
             
@@ -432,24 +454,26 @@ void ofApp::keyReleased(int key){
 
         case 'j':
         case 'k':
+        case 'l':
             
-            if (state == STATE_RECORD) {
+            if (state != STATE_PLAYBACK) {
                 
-                bool b1 = true;
-                bool b2 = false;
-                
-                if (key == 'k') {
-                    b2 = true;
-                }
-
-                animMouth.animateTo(0);
                 float _t = ofGetElapsedTimef() - timeCode;
-                arrCmds.push_back(bbcmd(CMD_MOUTH_CLOSE, _t, b1, b2));
                 
-                serial.writeByte('3');
-                if (key == 'k') {
-                    serial.writeByte('4');
-                }
+                string _cmd;
+
+                if (key == 'k')
+                    _cmd = buildCommandString(CMD_MOUTH_CLOSE,1);
+                else if (key == 'j')
+                    _cmd = buildCommandString(CMD_MOUTH_CLOSE,0);
+                else
+                    _cmd = buildCommandString(CMD_MOUTH_CLOSE,2);
+                    
+                animMouth.animateTo(0);
+                serial.writeBytes(_cmd.c_str(), _cmd.length());
+
+                if (state == STATE_RECORD)
+                   arrCmds.push_back(bbcmd(CMD_MOUTH_CLOSE, _t, _cmd));
             }
             break;
             

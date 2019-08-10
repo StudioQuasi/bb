@@ -13,26 +13,37 @@ const int CMD_MOUTH_CLOSE = 1;
 const int CMD_TAIL_ON = 2;
 const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
+const int CMD_TAIL_OFF = 5;
+
+const int LEAD_BASS = 0;
+
+const int LAST_MOUTH_LEAD = 0;
+const int LAST_MOUTH_ALL = 1;
+const int LAST_MOUTH_OTHERS = 2;
 
 struct bbcmd {
 
     int cmd;
     float timecode;
-    bool b1;
-    bool b2;
+    string sCmd;
+    Byte arrIndex[5];
     
     bbcmd(
         int _cmdID,
         float _timecode,
-        bool _b1,
-        bool _b2
+        string _cmdString
     )
     {
 
         cmd = _cmdID;
         timecode = _timecode;
-        b1 = _b1;
-        b2 = _b2;
+        sCmd = _cmdString;
+
+        /*
+        for (int i=0; i<5; i++) {
+            arrIndex[i] = _arrIndex[i];
+        }*/
+
     }
 };
 
@@ -55,6 +66,9 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
+        string buildCommandString(int _cmd, int _type);
+    
+
     ofxJSONElement result;
 
     void writeJsonFile();
@@ -87,4 +101,7 @@ class ofApp : public ofBaseApp{
     float nextTail;
     
     bool isFlipping;
+    
+    int _lastCmd;
+
 };
