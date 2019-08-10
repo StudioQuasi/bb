@@ -20,12 +20,6 @@ const int STATE_LOAD_SONG = 0;
 const int STATE_RUN = 1;
 const int STATE_WAIT = 0;
 
-const int CMD_OPEN = 0;
-const int CMD_CLOSE = 1;
-const int CMD_TAIL_ON = 2;
-const int CMD_HEAD_ON = 3;
-const int CMD_BODY_OFF = 4;
-
 const int BASS_1_MOUTH = 0;
 const int BASS_1_TAIL = 1;
 const int BASS_2_MOUTH = 2;
@@ -83,8 +77,8 @@ void setup() {
   arrBass[4] = new Bass(AFMS[1],2,1,true,false);
   */
 
-  arrBass[0] = new Bass(AFMS[1],3,1,true,true);
-  arrBass[1] = new Bass(AFMS[1],4,2,false,true);
+  arrBass[0] = new Bass(AFMS[1],3,1,true,false);
+  arrBass[1] = new Bass(AFMS[1],4,2,true,false);
   
   for (int i=0; i<3; i++) {
     AFMS[i]->begin();
@@ -222,6 +216,13 @@ void serialEvent() {
               case CMD_HEAD_ON:
                 arrBass[i]->bodyHead();
                 break;
+              case CMD_TAIL_OFF:
+              
+                if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
+                  arrBass[i]->runBody(RELEASE,255);
+                }
+                break;
+  
               case CMD_BODY_OFF:
                 arrBass[i]->runBody(RELEASE,255);
                 break;
