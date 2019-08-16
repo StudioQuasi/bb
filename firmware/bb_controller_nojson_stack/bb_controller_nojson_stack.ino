@@ -25,7 +25,7 @@ const int BASS_1_TAIL = 1;
 const int BASS_2_MOUTH = 2;
 const int BASS_2_TAIL = 3;
 
-const int NUM_BASS = 2;
+const int NUM_BASS = 5;
 
 //long mouthNext = 0;
 //long bodyNext = 0;
@@ -69,16 +69,16 @@ void setup() {
 
   //Create Billys 
   // Shield Point, Mouth Index, Body Index, Mouth Dir, Body Dir
-  /*
-  arrBass[0] = new Bass(AFMS[2],2,1,true,true);
-  arrBass[1] = new Bass(AFMS[2],4,3,false,true);
+  
+  arrBass[1] = new Bass(AFMS[2],1,2,true,false);
+  arrBass[0] = new Bass(AFMS[2],4,3,false,true);
   arrBass[2] = new Bass(AFMS[0],2,1,false,false);
   arrBass[3] = new Bass(AFMS[0],4,3,false,true);
-  arrBass[4] = new Bass(AFMS[1],2,1,true,false);
-  */
+  arrBass[4] = new Bass(AFMS[1],4,3,true,false);
+  
 
-  arrBass[0] = new Bass(AFMS[1],3,1,true,false);
-  arrBass[1] = new Bass(AFMS[1],4,2,true,false);
+  //arrBass[0] = new Bass(AFMS[1],3,1,true,false);
+  //arrBass[1] = new Bass(AFMS[1],4,2,true,false);
   
   for (int i=0; i<3; i++) {
     AFMS[i]->begin();
@@ -136,6 +136,8 @@ void printMotorIndex(int _index)
 
 void testLoop2() {
 
+  int _delay = 200;
+  
   for (int i=0; i<NUM_BASS; i++)
   {
 
@@ -143,27 +145,22 @@ void testLoop2() {
     
   Serial.println("MOUTH OPEN");
   arrBass[i]->mouthOpen();
-  delay(500);
+  delay(_delay);
 
   Serial.println("MOUTH CLOSE");
   arrBass[i]->mouthClose();
-  delay(500);
 
   Serial.println("BODY TAIL");
   arrBass[i]->bodyTail();
-  delay(500);
-
-  Serial.println("BODY ");
-  arrBass[i]->runBody(RELEASE,255);
-  delay(500);
+  delay(_delay);
 
   Serial.println("BODY HEAD");
   arrBass[i]->bodyHead();
-  delay(500);
+  delay(_delay);
 
   Serial.println("BODY ");
   arrBass[i]->runBody(RELEASE,255);
-  delay(500);
+  delay(_delay);
   
   }
 

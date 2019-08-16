@@ -12,8 +12,8 @@
 /*-----( Import needed libraries )-----*/
 #include <SoftwareSerial.h>
 /*-----( Declare Constants and Pin Numbers )-----*/
-#define SSerialRX        10  //Serial Receive pin
-#define SSerialTX        11  //Serial Transmit pin
+#define SSerialRX        A3  //Serial Receive pin
+#define SSerialTX        A2  //Serial Transmit pin
 
 #define SSerialTxControl 3   //RS485 Direction control
 #define RS485Transmit    HIGH
@@ -40,12 +40,13 @@ void setup()   /****** SETUP: RUNS ONCE ******/
   //Serial.println("SerialRemote");  // Can be ignored
 
   pinMode(Pin13LED, OUTPUT);
-  pinMode(SSerialTxControl, OUTPUT);
 
-  digitalWrite(SSerialTxControl, RS485Receive);  // Init Transceiver
+  //pinMode(SSerialTxControl, OUTPUT);
+  //digitalWrite(SSerialTxControl, RS485Receive);  // Init Transceiver
 
   // Start the software serial port, to another device
-  RS485Serial.begin(4800);   // set the data rate
+  RS485Serial.begin(9600);   // set the data rate
+
 }
 //--(end setup )---
 

@@ -42,7 +42,7 @@ void setup()   /****** SETUP: RUNS ONCE ******/
   digitalWrite(SSerialTxControl, RS485Receive);  // Init Transceiver   
 
   // Start the software serial port, to another device
-  RS485Serial.begin(4800);   // set the data rate 
+  RS485Serial.begin(9600);   // set the data rate 
 
 }//--(end setup )---
 
