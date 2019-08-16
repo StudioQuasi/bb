@@ -5,8 +5,9 @@ void ofApp::setup(){
 
     state = STATE_WAIT;
     
-    soundFileName = "hallandoats.mp3";
-    
+    soundFileName = "hallandoats.mp3"; //hallandoats.mp3";
+    cmdFileName = "hallandouts_good1.json";
+
     ofLog() << ofToDataPath(soundFileName);
     
     playerSound.load(ofToDataPath(soundFileName));
@@ -57,7 +58,7 @@ void ofApp::update(){
     float dt = 1.0f / 60.0f;
     animMouth.update(dt);
     
-    if (state == STATE_PLAYBACK) {
+    if (state == STATE_PLAYBACK && nextCmdIndex < arrCmds.size()) {
         
         float _n = arrCmds[nextCmdIndex].timecode;
         
@@ -79,6 +80,12 @@ void ofApp::update(){
 
             nextCmdIndex++;
 
+            //Start over song
+            if (arrCmds.size() == nextCmdIndex) {
+
+                readJsonFile();
+            }
+
         }
     }
 
@@ -98,7 +105,7 @@ void ofApp::update(){
                 serial.writeBytes(_scmd.c_str(), _scmd.length());
                 ofLog() << _scmd;
                 
-                nextTail = ofGetElapsedTimef() + .1;
+                nextTail = ofGetElapsedTimef() + 1.0;
             }
             else
             {
@@ -120,7 +127,7 @@ void ofApp::update(){
 
 void ofApp::readJsonFile() {
 
-    ofFile file(ofToDataPath("out.json"));
+    ofFile file(ofToDataPath(cmdFileName));
     ofJson js;
 
     if(file.exists()){
@@ -147,7 +154,7 @@ void ofApp::readJsonFile() {
     
     playerSound.stop();
     playerSound.play();
-    playerSound.setPosition(.1);
+    playerSound.setPosition(OFFSET_POSITION);
     
     nextCmdIndex = 0;
     arrPlayedCmds.clear();
@@ -281,7 +288,7 @@ string ofApp::buildCommandString(int _cmd, int _type)
         _scmd += ofToString(LEAD_BASS);
     } else if (_type == 2) {
 
-        _scmd += "1234";
+        _scmd += "0124";
     }
 
     _scmd += "\n";
@@ -306,7 +313,7 @@ void ofApp::keyPressed(int key){
                 state = STATE_RECORD;
                 
                 playerSound.play();
-                playerSound.setPosition(.17);
+                playerSound.setPosition(OFFSET_POSITION);
 
             } else if (state == STATE_RECORD) {
                 

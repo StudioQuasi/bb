@@ -1,2 +1,4 @@
+ofxGui
 externalAddons/ofxAnimatable
 externalAddons/ofxJson
+externalAddons/ofxTimeline

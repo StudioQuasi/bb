@@ -15,11 +15,13 @@ const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
 const int CMD_TAIL_OFF = 5;
 
-const int LEAD_BASS = 0;
+const int LEAD_BASS = 3;
 
 const int LAST_MOUTH_LEAD = 0;
 const int LAST_MOUTH_ALL = 1;
 const int LAST_MOUTH_OTHERS = 2;
+
+const float OFFSET_POSITION = 0;
 
 struct bbcmd {
 
@@ -87,6 +89,7 @@ class ofApp : public ofBaseApp{
     ofPath path;
 
     string soundFileName;
+    string cmdFileName;
     
     ofxAnimatableFloat animMouth;
     bool _keyOff = true;
@@ -104,4 +107,5 @@ class ofApp : public ofBaseApp{
     
     int _lastCmd;
 
+    
 };
