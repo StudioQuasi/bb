@@ -7,8 +7,8 @@
 #include <SparkFun_TB6612.h>
 #include <SoftwareSerial.h>
 
-#define SSerialRX        A3  //Serial Receive pin
-#define SSerialTX        A2  //Serial Transmit pin
+#define SSerialRX        A1  //Serial Receive pin
+#define SSerialTX        A0  //Serial Transmit pin
 #define Pin13LED         13
 
 #include <ArduinoJson.h>
@@ -32,27 +32,27 @@ struct cmd {
 #define BIN1_0 8
 #define BIN2_0 7
 #define PWMB_0 10
-#define STBY_0 5
+//#define STBY_0 5
 
-#define AIN1_1 A0
-#define AIN2_1 4
+#define AIN1_1 A2
+#define AIN2_1 A3
 #define PWMA_1 9
 
-#define BIN1_1 A1
+#define BIN1_1 4
 #define BIN2_1 2
 #define PWMB_1 6
-#define STBY_1 5
+//#define STBY_1 5
 
 #define AIN1_2 A6
 #define AIN2_2 A7
-#define PWMA_2 3
+#define PWMA_2 5
 
 #define BIN1_2 A5
 #define BIN2_2 A4
-#define PWMB_2 5
-#define STBY_2 5
+#define PWMB_2 3
+//#define STBY_2 5
 
-SoftwareSerial RS485Serial(SSerialRX, SSerialTX); // RX, TX
+//SoftwareSerial RS485Serial(SSerialRX, SSerialTX); // RX, TX
 
 
 int byteReceived;
@@ -114,19 +114,18 @@ int   numCmd;
 // Select which 'port' M1, M2, M3 or M4. In this case, M1
 //Motor  *_m[4];
 
-Motor _m0 =  Motor(AIN1_0, AIN2_0, PWMA_0, offsetA, STBY_0);
-Motor _m1 =  Motor(BIN1_0, BIN2_0, PWMB_0, offsetA, STBY_0);
+//Motor _m0 =  Motor(AIN1_0, AIN2_0, PWMA_0, offsetA);
+//Motor _m1 =  Motor(BIN1_0, BIN2_0, PWMB_0, offsetA);
 
-Motor _m2 =  Motor(AIN1_1, AIN2_1, PWMA_1, offsetA, STBY_1);
-Motor _m3 =  Motor(BIN1_1, BIN2_1, PWMB_1, offsetA, STBY_1);
+//Motor _m2 =  Motor(AIN1_1, AIN2_1, PWMA_1, offsetA);
+//Motor _m3 =  Motor(BIN1_1, BIN2_1, PWMB_1, offsetA);
 
 //#define AIN1_2 A6
 //#define AIN2_2 A7
 //#define PWMA_2 3
 
-Motor _m4 =  Motor(AIN1_2, AIN2_2, PWMA_2, offsetA, STBY_2);
-Motor _m5 =  Motor(BIN1_2, BIN2_2, PWMB_2, offsetA, STBY_2);
-
+Motor _m5 =  Motor(AIN1_2, AIN2_2, PWMA_2, offsetA);
+Motor _m4 =  Motor(BIN1_2, BIN2_2, PWMB_2, offsetA);
 
 //Adafruit_DCMotor *_m1 = AFMS.getMotor(1);
 //Adafruit_DCMotor *_m2 = AFMS.getMotor(2);
@@ -155,11 +154,11 @@ void setup() {
 
   //Set the pin modes
   //pinMode(2, OUTPUT);
-  //pinMode(3, OUTPUT);
+  pinMode(3, OUTPUT);
 
   runState = STATE_RUN;
 
-  RS485Serial.begin(9600);
+  //RS485Serial.begin(9600);
 }
 
 void printDirection(int _dir)
@@ -218,16 +217,21 @@ void runMotor(int _index, int _dir, int _speed)
   else if (_dir == BACKWARD)
     _speed = -_speed;
 
+/*
   switch(_index) {
 
-    /*
-    case BASS_1_MOUTH:
     
+    case BASS_1_MOUTH:
+
+      Serial.println("Drive m0");
+      
       _m0.drive(_speed);
       Serial.print("BASS_1_MOUTH ");
       break;
 
     case BASS_1_TAIL:
+
+      Serial.println("Drive m1");
 
       _m1.drive(_speed);
       Serial.print("BASS_1_TAIL ");
@@ -235,31 +239,39 @@ void runMotor(int _index, int _dir, int _speed)
 
     case BASS_2_MOUTH:
 
+      Serial.println("Drive m2");
+      
       _m2.drive(_speed);
       Serial.print("BASS_2_MOUTH ");
       break;
 
     case BASS_2_TAIL:
 
+      Serial.println("Drive m3");
+      
       _m3.drive(_speed);
       Serial.print("BASS_2_TAIL ");
       break;
 
     case BASS_3_MOUTH:
 
+      Serial.println("Drive m4");
+      
       _m4.drive(_speed);
       Serial.print("BASS_3_MOUTH ");
       break;
 
     case BASS_3_TAIL:
 
+      Serial.println("Drive m5");
+      
       _m5.drive(_speed);
       Serial.print("BASS_3_TAIL ");
       break;
-*/
+
 
   }
-  
+  */
 
 /*
   switch () {
@@ -297,17 +309,98 @@ void runMotor(int _index, int _dir, int _speed)
 
 void testLoop() {
 
-
-  _m0.drive(255);
-  _m1.drive(255);
-
+//  _m0.drive(255);
+//  _m1.drive(255);
+//  delay(500);
   
+ // _m0.drive(0);
+ // _m1.drive(0);
+ // delay(500);
+/*
+  _m0.drive(-255);
+  _m1.drive(-255);
+  delay(500);
+  
+  _m0.drive(0);
+  _m1.drive(0);
+  delay(500);
+*/
+
+/*
   _m2.drive(255);
   _m3.drive(255);
+  delay(500);
   
+  _m2.drive(0);
+  _m3.drive(0);
+  delay(500);
+    
+  _m2.drive(-255);
+  _m3.drive(-255);
+  delay(500);
+  
+  _m2.drive(0);
+  _m3.drive(0);
+  delay(500);
+*/
+  _m4.drive(255);
   _m5.drive(255);
- 
+  delay(2000);
+  
+  _m4.drive(0);
+  //_m5.drive(0);
+  delay(2000);
+    
+  //_m4.drive(-255);
+  _m5.drive(-255);
+  delay(2000);
+  
+  _m4.drive(0);
+  //_m5.drive(0);
+  delay(2000);
 
+  
+/*
+  _m0.drive(255);
+  Serial.println("Write M0");
+  delay(2000);
+  
+  _m0.drive(-255);
+  _m1.drive(255);
+  Serial.println("Write M1");
+  delay(2000);
+  
+  _m0.drive(0);
+  _m1.drive(-255);
+  _m2.drive(255);
+  Serial.println("Write M2");
+  delay(2000);
+  
+  _m1.drive(0);
+  _m2.drive(-255);
+  _m3.drive(255);
+  Serial.println("Write M3");
+  delay(2000);
+  
+  _m2.drive(0);
+  _m3.drive(-255);
+  _m4.drive(255);
+  Serial.println("Write M4");
+  delay(2000);
+  
+  _m3.drive(0);
+  _m4.drive(-255);
+  _m5.drive(255);
+  Serial.println("Write M5");
+  delay(2000);
+  
+  _m4.drive(0);
+  _m5.drive(-255);
+  delay(2000);
+  _m5.drive(0);
+ */
+  //_m5.drive(255);
+ 
 /*
   Serial.println("Test Loop");
   runMotor(BASS_3_MOUTH, FORWARD, 255);
@@ -328,32 +421,35 @@ void testLoop() {
 */
 
 /*
-  Serial.println("Test Loop");
-  
-  runMotor(BASS_1_MOUTH, FORWARD, 255);
-  runMotor(BASS_2_MOUTH, FORWARD, 255);
-  runMotor(BASS_3_MOUTH, FORWARD, 255);
-  delay(1000);
-  
+  Serial.println("Mouth Open");
+  runMotor(BASS_1_MOUTH, BACKWARD, 255);
+  runMotor(BASS_2_MOUTH, BACKWARD, 255);
+  runMotor(BASS_3_MOUTH, BACKWARD, 255);
+  delay(2000);
+
+  Serial.println("Mouth Close");
   runMotor(BASS_1_MOUTH, RELEASE, 0);
   runMotor(BASS_2_MOUTH, RELEASE, 0);
   runMotor(BASS_3_MOUTH, RELEASE, 0);
-  delay(1000);
+  delay(2000);
 
+  Serial.println("Tail");
   runMotor(BASS_1_TAIL, BACKWARD, 255);
   runMotor(BASS_2_TAIL, BACKWARD, 255);
   runMotor(BASS_3_TAIL, BACKWARD, 255);
-  delay(1000);
+  delay(2000);
 
+  Serial.println("HEAD");
   runMotor(BASS_1_TAIL, FORWARD, 255);
   runMotor(BASS_2_TAIL, FORWARD, 255);
   runMotor(BASS_3_TAIL, FORWARD, 255);
-  delay(1000);
+  delay(2000);
 
+  Serial.println("NO TAIL");
   runMotor(BASS_1_TAIL, RELEASE, 0);
   runMotor(BASS_2_TAIL, RELEASE, 0);
   runMotor(BASS_3_TAIL, RELEASE, 0);
-  delay(1000);
+  delay(2000);
 */
   
 }
@@ -361,6 +457,7 @@ void testLoop() {
 
 void loop() {
 
+/*
   if (RS485Serial.available())
   {
 
@@ -401,13 +498,14 @@ void loop() {
   {
 
   }
+*/
 
 }
 
 
 void serialEvent() {
 
-  Serial.println("in");
+  //Serial.println("in");
  
   while (Serial.available()) {
 
