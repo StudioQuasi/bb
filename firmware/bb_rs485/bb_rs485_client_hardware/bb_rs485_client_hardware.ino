@@ -45,7 +45,7 @@ void setup()   /****** SETUP: RUNS ONCE ******/
   //digitalWrite(SSerialTxControl, RS485Receive);  // Init Transceiver
 
   // Start the software serial port, to another device
-  RS485Serial.begin(9600);   // set the data rate
+  Serial.begin(9600);   // set the data rate
 
   digitalWrite(Pin13LED, HIGH);  // Show activity
   delay(1000);
@@ -59,10 +59,10 @@ void setup()   /****** SETUP: RUNS ONCE ******/
 void loop()   /****** LOOP: RUNS CONSTANTLY ******/
 {
   //Copy input data to output  
-  if (RS485Serial.available())
+  if (Serial.available())
   {
 
-    byteReceived = RS485Serial.read();   // Read the byte 
+    byteReceived = Serial.read();   // Read the byte 
 
     //IF END OF SERIAL STRING
     if (byteReceived == '\n') {

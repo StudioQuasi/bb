@@ -33,13 +33,13 @@ void setup()   /****** SETUP: RUNS ONCE ******/
 {
   // Start the built-in serial port, probably to Serial Monitor
   Serial.begin(9600);
-  Serial.println("YourDuino.com SoftwareSerial remote loop example");
-  Serial.println("Use Serial Monitor, type in upper window, ENTER");
+  //Serial.println("YourDuino.com SoftwareSerial remote loop example");
+  //Serial.println("Use Serial Monitor, type in upper window, ENTER");
 
   pinMode(Pin13LED, OUTPUT);
   pinMode(SSerialTxControl, OUTPUT);
 
-  digitalWrite(SSerialTxControl, RS485Receive);  // Init Transceiver   
+  //digitalWrite(SSerialTxControl, RS485Receive);  // Init Transceiver   
 
   // Start the software serial port, to another device
   RS485Serial.begin(9600);   // set the data rate 
@@ -50,6 +50,14 @@ void setup()   /****** SETUP: RUNS ONCE ******/
 void loop()   /****** LOOP: RUNS CONSTANTLY ******/
 {
 
+  //Serial.write("43\n");
+  RS485Serial.write('4');
+  RS485Serial.write('5');
+  RS485Serial.write('\n');
+  
+  delay(3000);
+
+/*
   digitalWrite(Pin13LED, HIGH);  // Show activity
   if (Serial.available())
   {
@@ -73,7 +81,7 @@ void loop()   /****** LOOP: RUNS CONSTANTLY ******/
     delay(10);
     digitalWrite(Pin13LED, LOW);  // Show activity   
    }
-
+*/
 }//--(end main loop )---
 
 /*-----( Declare User-written Functions )-----*/
