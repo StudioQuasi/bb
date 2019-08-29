@@ -33,6 +33,17 @@ byte _input[32];
 
 byte _addr = 4;
 
+void blink(int _c)
+{
+  for (int i=0; i<_c; i++)
+  {
+    digitalWrite(Pin13LED, HIGH);  // Show activity
+    delay(100);
+    digitalWrite(Pin13LED, LOW);
+    delay(200);
+  }
+}
+
 void setup()   /****** SETUP: RUNS ONCE ******/
 {
   // Start the built-in serial port, probably to Serial Monitor
@@ -47,10 +58,7 @@ void setup()   /****** SETUP: RUNS ONCE ******/
   // Start the software serial port, to another device
   Serial.begin(9600);   // set the data rate
 
-  digitalWrite(Pin13LED, HIGH);  // Show activity
-  delay(1000);
-  digitalWrite(Pin13LED, LOW);
-  delay(500);
+  blink(_addr);
         
 }
 //--(end setup )---
@@ -62,6 +70,11 @@ void loop()   /****** LOOP: RUNS CONSTANTLY ******/
   if (Serial.available())
   {
 
+    //digitalWrite(Pin13LED, HIGH);  // Show activity
+    //delay(300);
+    //digitalWrite(Pin13LED, LOW);
+    //delay(300);
+          
     byteReceived = Serial.read();   // Read the byte 
 
     //IF END OF SERIAL STRING
@@ -69,19 +82,19 @@ void loop()   /****** LOOP: RUNS CONSTANTLY ******/
           
       if (_input[0] == _addr) {
 
-        for (int i=0; i<_input[1]; i++)
-        {
-          digitalWrite(Pin13LED, HIGH);  // Show activity
-          delay(100);
-          digitalWrite(Pin13LED, LOW);
-          delay(100);
-        }
-
+        blink(_input[1]);
       }
    
       _readIndex = 0;
-      
+
     //
+    } else if (byteReceived == 'p') {
+
+      digitalWrite(Pin13LED, HIGH);  // Show activity
+      delay(100);
+      digitalWrite(Pin13LED, LOW);
+      delay(100);
+      
     } else {
 
       int _num = byteReceived - '0';
