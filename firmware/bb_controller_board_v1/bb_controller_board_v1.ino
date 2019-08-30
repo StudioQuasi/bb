@@ -6,7 +6,7 @@
 #include <Wire.h>
 //#include <Adafruit_MotorShield.h>
 
-#include <ArduinoJson.h>
+//#include <ArduinoJson.h>
 #include "Bass.cpp"
 
 //Fix below to be array of billys
