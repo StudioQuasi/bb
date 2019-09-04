@@ -31,7 +31,7 @@ int byteSend;
 int _readIndex = 0;
 byte _input[32];
 
-byte _addr = 4;
+byte _addr = 7;
 
 void blink(int _c)
 {

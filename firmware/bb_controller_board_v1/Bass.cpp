@@ -49,23 +49,41 @@ class Bass
     )
     {
         
-        _motor[MOUTH_MOTOR] = new Motor(AIN1, AIN2, PWMA, offsetA);
-        _motor[BODY_MOTOR] = new Motor(BIN1, BIN2, PWMB, offsetA);
+        _motor[BODY_MOTOR] = new Motor(AIN1, AIN2, PWMA, offsetA);
+        _motor[MOUTH_MOTOR] = new Motor(BIN1, BIN2, PWMB, offsetA);
 
         _motor[MOUTH_MOTOR]->brake();
         _motor[BODY_MOTOR]->brake();
 
         //If we need to flip the motor direction
+        MOUTH_OPEN = FORWARD;
+        MOUTH_CLOSE = BACKWARD;
+        
         if (!_mouthDirection) {
           MOUTH_OPEN = BACKWARD;
           MOUTH_CLOSE = FORWARD;
         }
 
-        if (!_mouthDirection) {
-          MOUTH_OPEN = BACKWARD;
-          MOUTH_CLOSE = FORWARD;
+        BODY_TAIL = FORWARD;
+        BODY_HEAD = BACKWARD;
+          
+        if (!_bodyDirection) {
+          BODY_TAIL = BACKWARD;
+          BODY_HEAD = FORWARD;
         }
 
+/*
+        _motor[MOUTH_MOTOR]->drive(255);
+        _motor[BODY_MOTOR]->drive(255);
+        delay(1000);
+        
+        _motor[MOUTH_MOTOR]->drive(-255);
+        _motor[BODY_MOTOR]->drive(-255);
+        delay(1000);
+        
+        _motor[MOUTH_MOTOR]->brake();
+        _motor[BODY_MOTOR]->brake();
+*/
     }
 
     void runMouth(int _dir, int _speed)
@@ -94,10 +112,10 @@ class Bass
 
     void bodyTail() {
 
-      if (lastCommand != CMD_HEAD_ON) {
+      //if (lastCommand != CMD_HEAD_ON) {
         lastCommand = CMD_TAIL_ON;
         runMotor(BODY_MOTOR, BODY_TAIL, 255);
-      }
+      //}
     }
 
     void bodyHead() {
@@ -109,13 +127,24 @@ class Bass
     void runMotor(int _index, int _dir, int _speed)
     { 
 
-      if (_dir == RELEASE)
-      
-        _motor[_index]->brake();
-      else if (_dir == BACKWARD)
-      
-        _motor[_index]->drive(_dir * _speed);
+      int _s = _dir * _speed;
 
+      //Serial.println("Drive Motor");
+      //Serial.println(_index);
+
+      
+      if (_dir == RELEASE) {
+
+        //    Serial.println("RELEASE");
+        _motor[_index]->brake();
+        
+      } else {
+
+        //    Serial.println("Speed : ");
+        //    Serial.println(_s);
+        _motor[_index]->drive(_s);
+      }
+      
     }
 
 };

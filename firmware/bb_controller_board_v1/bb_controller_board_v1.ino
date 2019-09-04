@@ -18,8 +18,8 @@ struct cmd {
 };
 
 //DEFINE THE MOTOR DRIVER PINS
-#define AIN2_0 13
-#define AIN1_0 12
+#define AIN2_0 12
+#define AIN1_0 13
 #define PWMA_0 11
 
 #define BIN1_0 8
@@ -34,8 +34,8 @@ struct cmd {
 #define BIN2_1 2
 #define PWMB_1 6
 
-#define AIN1_2 A6
-#define AIN2_2 A7
+#define AIN1_2 A1
+#define AIN2_2 A0
 #define PWMA_2 5
 
 #define BIN1_2 A5
@@ -51,8 +51,10 @@ const int BASS_1_MOUTH = 0;
 const int BASS_1_TAIL = 1;
 const int BASS_2_MOUTH = 2;
 const int BASS_2_TAIL = 3;
+const int BASS_3_MOUTH = 4;
+const int BASS_3_TAIL = 5;
 
-const int NUM_BASS = 5;
+const int NUM_BASS = 3;
 
 //long mouthNext = 0;
 //long bodyNext = 0;
@@ -99,9 +101,17 @@ void setup() {
   //Create Billys 
   // Shield Point, Mouth Index, Body Index, Mouth Dir, Body Dir
 
-  arrBass[0] = new Bass(AIN1_0, AIN2_0, PWMA_0, BIN1_0, BIN2_0, PWMB_0, true, true);
-  arrBass[1] = new Bass(AIN1_1, AIN2_1, PWMA_1, BIN1_1, BIN2_1, PWMB_1, true, true);
-  arrBass[2] = new Bass(AIN1_2, AIN2_2, PWMA_2, BIN1_2, BIN2_2, PWMB_2, true, true);
+  Serial.println("BASS 0");
+  arrBass[0] = new Bass(AIN1_0, AIN2_0, PWMA_0, BIN1_0, BIN2_0, PWMB_0, false, true);
+  delay(500);
+
+  Serial.println("BASS 1");
+  arrBass[1] = new Bass(AIN1_1, AIN2_1, PWMA_1, BIN1_1, BIN2_1, PWMB_1, false, true);
+  delay(500);
+
+  Serial.println("BASS 2");
+  arrBass[2] = new Bass(AIN1_2, AIN2_2, PWMA_2, BIN1_2, BIN2_2, PWMB_2, false, true);
+  delay(500);
 
   /*
   arrBass[1] = new Bass(AFMS[2],1,2,true,false);
@@ -158,12 +168,20 @@ void printMotorIndex(int _index)
     case BASS_2_TAIL:
       Serial.print("BASS_2_TAIL ");
       break;
+
+    case BASS_3_MOUTH:
+      Serial.print("BASS_3_MOUTH ");
+      break;
+
+    case BASS_3_TAIL:
+      Serial.print("BASS_3_TAIL ");
+      break;
   }
 }
 
 void testLoop2() {
 
-  int _delay = 200;
+  int _delay = 500;
   
   for (int i=0; i<NUM_BASS; i++)
   {
@@ -177,6 +195,7 @@ void testLoop2() {
   Serial.println("MOUTH CLOSE");
   arrBass[i]->mouthClose();
 
+/*
   Serial.println("BODY TAIL");
   arrBass[i]->bodyTail();
   delay(_delay);
@@ -188,7 +207,7 @@ void testLoop2() {
   Serial.println("BODY ");
   arrBass[i]->runBody(RELEASE,255);
   delay(_delay);
-  
+  */
   }
 
 }
@@ -212,8 +231,8 @@ void serialEvent() {
 
       int _cmd = inputString[0] - '0';
 
-      Serial.println("done");
-      Serial.println(_cmd);
+      //Serial.println("done");
+      //Serial.println(_cmd);
 
       if (inputString.length() == 1) {
 
@@ -222,25 +241,32 @@ void serialEvent() {
           {
             switch (_cmd) {
               case CMD_OPEN:
+                Serial.println("MOUTH OPEN");
                 arrBass[i]->mouthOpen();
                 break;
               case CMD_CLOSE:
+                Serial.println("MOUTH CLOSE");
                 arrBass[i]->mouthClose();
                 break;
               case CMD_TAIL_ON:
+                Serial.println("TAIL ON");
                 arrBass[i]->bodyTail();
                 break;
               case CMD_HEAD_ON:
+                Serial.println("HEAD ON");
                 arrBass[i]->bodyHead();
                 break;
               case CMD_TAIL_OFF:
-              
-                if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
+
+                Serial.println("TAIL OFF");
+                //if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
                   arrBass[i]->runBody(RELEASE,255);
-                }
+                //}
                 break;
   
               case CMD_BODY_OFF:
+
+                Serial.println("BODY OFF");
                 arrBass[i]->runBody(RELEASE,255);
                 break;
             }

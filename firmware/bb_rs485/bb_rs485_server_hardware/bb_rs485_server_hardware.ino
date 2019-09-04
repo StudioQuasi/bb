@@ -42,7 +42,7 @@ void setup()   /****** SETUP: RUNS ONCE ******/
   //digitalWrite(SSerialTxControl, RS485Receive);  // Init Transceiver   
 
   // Start the software serial port, to another device
-  //RS485Serial.begin(9600);   // set the data rate 
+  RS485Serial.begin(9600);   // set the data rate 
 
 }//--(end setup )---
 
@@ -50,18 +50,19 @@ void setup()   /****** SETUP: RUNS ONCE ******/
 void loop()   /****** LOOP: RUNS CONSTANTLY ******/
 {
 
-  //Serial.write("43\n");
+/*  //Serial.write("43\n");
   digitalWrite(Pin13LED, HIGH);
 
-  for (int i=1; i<5; i++)
+
+  for (int i=1; i<8; i++)
   {
     char _c = '0' + i;
     Serial.write(_c);
     Serial.write('1');
     Serial.write('\n');
-    delay(300);
+    delay(200);
   }
-
+*/
 /*
   for (int i=1; i<=4; i++)
   {
@@ -73,7 +74,7 @@ void loop()   /****** LOOP: RUNS CONSTANTLY ******/
   }
 
  */
-/*
+
   digitalWrite(Pin13LED, HIGH);  // Show activity
   if (Serial.available())
   {
@@ -98,7 +99,7 @@ void loop()   /****** LOOP: RUNS CONSTANTLY ******/
     delay(10);
     digitalWrite(Pin13LED, LOW);  // Show activity   
    }
-*/
+
 
 }//--(end main loop )---
 
