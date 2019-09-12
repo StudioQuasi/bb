@@ -1,0 +1,33 @@
+[
+   {
+      "id" : 0,
+      "controllerIndex" : 0,
+      "driverIndex": 0,
+      "pos" : [200,300],
+      "groups" : [0]
+   },
+   {
+       "id" : 1,
+       "controllerIndex" : 0,
+       "driverIndex": 1,
+       "pos" : [200,400]
+   },
+   {
+       "id" : 2,
+       "controllerIndex" : 0,
+       "driverIndex": 2,
+       "pos" : [300,300]
+   },
+   {
+       "id" : 3,
+       "controllerIndex" : 1,
+       "driverIndex": 0,
+       "pos" : [400,400]
+   },
+   {
+       "id" : 4,
+       "controllerIndex" : 1,
+       "driverIndex": 1,
+       "pos" : [500,500]
+   }
+]
