@@ -7,7 +7,7 @@
 
 #include "fish.h"
 
-fish::fish(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec)
+fish::fish(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec, bool _isLead)
 {
     
     wallIndex = _wallIndex;
@@ -32,11 +32,17 @@ fish::fish(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec)
     scaledSize.x = arrBassImg[DISPLAY_STATE_CLOSE].getWidth() * SCALE_FISH;
     scaledSize.y = arrBassImg[DISPLAY_STATE_CLOSE].getHeight() * SCALE_FISH;
 
+    isLead = _isLead;
 }
 
 fish::~fish()
 {
     
+}
+
+int fish::getBodyState()
+{
+    return stateBody;
 }
 
 void fish::setBodyState(int _mouthState, int _bodyState)
@@ -88,13 +94,13 @@ void fish::update()
     
 }
 
-void fish::draw()
+void fish::draw(int _x, int _y)
 {
-    ofDrawEllipse(loc.x, loc.y, RENDER_SIZE, RENDER_SIZE*.5);
-
     //Get image based on state mouth and body
     string _bassImg = "bass_" + ofToString(stateMouth) + "_" + ofToString(stateBody) + ".png";
 
     //Draw image
-    arrBassImg[displayState].draw(loc, scaledSize.x, scaledSize.y);
+    arrBassImg[displayState].draw(_x, _y, scaledSize.x, scaledSize.y);
+    //arrBassImg[displayState].draw(loc, scaledSize.x, scaledSize.y);
+
 }

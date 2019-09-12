@@ -30,19 +30,22 @@ class fish {
     
 public:
     
-    fish(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc);
+    fish(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead);
     ~fish();
 
-    void draw();
+    void draw(int _x, int _y);
     void update();
 
     void setBodyState(int _mouthState, int _bodyState);
 
+    int getBodyState();
+    
+    bool isLead;
+    
 protected:
     
     int stateMouth;
     int stateBody;
-    
     int displayState;
 
     int wallIndex;
@@ -52,7 +55,7 @@ protected:
     ofImage arrBassImg[6];
     ofVec2f loc;
     ofVec2f scaledSize;
-    
+
 };
 
 #endif /* fish_hpp */

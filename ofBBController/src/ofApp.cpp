@@ -17,7 +17,7 @@ void ofApp::setup(){
     isPaused = false;
     
     ttf.load("mono.ttf", 35);
-    ttf_side.load("mono.ttf", 15);
+    ttf_side.load("mono.ttf", 14);
 
     path.setStrokeColor(0);
     path.setFilled(false);
@@ -55,6 +55,27 @@ void ofApp::setup(){
     
     //Open stairs image
     imgStairs.load("stairs_.png");
+
+    //Add All Gui elements to set
+    panelGroup.setName("Bass Layout Params");
+    panelGroup.add(bbCols.set("Columns",10,1,50));
+    panelGroup.add(bbRows.set("Rows",10,1,50));
+    panelGroup.add(bbColSpacing.set("Col Spacing",20,0,200));
+    panelGroup.add(bbRowSpacing.set("Row Spacing",20,0,200));
+    panelGroup.add(bbScale.set("Bass Scale",.1,.05,5));
+
+    panelGroup.add(bbOriginX.set("Origin X",0,0,ofGetWidth()));
+    panelGroup.add(bbOriginY.set("Origin Y",0,0,ofGetHeight()));
+
+    panel.setDefaultHeight(25);
+    panel.setDefaultWidth(ofGetWidth()/5);
+    panel.setup(panelGroup, "bbwall_settings.xml");
+    panel.setPosition(0, 200);
+    panel.loadFromFile("bbwall_settings.xml");
+
+    //Read Layout File
+    //readLayoutJsonFile();
+    createLayoutByParam();
 }
 
 //--------------------------------------------------------------
@@ -73,15 +94,8 @@ void ofApp::update(){
             
             ofLog() << _t << " " << _n;
 
-            //Handle commands
-            //bool b1 = false;
-            //bool b2 = false;
-
-            //Serial.println(arrCmds[nextCmdIndex].cmd);
-            //Serial.println(arrCmds[nextCmdIndex].b1);
             arrPlayedCmds.push_back(arrCmds[nextCmdIndex]);
-
-            serial.writeBytes(arrCmds[nextCmdIndex].sCmd.c_str(), arrCmds[nextCmdIndex].sCmd.length());
+            writeCommand(arrCmds[nextCmdIndex].cmd, arrCmds[nextCmdIndex].cmdType, false);
 
             nextCmdIndex++;
 
@@ -102,25 +116,13 @@ void ofApp::update(){
             
             if (bTailOn) {
                 
-                string _scmd = buildCommandString(CMD_TAIL_ON, 1);
-                
-                if (state == STATE_RECORD)
-                    arrCmds.push_back(bbcmd(CMD_TAIL_ON, _t, _scmd));
-                
-                serial.writeBytes(_scmd.c_str(), _scmd.length());
-                ofLog() << _scmd;
+                writeCommand(CMD_TAIL_ON, 1, true);
                 
                 nextTail = ofGetElapsedTimef() + 1.0;
             }
             else
             {
-                string _scmd = buildCommandString(CMD_TAIL_OFF, 1);
-                
-                if (state == STATE_RECORD)
-                    arrCmds.push_back(bbcmd(CMD_TAIL_OFF, _t, _scmd));
-                
-                serial.writeBytes(_scmd.c_str(), _scmd.length());
-                ofLog() << _scmd;
+                writeCommand(CMD_TAIL_OFF, 1, true);
                 
                 nextTail = ofGetElapsedTimef() + 1.2;
             }
@@ -129,7 +131,7 @@ void ofApp::update(){
         }
     }
     
-    //Draw each fish
+    //Update each fish
     for (int i=0; i<arrFish.size(); i++)
     {
         arrFish[i].update();
@@ -141,6 +143,49 @@ void ofApp::drawStairs()
 
     
 }
+
+void ofApp::createLayoutByParam() {
+    
+    int _id = 0;
+    int _controllerIndex = 0;
+    int _driverIndex = 0;
+
+    int _x, _y;
+
+    ofLog() << ">>> Create Layout by Param";
+
+    ofLog() << "Cols : " << bbCols.get();
+    ofLog() << "Rows : " << bbRows.get();
+
+    for (int i=0; i<bbCols.get(); i++) {
+        
+        for (int j=0; j<bbRows.get(); j++) {
+
+            _x = i * bbColSpacing.get();
+            _y = j * bbRowSpacing.get();
+
+            ofLog() << _x << "," << _y;
+
+            _id++;
+
+            if (_id % 3 == 0) {
+                _controllerIndex++;
+            }
+
+            arrFish.push_back(
+                fish(
+                     _id,
+                     _controllerIndex,
+                     _driverIndex,
+                     ofVec2f(_x, _y),
+                     false
+                )
+            );
+
+        }
+    }
+}
+
 
 void ofApp::readLayoutJsonFile() {
     
@@ -155,20 +200,30 @@ void ofApp::readLayoutJsonFile() {
         arrFish.clear();
         
         int _count = 0;
+        bool _isLead = false;
+
         for(auto & _cmd: js){
-            
-            //ofLog() << _cmd;
+
+            ofLog() << _cmd;
+            _isLead = false;
+
+            if (!_cmd["groups"].empty()) {
+                ofLog() << "*** IS EMPTY";
+                _isLead = true;
+            }
+
             arrFish.push_back(
                 fish(
                      _cmd["id"],
                      _cmd["controllerIndex"],
                      _cmd["driverIndex"],
-                     ofVec2f(_cmd["pos"][0],_cmd["pos"][1])
+                     ofVec2f(_cmd["pos"][0],_cmd["pos"][1]),
+                     _isLead
                 )
             );
             _count++;
         }
-        
+
         ofLog() << "* Read Fish In" << _count;
         
     }
@@ -189,7 +244,20 @@ void ofApp::readJsonFile() {
         for(auto & _cmd: js){
 
             //ofLog() << _cmd;
-            arrCmds.push_back(bbcmd(_cmd["cmd"], _cmd["timecode"], _cmd["set"]));
+            int _cmdType = CMD_TYPE_ALL;
+
+            if (!_cmd["group"].empty()) {
+                _cmdType = CMD_TYPE_LEAD;
+            }
+
+            arrCmds.push_back(
+                bbcmd(
+                      _cmd["cmd"],
+                      _cmd["timecode"],
+                      _cmd["set"],
+                      _cmdType
+                )
+            );
             _count++;
         }
         
@@ -222,18 +290,11 @@ void ofApp::writeJsonFile() {
 
         _cmd["cmd"] = arrCmds[i].cmd;
         _cmd["timecode"] = arrCmds[i].timecode;
-
-        /*
-        if (arrCmds[i].b1)
-            _arrBB.append(Json::Value(0));
-
-        if (arrCmds[i].b2)
-            _arrBB.append(Json::Value(1));
-
-        _cmd["set"] = _arrBB;
-         */
-
         _cmd["set"] = arrCmds[i].sCmd;
+
+        if (arrCmds[i].cmdType == CMD_TYPE_LEAD) {
+            _cmd["group"] = {0};
+        }
 
         ofLog() << arrCmds[i].cmd << "\t" << arrCmds[i].timecode;
 
@@ -242,15 +303,6 @@ void ofApp::writeJsonFile() {
 
     ofLog() << arrCommands;
     ofLog() << "* Write " << arrCmds.size();
-
-    /*
-    //Write the file
-    ofFile _file;
-    _file.open(ofToDataPath("out.json"), ofFile::ReadWrite, false);
-    
-    bool _written = _file.writeFromBuffer(arrCommands);
-    _file.close();
-    */
     
     std::ofstream file_id;
     file_id.open(ofToDataPath("out.json"));
@@ -308,6 +360,10 @@ void ofApp::draw(){
     int _offset = 40;
     string _s = "";
 
+    ofPushStyle();
+    
+    ofSetColor(50);
+
     if (state == STATE_RECORD)
     {
         for (int i=arrCmds.size()-1; i>=0; i--) {
@@ -329,13 +385,20 @@ void ofApp::draw(){
             _offset += 25;
         }
     }
+    ofPopStyle();
 
     //Draw each fish
     for (int i=0; i<arrFish.size(); i++)
     {
-        arrFish[i].draw();
+        int _x = (i % bbCols.get()) * bbColSpacing.get();
+        int _y = (i / bbCols.get()) * bbRowSpacing.get();
+
+        arrFish[i].draw(_x, _y);
     }
 
+    //Draw
+    if (bShowGui)
+        panel.draw();
 }
 
 string ofApp::buildCommandString(int _cmd, int _type)
@@ -355,20 +418,79 @@ string ofApp::buildCommandString(int _cmd, int _type)
     return _scmd;
 }
 
-void ofApp::writeCommand(string _cmd)
+void ofApp::writeCommand(int _cmdID, int _cmdType, bool _record)
 {
 
+    int _mouth = -1;
+    int _body = -1;
+
+    string _cmd = buildCommandString(_cmdID, _cmdType);
+
+    float _t = ofGetElapsedTimef() - timeCode;
+
+    switch (_cmdID) {
+
+        case CMD_MOUTH_OPEN:
+            _mouth = STATE_MOUTH_OPEN;
+            break;
+        
+        case CMD_MOUTH_CLOSE:
+            _mouth = STATE_MOUTH_CLOSE;
+            break;
+
+        case CMD_TAIL_ON:
+            _body = STATE_BODY_TAIL;
+            break;
+
+        case CMD_HEAD_ON:
+            _body = STATE_BODY_HEAD;
+            break;
+            
+        case CMD_BODY_OFF:
+        case CMD_TAIL_OFF:
+            _body = STATE_BODY_OFF;
+            break;
+
+    }
+
+    //Set visuals for all fish
+    setAllBodyState(_mouth, _body, _cmdID, _cmdType);
+
+    //Write to the hardware
     serial.writeBytes(_cmd.c_str(), _cmd.length());
+
+    //If is a subgroup
+    bool _isGroup = false;
+
+    if (_cmdType == CMD_TYPE_LEAD) {
+        _isGroup = true;
+    }
+
+    if (_record && state == STATE_RECORD)
+        arrCmds.push_back(bbcmd(_cmdID, _t, _cmd, _isGroup));
+
 }
 
-void ofApp::setAllBodyState(int _mouthState, int _bodyState)
+void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cmdType)
 {
 
     for (int i=0; i<arrFish.size(); i++)
     {
-        ofLog() << "Set body state " << i << " " << _mouthState << " " << _bodyState;
 
-        arrFish[i].setBodyState(_mouthState, _bodyState);
+        if (
+            _cmdType == CMD_TYPE_ALL
+            ||
+            (_cmdType == CMD_TYPE_LEAD && arrFish[i].isLead)
+            ||
+            (_cmdType == CMD_TYPE_OTHERS && !arrFish[i].isLead)
+        )
+        {
+            if (arrFish[i].getBodyState() == STATE_BODY_HEAD && (_cmdID == CMD_TAIL_ON || _cmdID == CMD_TAIL_OFF)) {
+                arrFish[i].setBodyState(_mouthState, -1);
+            } else {
+                arrFish[i].setBodyState(_mouthState, _bodyState);
+            }
+        }
     }
 }
 
@@ -417,34 +539,26 @@ void ofApp::keyPressed(int key){
 
                 animMouth.animateTo(1);
                 
-                float _t = ofGetElapsedTimef() - timeCode;
+                //float _t = ofGetElapsedTimef() - timeCode;
 
-                string _cmd;
-
+                int _cmd = CMD_MOUTH_OPEN;
+                int _cmdType;
+                
                 if (key == 'k') {
                     
                     _lastCmd = LAST_MOUTH_ALL;
-                    _cmd = buildCommandString(CMD_MOUTH_OPEN,1);
-
-                    //Set all mouth open
-                    setAllBodyState(STATE_MOUTH_OPEN, -1);
-
+                    _cmdType = CMD_TYPE_ALL;
                 } else if (key == 'j' ) {
                     
                     _lastCmd = LAST_MOUTH_LEAD;
-                    _cmd = buildCommandString(CMD_MOUTH_OPEN,0);
+                    _cmdType = CMD_TYPE_LEAD;
                 } else {
 
                     _lastCmd = LAST_MOUTH_OTHERS;
-                    _cmd = buildCommandString(CMD_MOUTH_OPEN,2);
+                    _cmdType = CMD_TYPE_OTHERS;
                 }
 
-                serial.writeBytes(_cmd.c_str(), _cmd.length());
-
-                ofLog() << _cmd;
-    
-                if (state == STATE_RECORD)
-                    arrCmds.push_back(bbcmd(CMD_MOUTH_OPEN, _t, _cmd));
+                writeCommand(_cmd, _cmdType, true);
             }
             break;
 
@@ -453,26 +567,17 @@ void ofApp::keyPressed(int key){
 
             if (state != STATE_PLAYBACK) {
 
-                float _t = ofGetElapsedTimef() - timeCode;
 
-                string _cmd;
+                int _cmd = CMD_HEAD_ON;
+                int _cmdType;
                 
                 if (key == 'i') {
-                    
-                    _cmd = buildCommandString(CMD_HEAD_ON,1);
-                    
-                    //Set all mouth close
-                    setAllBodyState(-1, STATE_BODY_HEAD);
-                    
+                    _cmdType = 1;
                 } else {
-
-                    _cmd = buildCommandString(CMD_HEAD_ON,0);
+                    _cmdType = 0;
                 }
                 
-                serial.writeBytes(_cmd.c_str(), _cmd.length());
-
-                if (state == STATE_RECORD)
-                    arrCmds.push_back(bbcmd(CMD_HEAD_ON, _t, _cmd));
+                writeCommand(_cmd, _cmdType, true);
             }
             break;
 
@@ -481,25 +586,16 @@ void ofApp::keyPressed(int key){
             
             if (state != STATE_PLAYBACK) {
                 
-                float _t = ofGetElapsedTimef() - timeCode;
-                
-                string _cmd;
-                
+                int _cmd = CMD_TAIL_ON;
+                int _cmdType;
+    
                 if (key == '8') {
-
-                    //Set all mouth close
-                    setAllBodyState(-1, STATE_BODY_TAIL);
-
-                    _cmd = buildCommandString(CMD_TAIL_ON,1);
+                    _cmdType = 1;
                 } else {
-                    
-                    _cmd = buildCommandString(CMD_TAIL_ON,0);
+                    _cmdType = 0;
                 }
                 
-                serial.writeBytes(_cmd.c_str(), _cmd.length());
-                
-                if (state == STATE_RECORD)
-                    arrCmds.push_back(bbcmd(CMD_TAIL_ON, _t, _cmd));
+                writeCommand(_cmd, _cmdType, true);
             }
             break;
 
@@ -507,26 +603,16 @@ void ofApp::keyPressed(int key){
         case ',':
             
             if (state != STATE_PLAYBACK) {
-                
-                float _t = ofGetElapsedTimef() - timeCode;
-                
-                string _cmd;
+
+                int _cmdType;
 
                 if (key == ',') {
-                    
-                    //Set all mouth close
-                    setAllBodyState(-1, STATE_BODY_OFF);
-
-                    _cmd = buildCommandString(CMD_BODY_OFF,1);
+                    _cmdType = 1;
                 } else {
-
-                    _cmd = buildCommandString(CMD_BODY_OFF,0);
+                    _cmdType = 0;
                 }
                 
-                serial.writeBytes(_cmd.c_str(), _cmd.length());
-                
-                if (state == STATE_RECORD)
-                    arrCmds.push_back(bbcmd(CMD_BODY_OFF, _t, _cmd));
+                writeCommand(CMD_BODY_OFF, _cmdType, true);
 
             }
             break;
@@ -541,13 +627,12 @@ void ofApp::keyPressed(int key){
         case 'o':
             
             ofLog() << "Read layout json file.";
-            readLayoutJsonFile();
-            //readJsonFile();
+            readJsonFile();
             break;
             
         case 'p':
             
-            //isFlipping = !isFlipping;
+            isFlipping = !isFlipping;
             break;
             
         case 'x':
@@ -557,7 +642,6 @@ void ofApp::keyPressed(int key){
                 arrFish[i].setBodyState(STATE_MOUTH_OPEN, -1);
             }
             break;
-            
         }
     }
 }
@@ -576,28 +660,25 @@ void ofApp::keyReleased(int key){
             
             if (state != STATE_PLAYBACK) {
                 
-                float _t = ofGetElapsedTimef() - timeCode;
+                //float _t = ofGetElapsedTimef() - timeCode;
                 
-                string _cmd;
+                int _cmdType;
 
-                if (key == 'k') {
-                    _cmd = buildCommandString(CMD_MOUTH_CLOSE,1);
-                
-                    //Set all mouth close
-                    setAllBodyState(STATE_MOUTH_CLOSE, -1);
-                
-                } else if (key == 'j') {
-                    
-                    _cmd = buildCommandString(CMD_MOUTH_CLOSE,0);
-                }
+                if (key == 'k')
+                    _cmdType = 1;
+                else if (key == 'j')
+                    _cmdType = 0;
                 else
-                    _cmd = buildCommandString(CMD_MOUTH_CLOSE,2);
+                    _cmdType = 2;
+                    //_cmd = buildCommandString(CMD_MOUTH_CLOSE,2);
                     
                 animMouth.animateTo(0);
-                serial.writeBytes(_cmd.c_str(), _cmd.length());
 
-                if (state == STATE_RECORD)
-                   arrCmds.push_back(bbcmd(CMD_MOUTH_CLOSE, _t, _cmd));
+                writeCommand(CMD_MOUTH_CLOSE, _cmdType, true);
+                //serial.writeBytes(_cmd.c_str(), _cmd.length());
+
+                //if (state == STATE_RECORD)
+                //   arrCmds.push_back(bbcmd(CMD_MOUTH_CLOSE, _t, _cmd));
             }
             break;
             

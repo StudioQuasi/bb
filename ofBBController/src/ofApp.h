@@ -19,6 +19,10 @@ const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
 const int CMD_TAIL_OFF = 5;
 
+const int CMD_TYPE_ALL = 1;
+const int CMD_TYPE_LEAD = 0;
+const int CMD_TYPE_OTHERS = 2;
+
 const int LEAD_BASS = 0;
 
 const int LAST_MOUTH_LEAD = 0;
@@ -38,23 +42,20 @@ struct bbcmd {
     float timecode;
     string sCmd;
     Byte arrIndex[5];
+    int cmdType;
     
     bbcmd(
         int _cmdID,
         float _timecode,
-        string _cmdString
+        string _cmdString,
+        int _cmdType
     )
     {
 
         cmd = _cmdID;
         timecode = _timecode;
         sCmd = _cmdString;
-
-        /*
-        for (int i=0; i<5; i++) {
-            arrIndex[i] = _arrIndex[i];
-        }*/
-
+        cmdType = _cmdType;
     }
 };
 
@@ -79,19 +80,32 @@ class ofApp : public ofBaseApp{
 		
         string buildCommandString(int _cmd, int _type);
     
-    void setAllBodyState(int _mouthState, int _bodyState);
+    void setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cmdType);
 
+    //Gui Panel
+    ofxPanel panel;
+    ofParameterGroup panelGroup;
     
-    ofxPanel cvGui;
-    ofParameterGroup paramCV;
-    ofParameter<string> cvName;
-    
+    ofParameter<int> bbCols;
+    ofParameter<int> bbRows;
+    ofParameter<float> bbScale;
+    ofParameter<int> bbColSpacing;
+    ofParameter<int> bbRowSpacing;
+    ofParameter<int> bbOriginX;
+    ofParameter<int> bbOriginY;
+
+    ofParameter<int> bbSlope;
+
+    bool bShowGui = true;
+
     ofxJSONElement result;
 
-    void writeCommand(string _cmd);
+    void writeCommand(int _cmdID, int _cmdType, bool _record);
 
     void writeJsonFile();
     void readJsonFile();
+    
+    void createLayoutByParam();
     void readLayoutJsonFile();
 
     void drawStairs();
