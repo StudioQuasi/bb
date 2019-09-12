@@ -5,8 +5,10 @@ void ofApp::setup(){
 
     state = STATE_WAIT;
     
-    soundFileName = "hallandoats.mp3"; //hallandoats.mp3";
-    cmdFileName = "hallandouts_good1.json";
+    soundFileName = "smooth_operator.mp3"; //hallandoats.mp3";
+    cmdFileName = "smooth_operator.json";
+
+    layoutFile = "layout.json";
 
     ofLog() << ofToDataPath(soundFileName);
     
@@ -14,7 +16,7 @@ void ofApp::setup(){
     
     isPaused = false;
     
-    ttf.load("mono.ttf", 25);
+    ttf.load("mono.ttf", 35);
     ttf_side.load("mono.ttf", 15);
 
     path.setStrokeColor(0);
@@ -50,6 +52,9 @@ void ofApp::setup(){
     nextTail = 0;
     
     isFlipping = false;
+    
+    //Open stairs image
+    imgStairs.load("stairs_.png");
 }
 
 //--------------------------------------------------------------
@@ -81,7 +86,7 @@ void ofApp::update(){
             nextCmdIndex++;
 
             //Start over song
-            if (arrCmds.size() == nextCmdIndex) {
+            if (arrCmds.size() == nextCmdIndex && isLoop) {
 
                 readJsonFile();
             }
@@ -123,7 +128,52 @@ void ofApp::update(){
             bTailOn = !bTailOn;
         }
     }
+    
+    //Draw each fish
+    for (int i=0; i<arrFish.size(); i++)
+    {
+        arrFish[i].update();
+    }
 }
+
+void ofApp::drawStairs()
+{
+
+    
+}
+
+void ofApp::readLayoutJsonFile() {
+    
+    ofFile file(ofToDataPath(layoutFile));
+    ofJson js;
+    
+    ofLog() << "* Read layout file : " << layoutFile;
+    
+    if(file.exists()){
+        
+        file >> js;
+        arrFish.clear();
+        
+        int _count = 0;
+        for(auto & _cmd: js){
+            
+            //ofLog() << _cmd;
+            arrFish.push_back(
+                fish(
+                     _cmd["id"],
+                     _cmd["controllerIndex"],
+                     _cmd["driverIndex"],
+                     ofVec2f(_cmd["pos"][0],_cmd["pos"][1])
+                )
+            );
+            _count++;
+        }
+        
+        ofLog() << "* Read Fish In" << _count;
+        
+    }
+}
+
 
 void ofApp::readJsonFile() {
 
@@ -216,12 +266,15 @@ void ofApp::writeJsonFile() {
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    ofSetColor(0);
+    //ofSetColor(0);
+    
+    //Draw backgtround image
+    imgStairs.draw(0,0, 1102, 702);
+
     ttf.drawString("Billy Bass Wall", 20, 40);
     ttf.drawString("\"" + soundFileName + "\"", 20, 90);
-    
+
     float _t = 0;
-    
     if (state == STATE_RECORD || state == STATE_PLAYBACK) {
         _t = ofGetElapsedTimef() - timeCode;
     }
@@ -277,6 +330,12 @@ void ofApp::draw(){
         }
     }
 
+    //Draw each fish
+    for (int i=0; i<arrFish.size(); i++)
+    {
+        arrFish[i].draw();
+    }
+
 }
 
 string ofApp::buildCommandString(int _cmd, int _type)
@@ -296,6 +355,22 @@ string ofApp::buildCommandString(int _cmd, int _type)
     return _scmd;
 }
 
+void ofApp::writeCommand(string _cmd)
+{
+
+    serial.writeBytes(_cmd.c_str(), _cmd.length());
+}
+
+void ofApp::setAllBodyState(int _mouthState, int _bodyState)
+{
+
+    for (int i=0; i<arrFish.size(); i++)
+    {
+        ofLog() << "Set body state " << i << " " << _mouthState << " " << _bodyState;
+
+        arrFish[i].setBodyState(_mouthState, _bodyState);
+    }
+}
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
@@ -311,11 +386,13 @@ void ofApp::keyPressed(int key){
             if (state == STATE_WAIT) {
                 
                 state = STATE_RECORD;
-                
+                isFlipping = !isFlipping;
+
                 playerSound.play();
                 playerSound.setPosition(OFFSET_POSITION);
 
             } else if (state == STATE_RECORD) {
+                
                 
                 isPaused = !isPaused;
                 playerSound.setPaused(isPaused);
@@ -348,6 +425,10 @@ void ofApp::keyPressed(int key){
                     
                     _lastCmd = LAST_MOUTH_ALL;
                     _cmd = buildCommandString(CMD_MOUTH_OPEN,1);
+
+                    //Set all mouth open
+                    setAllBodyState(STATE_MOUTH_OPEN, -1);
+
                 } else if (key == 'j' ) {
                     
                     _lastCmd = LAST_MOUTH_LEAD;
@@ -376,10 +457,17 @@ void ofApp::keyPressed(int key){
 
                 string _cmd;
                 
-                if (key == 'i')
+                if (key == 'i') {
+                    
                     _cmd = buildCommandString(CMD_HEAD_ON,1);
-                else
+                    
+                    //Set all mouth close
+                    setAllBodyState(-1, STATE_BODY_HEAD);
+                    
+                } else {
+
                     _cmd = buildCommandString(CMD_HEAD_ON,0);
+                }
                 
                 serial.writeBytes(_cmd.c_str(), _cmd.length());
 
@@ -397,10 +485,16 @@ void ofApp::keyPressed(int key){
                 
                 string _cmd;
                 
-                if (key == '8')
+                if (key == '8') {
+
+                    //Set all mouth close
+                    setAllBodyState(-1, STATE_BODY_TAIL);
+
                     _cmd = buildCommandString(CMD_TAIL_ON,1);
-                else
+                } else {
+                    
                     _cmd = buildCommandString(CMD_TAIL_ON,0);
+                }
                 
                 serial.writeBytes(_cmd.c_str(), _cmd.length());
                 
@@ -418,10 +512,16 @@ void ofApp::keyPressed(int key){
                 
                 string _cmd;
 
-                if (key == ',')
+                if (key == ',') {
+                    
+                    //Set all mouth close
+                    setAllBodyState(-1, STATE_BODY_OFF);
+
                     _cmd = buildCommandString(CMD_BODY_OFF,1);
-                else
+                } else {
+
                     _cmd = buildCommandString(CMD_BODY_OFF,0);
+                }
                 
                 serial.writeBytes(_cmd.c_str(), _cmd.length());
                 
@@ -440,13 +540,24 @@ void ofApp::keyPressed(int key){
             
         case 'o':
             
-            readJsonFile();
+            ofLog() << "Read layout json file.";
+            readLayoutJsonFile();
+            //readJsonFile();
             break;
             
         case 'p':
             
-            isFlipping = !isFlipping;
+            //isFlipping = !isFlipping;
             break;
+            
+        case 'x':
+            
+            for (int i=0; i<arrFish.size(); i++)
+            {
+                arrFish[i].setBodyState(STATE_MOUTH_OPEN, -1);
+            }
+            break;
+            
         }
     }
 }
@@ -469,10 +580,16 @@ void ofApp::keyReleased(int key){
                 
                 string _cmd;
 
-                if (key == 'k')
+                if (key == 'k') {
                     _cmd = buildCommandString(CMD_MOUTH_CLOSE,1);
-                else if (key == 'j')
+                
+                    //Set all mouth close
+                    setAllBodyState(STATE_MOUTH_CLOSE, -1);
+                
+                } else if (key == 'j') {
+                    
                     _cmd = buildCommandString(CMD_MOUTH_CLOSE,0);
+                }
                 else
                     _cmd = buildCommandString(CMD_MOUTH_CLOSE,2);
                     

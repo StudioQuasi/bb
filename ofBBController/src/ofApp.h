@@ -3,6 +3,10 @@
 #include "ofMain.h"
 #include "ofxAnimatableFloat.h"
 #include "ofxJSON.h"
+#include "ofxGui.h"
+
+#include "controller.h"
+#include "fish.h"
 
 const int STATE_WAIT = 0;
 const int STATE_RECORD = 1;
@@ -15,13 +19,18 @@ const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
 const int CMD_TAIL_OFF = 5;
 
-const int LEAD_BASS = 3;
+const int LEAD_BASS = 0;
 
 const int LAST_MOUTH_LEAD = 0;
 const int LAST_MOUTH_ALL = 1;
 const int LAST_MOUTH_OTHERS = 2;
 
-const float OFFSET_POSITION = 0;
+const float OFFSET_POSITION = .303;
+
+const int NUM_FISH = 63;
+const int NUM_CONTROLLER = 21;
+
+const bool isLoop = false;
 
 struct bbcmd {
 
@@ -70,19 +79,32 @@ class ofApp : public ofBaseApp{
 		
         string buildCommandString(int _cmd, int _type);
     
+    void setAllBodyState(int _mouthState, int _bodyState);
 
+    
+    ofxPanel cvGui;
+    ofParameterGroup paramCV;
+    ofParameter<string> cvName;
+    
     ofxJSONElement result;
+
+    void writeCommand(string _cmd);
 
     void writeJsonFile();
     void readJsonFile();
+    void readLayoutJsonFile();
+
+    void drawStairs();
 
     int state;
-    ofSoundPlayer   playerSound;
+    ofSoundPlayer playerSound;
     float timeCode;
     bool isPaused;
 
     vector<bbcmd> arrCmds;
     vector<bbcmd> arrPlayedCmds;
+
+    vector<fish> arrFish;
 
     ofJson stroke;
     ofTrueTypeFont ttf, ttf_side;
@@ -90,7 +112,8 @@ class ofApp : public ofBaseApp{
 
     string soundFileName;
     string cmdFileName;
-    
+    string layoutFile;
+
     ofxAnimatableFloat animMouth;
     bool _keyOff = true;
     
@@ -106,6 +129,7 @@ class ofApp : public ofBaseApp{
     bool isFlipping;
     
     int _lastCmd;
-
     
+    //Background stairs image
+    ofImage imgStairs;
 };
