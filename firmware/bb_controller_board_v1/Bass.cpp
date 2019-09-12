@@ -19,10 +19,21 @@ const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
 const int CMD_TAIL_OFF = 5;
 
+const int MOUTH_OPEN = 0;
+const int MOUTH_CLOSING = 1;
+const int MOUTH_CLOSED = 2;
+
+const int MOUTH_CLOSING_TIME = 2000;
+
+const int MAX_MOTOR = 255;
+
 class Bass
 {
 
   int id;
+  int state = 0;
+
+  int mouthClosingIndex = 0;
 
   //Adafruit_MotorShield *AFMS;
   //Adafruit_DCMotor *_motor[2];
@@ -93,16 +104,45 @@ class Bass
 
     void mouthOpen() {
 
-      lastCommand = CMD_OPEN;
-      runMotor(MOUTH_MOTOR, MOUTH_OPEN, 255);
+      state = MOUTH_OPEN;
+      
+      //lastCommand = CMD_OPEN;
+      runMotor(MOUTH_MOTOR, MOUTH_OPEN, MAX_MOTOR);
     }
 
     void mouthClose() {
 
-      lastCommand = CMD_CLOSE;
+      //lastCommand = CMD_CLOSE;
+      runMotor(MOUTH_MOTOR, MOUTH_CLOSE, MAX_MOTOR);
+      //runMotor(MOUTH_MOTOR, RELEASE, 0);
+
+      state = MOUTH_CLOSING;
+      mouthClosingIndex = 0;
+      
+    }
+
+    void update() {
+  
+      if (state == MOUTH_CLOSING) {
+
+        mouthClosingIndex = mouthClosingIndex + 1;
+        if (mouthClosingIndex > MOUTH_CLOSING_TIME) {
+          endMouthClose();
+        }
+      }
+
+    }
+    
+    void endMouthClose() {
+
+      state = MOUTH_CLOSED;
+      mouthClosingIndex = 0;
+   
+      //lastCommand = CMD_CLOSE;
+      //runMotor(MOUTH_MOTOR, MOUTH_CLOSE, MAX_MOTOR);
       runMotor(MOUTH_MOTOR, RELEASE, 0);
     }
- 
+
     void runBody(int _dir, int _speed)
     {
 
@@ -114,14 +154,14 @@ class Bass
 
       //if (lastCommand != CMD_HEAD_ON) {
         lastCommand = CMD_TAIL_ON;
-        runMotor(BODY_MOTOR, BODY_TAIL, 255);
+        runMotor(BODY_MOTOR, BODY_TAIL, MAX_MOTOR);
       //}
     }
 
     void bodyHead() {
 
       lastCommand = CMD_HEAD_ON;
-      runMotor(BODY_MOTOR, BODY_HEAD, 255);
+      runMotor(BODY_MOTOR, BODY_HEAD, MAX_MOTOR);
     }
     
     void runMotor(int _index, int _dir, int _speed)

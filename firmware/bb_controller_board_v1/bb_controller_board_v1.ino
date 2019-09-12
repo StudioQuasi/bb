@@ -55,6 +55,8 @@ const int BASS_3_MOUTH = 4;
 const int BASS_3_TAIL = 5;
 
 const int NUM_BASS = 3;
+const int BOARD_ID = 0;
+
 
 //long mouthNext = 0;
 //long bodyNext = 0;
@@ -194,6 +196,9 @@ void testLoop2() {
 
   Serial.println("MOUTH CLOSE");
   arrBass[i]->mouthClose();
+  delay(_delay);
+
+  
 
 /*
   Serial.println("BODY TAIL");
@@ -215,6 +220,9 @@ void testLoop2() {
 
 void loop() {
 
+  for (int i=0; i<3; i++) {
+    arrBass[i]->update();
+  }
 }
 
 
@@ -249,8 +257,12 @@ void serialEvent() {
                 arrBass[i]->mouthClose();
                 break;
               case CMD_TAIL_ON:
+                
                 Serial.println("TAIL ON");
-                arrBass[i]->bodyTail();
+                if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
+                  arrBass[i]->bodyTail();
+                }
+                
                 break;
               case CMD_HEAD_ON:
                 Serial.println("HEAD ON");
@@ -259,15 +271,15 @@ void serialEvent() {
               case CMD_TAIL_OFF:
 
                 Serial.println("TAIL OFF");
-                //if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
-                  arrBass[i]->runBody(RELEASE,255);
-                //}
+                if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
+                  arrBass[i]->runBody(RELEASE,MAX_MOTOR);
+                }
                 break;
   
               case CMD_BODY_OFF:
 
                 Serial.println("BODY OFF");
-                arrBass[i]->runBody(RELEASE,255);
+                arrBass[i]->runBody(RELEASE,MAX_MOTOR);
                 break;
             }
           }
@@ -275,30 +287,35 @@ void serialEvent() {
       else
       {
 
-          //Parse String
-          for (int i=1; i<inputString.length(); i++)
-          {
-            int _index = inputString[i] - '0';
-    
+          int _boardNum = inputString[1] - '0';
+
+          if (_boardNum == BOARD_ID) {
+
+            int _bassIndex = 0;
+            
             switch (_cmd) {
     
               case CMD_OPEN:
-                arrBass[_index]->mouthOpen();
+                arrBass[_bassIndex]->mouthOpen();
                 break;
               case CMD_CLOSE:
-                arrBass[_index]->mouthClose();
+                arrBass[_bassIndex]->mouthClose();
                 break;
               case CMD_TAIL_ON:
-                arrBass[_index]->bodyTail();
+                arrBass[_bassIndex]->bodyTail();
                 break;
               case CMD_HEAD_ON:
-                arrBass[_index]->bodyHead();
+                arrBass[_bassIndex]->bodyHead();
                 break;
               case CMD_BODY_OFF:
-                arrBass[_index]->runBody(RELEASE,255);
+                arrBass[_bassIndex]->runBody(RELEASE,MAX_MOTOR);
                 break;
             }
           }
+      
+          //Parse String
+          /*
+          */
       }
       
       inputString = "";
