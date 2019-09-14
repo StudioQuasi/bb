@@ -33,7 +33,7 @@ public:
     fish(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead);
     ~fish();
 
-    void draw(int _x, int _y);
+    void draw(int _x, int _y, float _scaledSize);
     void update();
 
     void setBodyState(int _mouthState, int _bodyState);

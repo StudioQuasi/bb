@@ -60,13 +60,18 @@ void ofApp::setup(){
     panelGroup.setName("Bass Layout Params");
     panelGroup.add(bbCols.set("Columns",10,1,50));
     panelGroup.add(bbRows.set("Rows",10,1,50));
-    panelGroup.add(bbColSpacing.set("Col Spacing",20,0,200));
-    panelGroup.add(bbRowSpacing.set("Row Spacing",20,0,200));
+    panelGroup.add(bbColSpacing.set("Col Spacing",20,0,300));
+    panelGroup.add(bbRowSpacing.set("Row Spacing",20,0,300));
     panelGroup.add(bbScale.set("Bass Scale",.1,.05,5));
 
     panelGroup.add(bbOriginX.set("Origin X",0,0,ofGetWidth()));
     panelGroup.add(bbOriginY.set("Origin Y",0,0,ofGetHeight()));
-
+    panelGroup.add(bbSlope.set("Slope",0,0,200));
+    
+    panelGroup.add(bbBGX.set("Background X",0,-ofGetWidth(),ofGetWidth()));
+    panelGroup.add(bbBGY.set("Background Y",0,-ofGetHeight(),ofGetHeight()));
+    panelGroup.add(bbBGScale.set("Background Scale",1,0,10));
+    
     panel.setDefaultHeight(25);
     panel.setDefaultWidth(ofGetWidth()/5);
     panel.setup(panelGroup, "bbwall_settings.xml");
@@ -167,7 +172,11 @@ void ofApp::createLayoutByParam() {
             ofLog() << _x << "," << _y;
 
             _id++;
-
+            bool isLead = false;
+            
+            if (_id % 4 == 1)
+                isLead = true;
+            
             if (_id % 3 == 0) {
                 _controllerIndex++;
             }
@@ -178,7 +187,7 @@ void ofApp::createLayoutByParam() {
                      _controllerIndex,
                      _driverIndex,
                      ofVec2f(_x, _y),
-                     false
+                     isLead
                 )
             );
 
@@ -321,7 +330,7 @@ void ofApp::draw(){
     //ofSetColor(0);
     
     //Draw backgtround image
-    imgStairs.draw(0,0, 1102, 702);
+    imgStairs.draw(bbBGX.get(), bbBGY.get(), bbBGScale.get()*1102, bbBGScale.get()*702);
 
     ttf.drawString("Billy Bass Wall", 20, 40);
     ttf.drawString("\"" + soundFileName + "\"", 20, 90);
@@ -353,9 +362,9 @@ void ofApp::draw(){
     
     int _r = ofGetWidth() * (.05 + .1 * animMouth.getCurrentValue());
     
-    ofNoFill();
-    ofSetLineWidth(3);
-    ofDrawCircle(ofGetWidth()*.5, ofGetHeight()*.5, _r);
+    //ofNoFill();
+    //ofSetLineWidth(3);
+    //ofDrawCircle(ofGetWidth()*.5, ofGetHeight()*.5, _r);
     
     int _offset = 40;
     string _s = "";
@@ -388,13 +397,18 @@ void ofApp::draw(){
     ofPopStyle();
 
     //Draw each fish
+    ofPushMatrix();
+    ofTranslate(bbOriginX.get(), bbOriginY.get());
+    
     for (int i=0; i<arrFish.size(); i++)
     {
-        int _x = (i % bbCols.get()) * bbColSpacing.get();
-        int _y = (i / bbCols.get()) * bbRowSpacing.get();
+        int _xIndex = i % bbCols.get();
+        int _x = _xIndex * bbColSpacing.get();
+        int _y = (i / bbCols.get()) * bbRowSpacing.get() - (_xIndex > 4 ? _xIndex : _xIndex) * bbSlope.get();
 
-        arrFish[i].draw(_x, _y);
+        arrFish[i].draw(_x, _y, bbScale.get());
     }
+    ofPopMatrix();
 
     //Draw
     if (bShowGui)

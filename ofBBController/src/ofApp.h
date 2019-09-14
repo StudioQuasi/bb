@@ -94,6 +94,10 @@ class ofApp : public ofBaseApp{
     ofParameter<int> bbOriginX;
     ofParameter<int> bbOriginY;
 
+    ofParameter<int> bbBGX;
+    ofParameter<int> bbBGY;
+    ofParameter<float> bbBGScale;
+    
     ofParameter<int> bbSlope;
 
     bool bShowGui = true;

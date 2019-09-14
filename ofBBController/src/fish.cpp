@@ -94,13 +94,14 @@ void fish::update()
     
 }
 
-void fish::draw(int _x, int _y)
+void fish::draw(int _x, int _y, float _scale)
 {
+
     //Get image based on state mouth and body
     string _bassImg = "bass_" + ofToString(stateMouth) + "_" + ofToString(stateBody) + ".png";
 
     //Draw image
-    arrBassImg[displayState].draw(_x, _y, scaledSize.x, scaledSize.y);
+    arrBassImg[displayState].draw(_x, _y, _scale * scaledSize.x, _scale * scaledSize.y);
     //arrBassImg[displayState].draw(loc, scaledSize.x, scaledSize.y);
 
 }
