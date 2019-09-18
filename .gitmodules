@@ -21,7 +21,7 @@
 	url = https://github.com/kylemcdonald/ofxTimecode.git
 [submodule "ofBBController/externalAddons/ofxTimeline"]
 	path = ofBBController/externalAddons/ofxTimeline
-	url = https://github.com/Entropy/ofxTimeline.git
+	url = https://github.com/pierrep/ofxTimeline.git
 [submodule "ofBBController/externalAddons/ofxTween"]
 	path = ofBBController/externalAddons/ofxTween
 	url = https://github.com/kylemcdonald/ofxTween.git
