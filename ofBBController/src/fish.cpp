@@ -7,13 +7,14 @@
 
 #include "fish.h"
 
-fish::fish(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec, bool _isLead)
+fish::fish(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec, bool _isLead, int _groupIndex)
 {
     
     wallIndex = _wallIndex;
     controllerIndex = _controllerIndex;
     driverIndex = _driverIndex;
 
+    groupIndex = _groupIndex;
     loc = _vec;
     
     stateBody = STATE_BODY_OFF;
@@ -33,6 +34,22 @@ fish::fish(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec,
     scaledSize.y = arrBassImg[DISPLAY_STATE_CLOSE].getHeight() * SCALE_FISH;
 
     isLead = _isLead;
+
+    panel.setName("Bass ID");
+    panel.add(fishID.setup("ID",wallIndex,0,65));
+    panel.add(fishControllerID.setup("Controller",controllerIndex,0,21));
+    panel.add(fishControllerIndex.setup("Driver Index",driverIndex,0,2));
+
+    //panelGroup.add(fishControllerID.set("Controller ID",0,0,21));
+    //panelGroup.add(fishControllerIndex.set("Bass Index",0,0,2));
+    //panelGroup.add(fishControllerIndex.set("Group",0,0,2));
+
+    panel.setDefaultHeight(25);
+    panel.setDefaultWidth(ofGetWidth()/10);
+    panel.setup(panelGroup, "bass_settings.xml");
+    panel.setPosition(150, 200);
+    panel.loadFromFile("bass_settings.xml");
+
 }
 
 fish::~fish()

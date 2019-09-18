@@ -72,12 +72,31 @@ void ofApp::setup(){
     panelGroup.add(bbBGY.set("Background Y",0,-ofGetHeight(),ofGetHeight()));
     panelGroup.add(bbBGScale.set("Background Scale",1,0,10));
     
+    /*
+    panelFishGroup.setName("Bass ID");
+    panelFishGroup.add(fishID.set("ID",0,0,65));
+
+    panelFishGroup.add(new ofxIntSlider("test"));
+
+    panelFishGroup.add(fishControllerID.set("Controller ID",0,0,21));
+    panelFishGroup.add(fishControllerIndex.set("Bass Index",0,0,2));
+    panelFishGroup.add(fishControllerIndex.set("Group",0,0,2));
+    */
+
     panel.setDefaultHeight(25);
     panel.setDefaultWidth(ofGetWidth()/5);
     panel.setup(panelGroup, "bbwall_settings.xml");
     panel.setPosition(0, 200);
     panel.loadFromFile("bbwall_settings.xml");
 
+    /*
+    panelFish.setDefaultHeight(25);
+    panelFish.setDefaultWidth(ofGetWidth()/10);
+    panelFish.setup(panelFishGroup, "bbwall_fish_settings.xml");
+    panelFish.setPosition(150, 200);
+    panelFish.loadFromFile("bbwall_fish_settings.xml");
+    */
+    
     //Read Layout File
     //readLayoutJsonFile();
     createLayoutByParam();
@@ -169,7 +188,7 @@ void ofApp::createLayoutByParam() {
             _x = i * bbColSpacing.get();
             _y = j * bbRowSpacing.get();
 
-            ofLog() << _x << "," << _y;
+            //ofLog() << _x << "," << _y;
 
             _id++;
             bool isLead = false;
@@ -187,7 +206,8 @@ void ofApp::createLayoutByParam() {
                      _controllerIndex,
                      _driverIndex,
                      ofVec2f(_x, _y),
-                     isLead
+                     isLead,
+                     1
                 )
             );
 
@@ -227,7 +247,8 @@ void ofApp::readLayoutJsonFile() {
                      _cmd["controllerIndex"],
                      _cmd["driverIndex"],
                      ofVec2f(_cmd["pos"][0],_cmd["pos"][1]),
-                     _isLead
+                     _isLead,
+                     1
                 )
             );
             _count++;
@@ -412,7 +433,11 @@ void ofApp::draw(){
 
     //Draw
     if (bShowGui)
+    {
         panel.draw();
+        panelFish.draw();
+    }
+
 }
 
 string ofApp::buildCommandString(int _cmd, int _type)

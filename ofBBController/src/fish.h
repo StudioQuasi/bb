@@ -9,6 +9,7 @@
 #define fish_h
 
 #include "ofMain.h"
+#include "ofxGui.h"
 
 const int STATE_MOUTH_OPEN = 0;
 const int STATE_MOUTH_CLOSE = 1;
@@ -30,7 +31,7 @@ class fish {
     
 public:
     
-    fish(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead);
+    fish(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead, int groupIndex);
     ~fish();
 
     void draw(int _x, int _y, float _scaledSize);
@@ -52,10 +53,20 @@ protected:
     int controllerIndex;
     int driverIndex;
 
+    int groupIndex;
+    
     ofImage arrBassImg[6];
     ofVec2f loc;
     ofVec2f scaledSize;
 
+    ofxPanel panel;
+    ofParameterGroup panelGroup;
+
+    ofxIntField fishID;
+    ofxIntField fishControllerID;
+    ofxIntSlider fishControllerIndex;
+    ofParameter<int> fishGroupID;
+    
 };
 
 #endif /* fish_hpp */

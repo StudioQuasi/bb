@@ -83,7 +83,8 @@ class ofApp : public ofBaseApp{
     void setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cmdType);
 
     //Gui Panel
-    ofxPanel panel;
+    ofxPanel panel, panelFish;
+    
     ofParameterGroup panelGroup;
     
     ofParameter<int> bbCols;
@@ -97,9 +98,16 @@ class ofApp : public ofBaseApp{
     ofParameter<int> bbBGX;
     ofParameter<int> bbBGY;
     ofParameter<float> bbBGScale;
-    
     ofParameter<int> bbSlope;
 
+    /*
+    ofParameterGroup panelFishGroup;
+    ofParameter<int> fishID;
+    ofParameter<int> fishControllerID;
+    ofParameter<int> fishControllerIndex;
+    ofParameter<int> fishGroupID;
+    */
+    
     bool bShowGui = true;
 
     ofxJSONElement result;
