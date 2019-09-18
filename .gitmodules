@@ -3,28 +3,10 @@
 	url = https://github.com/armadillu/ofxAnimatable
 [submodule "ofBBController/externalAddons/ofxJSON"]
 	path = ofBBController/externalAddons/ofxJSON
-	url = https://github.com/jeffcrouse/ofxJSON.git
-[submodule "ofBBController/externalAddons/ofxAudioDecoder"]
-	path = ofBBController/externalAddons/ofxAudioDecoder
-	url = https://github.com/kylemcdonald/ofxAudioDecoder.git
-[submodule "ofBBController/externalAddons/ofxMSATimer"]
-	path = ofBBController/externalAddons/ofxMSATimer
-	url = https://github.com/kylemcdonald/ofxMSATimer.git
-[submodule "ofBBController/externalAddons/ofxRange"]
-	path = ofBBController/externalAddons/ofxRange
-	url = https://github.com/kylemcdonald/ofxRange.git
-[submodule "ofBBController/externalAddons/ofxTextInputField"]
-	path = ofBBController/externalAddons/ofxTextInputField
-	url = https://github.com/kylemcdonald/ofxTextInputField.git
-[submodule "ofBBController/externalAddons/ofxTimecode"]
-	path = ofBBController/externalAddons/ofxTimecode
-	url = https://github.com/kylemcdonald/ofxTimecode.git
-[submodule "ofBBController/externalAddons/ofxTimeline"]
-	path = ofBBController/externalAddons/ofxTimeline
-	url = https://github.com/Entropy/ofxTimeline.git
-[submodule "ofBBController/externalAddons/ofxTween"]
-	path = ofBBController/externalAddons/ofxTween
-	url = https://github.com/kylemcdonald/ofxTween.git
-[submodule "ofBBController/externalAddons/ofxBasicSoundPlayer"]
-	path = ofBBController/externalAddons/ofxBasicSoundPlayer
-	url = https://github.com/arturoc/ofxBasicSoundPlayer
+	url = https://github.com/jeffcrouse/ofxJSON
+[submodule "ofxInterface"]
+	path = ofxInterface
+	url = https://github.com/galsasson/ofxInterface.git
+[submodule "ofBBController/externalAddons/ofxInterface"]
+	path = ofBBController/externalAddons/ofxInterface
+	url = https://github.com/galsasson/ofxInterface.git

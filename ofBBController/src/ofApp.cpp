@@ -378,15 +378,16 @@ void ofApp::draw(){
             ofSetColor(50,250,50);
             break;
     }
+
     ttf.drawString(arrStateNames[state], 20, 190);
     ofPopStyle();
-    
+
     int _r = ofGetWidth() * (.05 + .1 * animMouth.getCurrentValue());
-    
+
     //ofNoFill();
     //ofSetLineWidth(3);
     //ofDrawCircle(ofGetWidth()*.5, ofGetHeight()*.5, _r);
-    
+
     int _offset = 40;
     string _s = "";
 
@@ -435,7 +436,7 @@ void ofApp::draw(){
     if (bShowGui)
     {
         panel.draw();
-        panelFish.draw();
+        //panelFish.draw();
     }
 
 }

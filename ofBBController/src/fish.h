@@ -10,6 +10,7 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
+#include "ofxInterface.h"
 
 const int STATE_MOUTH_OPEN = 0;
 const int STATE_MOUTH_CLOSE = 1;
@@ -27,10 +28,10 @@ const int DISPLAY_STATE_OPEN_HEAD = 5;
 const int RENDER_SIZE = 100;
 const float SCALE_FISH = .5;
 
-class fish {
-    
+class fish : public ofxInterface::Node {
+
 public:
-    
+
     fish(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead, int groupIndex);
     ~fish();
 
@@ -43,6 +44,11 @@ public:
     
     bool isLead;
     
+    void onTouchDown(ofxInterface::TouchEvent &event);
+    void onTouchMove(ofxInterface::TouchEvent &event);
+    void onTouchUp(ofxInterface::TouchEvent &event);
+    void onTouchClick(ofxInterface::TouchEvent &event);
+
 protected:
     
     int stateMouth;
@@ -59,6 +65,7 @@ protected:
     ofVec2f loc;
     ofVec2f scaledSize;
 
+    /*
     ofxPanel panel;
     ofParameterGroup panelGroup;
 
@@ -66,7 +73,8 @@ protected:
     ofxIntField fishControllerID;
     ofxIntSlider fishControllerIndex;
     ofParameter<int> fishGroupID;
-    
+    */
+
 };
 
 #endif /* fish_hpp */

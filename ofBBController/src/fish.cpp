@@ -35,26 +35,37 @@ fish::fish(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec,
 
     isLead = _isLead;
 
+    /*
     panel.setName("Bass ID");
     panel.add(fishID.setup("ID",wallIndex,0,65));
     panel.add(fishControllerID.setup("Controller",controllerIndex,0,21));
     panel.add(fishControllerIndex.setup("Driver Index",driverIndex,0,2));
-
+     */
+    
     //panelGroup.add(fishControllerID.set("Controller ID",0,0,21));
     //panelGroup.add(fishControllerIndex.set("Bass Index",0,0,2));
     //panelGroup.add(fishControllerIndex.set("Group",0,0,2));
 
+    /*
     panel.setDefaultHeight(25);
     panel.setDefaultWidth(ofGetWidth()/10);
     panel.setup(panelGroup, "bass_settings.xml");
     panel.setPosition(150, 200);
     panel.loadFromFile("bass_settings.xml");
+     */
+    
+    ofAddListener(eventTouchDown, this, &fish::onTouchDown);
 
 }
 
 fish::~fish()
 {
     
+}
+
+void fish::onTouchDown(ofxInterface::TouchEvent &event) {
+    
+    ofLog() << "pressed " << wallIndex << " " << event.position;
 }
 
 int fish::getBodyState()
@@ -113,7 +124,10 @@ void fish::update()
 
 void fish::draw(int _x, int _y, float _scale)
 {
-
+    //Set the position
+    setPosition(_x, _y, 0);
+    setSize(50,50);
+    
     //Get image based on state mouth and body
     string _bassImg = "bass_" + ofToString(stateMouth) + "_" + ofToString(stateBody) + ".png";
 
@@ -121,4 +135,7 @@ void fish::draw(int _x, int _y, float _scale)
     arrBassImg[displayState].draw(_x, _y, _scale * scaledSize.x, _scale * scaledSize.y);
     //arrBassImg[displayState].draw(loc, scaledSize.x, scaledSize.y);
 
+    ofNoFill();
+    ofDrawRectangle(_x,_y,50,50);
 }
+
