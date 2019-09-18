@@ -59,14 +59,15 @@ protected:
     ofVec2f loc;
     ofVec2f scaledSize;
 
+    /*
     ofxPanel panel;
     ofParameterGroup panelGroup;
 
     ofxIntField fishID;
     ofxIntField fishControllerID;
     ofxIntSlider fishControllerIndex;
-    ofParameter<int> fishGroupID;
-    
+    //ofParameter<int> fishGroupID;
+    */
 };
 
 #endif /* fish_hpp */

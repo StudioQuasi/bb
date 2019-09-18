@@ -35,6 +35,7 @@ fish::fish(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec,
 
     isLead = _isLead;
 
+    /*
     panel.setName("Bass ID");
     panel.add(fishID.setup("ID",wallIndex,0,65));
     panel.add(fishControllerID.setup("Controller",controllerIndex,0,21));
@@ -49,7 +50,7 @@ fish::fish(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec,
     panel.setup(panelGroup, "bass_settings.xml");
     panel.setPosition(150, 200);
     panel.loadFromFile("bass_settings.xml");
-
+     */
 }
 
 fish::~fish()
