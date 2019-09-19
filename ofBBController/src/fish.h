@@ -10,6 +10,9 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
+#include "ofxInterface.h"
+
+using namespace ofxInterface;
 
 const int STATE_MOUTH_OPEN = 0;
 const int STATE_MOUTH_CLOSE = 1;
@@ -24,15 +27,17 @@ const int DISPLAY_STATE_OPEN = 3;
 const int DISPLAY_STATE_OPEN_TAIL = 4;
 const int DISPLAY_STATE_OPEN_HEAD = 5;
 
-const int RENDER_SIZE = 100;
+const int RENDER_SIZE = 275;
 const float SCALE_FISH = .5;
 
-class fish {
-    
+const int FISH_IMG_WIDTH = 500;
+const int FISH_IMG_HEIGHT = 304;
+
+class fish : public ofxInterface::Node {
+
 public:
-    
-    fish(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead, int groupIndex);
-    ~fish();
+
+    void setup(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead, int groupIndex);
 
     void draw(int _x, int _y, float _scaledSize);
     void update();
@@ -43,8 +48,12 @@ public:
     
     bool isLead;
     
+    void onTouchDown(TouchEvent &event);
+    void onTouchMove(TouchEvent &event);
+    void onTouchUp(TouchEvent &event);
+
 protected:
-    
+
     int stateMouth;
     int stateBody;
     int displayState;
@@ -52,12 +61,16 @@ protected:
     int wallIndex;
     int controllerIndex;
     int driverIndex;
-
     int groupIndex;
-    
+
     ofImage arrBassImg[6];
     ofVec2f loc;
     ofVec2f scaledSize;
+    ofVec2f offset;
+
+    void drawLabel();
+
+    ofTrueTypeFont ttf;
 
     /*
     ofxPanel panel;
@@ -66,8 +79,8 @@ protected:
     ofxIntField fishID;
     ofxIntField fishControllerID;
     ofxIntSlider fishControllerIndex;
-    //ofParameter<int> fishGroupID;
-    */
+     */
+
 };
 
 #endif /* fish_hpp */

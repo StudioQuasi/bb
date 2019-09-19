@@ -1,7 +1,16 @@
 #include "ofApp.h"
 
+using namespace ofxInterface;
+
 //--------------------------------------------------------------
 void ofApp::setup(){
+
+    //
+    scene = new Node();
+    scene->setSize(ofGetWidth(), ofGetHeight());
+    scene->setName("Scene");
+
+    TouchManager::one().setup(scene);
 
     state = STATE_WAIT;
     
@@ -71,17 +80,12 @@ void ofApp::setup(){
     panelGroup.add(bbBGX.set("Background X",0,-ofGetWidth(),ofGetWidth()));
     panelGroup.add(bbBGY.set("Background Y",0,-ofGetHeight(),ofGetHeight()));
     panelGroup.add(bbBGScale.set("Background Scale",1,0,10));
-    
-    /*
-    panelFishGroup.setName("Bass ID");
-    panelFishGroup.add(fishID.set("ID",0,0,65));
 
-    panelFishGroup.add(new ofxIntSlider("test"));
-
-    panelFishGroup.add(fishControllerID.set("Controller ID",0,0,21));
-    panelFishGroup.add(fishControllerIndex.set("Bass Index",0,0,2));
-    panelFishGroup.add(fishControllerIndex.set("Group",0,0,2));
-    */
+    panelFish.setup();
+    panelFish.add(fishID.setup("Bass ID",0,0,63));
+    panelFish.add(fishControllerID.setup("Controller ID",0,0,21));
+    panelFish.add(fishControllerIndex.setup("Motor Index",0,0,2));
+    panelFish.add(fishGroupID.setup("Group",0,0,2));
 
     panel.setDefaultHeight(25);
     panel.setDefaultWidth(ofGetWidth()/5);
@@ -89,22 +93,24 @@ void ofApp::setup(){
     panel.setPosition(0, 200);
     panel.loadFromFile("bbwall_settings.xml");
 
-    /*
     panelFish.setDefaultHeight(25);
-    panelFish.setDefaultWidth(ofGetWidth()/10);
-    panelFish.setup(panelFishGroup, "bbwall_fish_settings.xml");
+    panelFish.setDefaultWidth(ofGetWidth()/25);
+    //panelFish.setup(panelFishGroup, "bbwall_fish_settings.xml");
     panelFish.setPosition(150, 200);
-    panelFish.loadFromFile("bbwall_fish_settings.xml");
-    */
+    //panelFish.loadFromFile("bbwall_fish_settings.xml");
     
     //Read Layout File
     //readLayoutJsonFile();
     createLayoutByParam();
+
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    
+
+    //Update the touch manager
+    TouchManager::one().update();
+
     float dt = 1.0f / 60.0f;
     animMouth.update(dt);
     
@@ -158,8 +164,9 @@ void ofApp::update(){
     //Update each fish
     for (int i=0; i<arrFish.size(); i++)
     {
-        arrFish[i].update();
+        arrFish[i]->update();
     }
+
 }
 
 void ofApp::drawStairs()
@@ -200,16 +207,19 @@ void ofApp::createLayoutByParam() {
                 _controllerIndex++;
             }
 
-            arrFish.push_back(
-                fish(
-                     _id,
-                     _controllerIndex,
-                     _driverIndex,
-                     ofVec2f(_x, _y),
-                     isLead,
-                     1
-                )
-            );
+            fish * _f = new fish();
+            
+            _f->setup(
+                                     _id,
+                                     _controllerIndex,
+                                     _driverIndex,
+                                     ofVec2f(_x, _y),
+                                     isLead,
+                                     1
+                                     );
+            
+            scene->addChild(_f);
+            arrFish.push_back(_f);
 
         }
     }
@@ -241,16 +251,21 @@ void ofApp::readLayoutJsonFile() {
                 _isLead = true;
             }
 
-            arrFish.push_back(
-                fish(
-                     _cmd["id"],
-                     _cmd["controllerIndex"],
-                     _cmd["driverIndex"],
-                     ofVec2f(_cmd["pos"][0],_cmd["pos"][1]),
-                     _isLead,
-                     1
-                )
+            fish * _f = new fish();
+            
+            _f->setup(
+                                _cmd["id"],
+                                _cmd["controllerIndex"],
+                                _cmd["driverIndex"],
+                                ofVec2f(_cmd["pos"][0],_cmd["pos"][1]),
+                                _isLead,
+                                1
             );
+
+            arrFish.push_back(
+                _f
+            );
+
             _count++;
         }
 
@@ -378,15 +393,16 @@ void ofApp::draw(){
             ofSetColor(50,250,50);
             break;
     }
+
     ttf.drawString(arrStateNames[state], 20, 190);
     ofPopStyle();
-    
+
     int _r = ofGetWidth() * (.05 + .1 * animMouth.getCurrentValue());
-    
+
     //ofNoFill();
     //ofSetLineWidth(3);
     //ofDrawCircle(ofGetWidth()*.5, ofGetHeight()*.5, _r);
-    
+
     int _offset = 40;
     string _s = "";
 
@@ -418,18 +434,18 @@ void ofApp::draw(){
     ofPopStyle();
 
     //Draw each fish
-    ofPushMatrix();
-    ofTranslate(bbOriginX.get(), bbOriginY.get());
+    //ofPushMatrix();
+    //ofTranslate(bbOriginX.get(), bbOriginY.get());
     
     for (int i=0; i<arrFish.size(); i++)
     {
         int _xIndex = i % bbCols.get();
-        int _x = _xIndex * bbColSpacing.get();
-        int _y = (i / bbCols.get()) * bbRowSpacing.get() - (_xIndex > 4 ? _xIndex : _xIndex) * bbSlope.get();
+        int _x = _xIndex * bbColSpacing.get() + bbOriginX.get();
+        int _y = (i / bbCols.get()) * bbRowSpacing.get() - (_xIndex > 4 ? _xIndex : _xIndex) * bbSlope.get() + bbOriginY.get();
 
-        arrFish[i].draw(_x, _y, bbScale.get());
+        arrFish[i]->draw(_x, _y, bbScale.get());
     }
-    ofPopMatrix();
+    //ofPopMatrix();
 
     //Draw
     if (bShowGui)
@@ -515,19 +531,18 @@ void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cm
 
     for (int i=0; i<arrFish.size(); i++)
     {
-
         if (
             _cmdType == CMD_TYPE_ALL
             ||
-            (_cmdType == CMD_TYPE_LEAD && arrFish[i].isLead)
+            (_cmdType == CMD_TYPE_LEAD && arrFish[i]->isLead)
             ||
-            (_cmdType == CMD_TYPE_OTHERS && !arrFish[i].isLead)
+            (_cmdType == CMD_TYPE_OTHERS && !arrFish[i]->isLead)
         )
         {
-            if (arrFish[i].getBodyState() == STATE_BODY_HEAD && (_cmdID == CMD_TAIL_ON || _cmdID == CMD_TAIL_OFF)) {
-                arrFish[i].setBodyState(_mouthState, -1);
+            if (arrFish[i]->getBodyState() == STATE_BODY_HEAD && (_cmdID == CMD_TAIL_ON || _cmdID == CMD_TAIL_OFF)) {
+                arrFish[i]->setBodyState(_mouthState, -1);
             } else {
-                arrFish[i].setBodyState(_mouthState, _bodyState);
+                arrFish[i]->setBodyState(_mouthState, _bodyState);
             }
         }
     }
@@ -678,7 +693,7 @@ void ofApp::keyPressed(int key){
             
             for (int i=0; i<arrFish.size(); i++)
             {
-                arrFish[i].setBodyState(STATE_MOUTH_OPEN, -1);
+                arrFish[i]->setBodyState(STATE_MOUTH_OPEN, -1);
             }
             break;
         }
@@ -729,20 +744,32 @@ void ofApp::mouseMoved(int x, int y ){
 
 }
 
-//--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-
+    
+    /******
+     * pass touch/mouse events to the touch manager
+     */
+    TouchManager::one().touchMove(button, ofVec2f(x, y));
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-
+    
+    /******
+     * pass touch/mouse events to the touch manager
+     */
+    TouchManager::one().touchDown(button, ofVec2f(x, y));
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-
+    
+    /******
+     * pass touch/mouse events to the touch manager
+     */
+    TouchManager::one().touchUp(button, ofVec2f(x, y));
 }
+
 
 //--------------------------------------------------------------
 void ofApp::mouseEntered(int x, int y){

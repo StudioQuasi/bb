@@ -7,10 +7,13 @@
 
 #include "controller.h"
 #include "fish.h"
+#include "ofxInterface.h"
 
 const int STATE_WAIT = 0;
 const int STATE_RECORD = 1;
 const int STATE_PLAYBACK = 2;
+
+
 
 const int CMD_MOUTH_OPEN = 0;
 const int CMD_MOUTH_CLOSE = 1;
@@ -82,6 +85,8 @@ class ofApp : public ofBaseApp{
     
     void setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cmdType);
 
+    ofxInterface::Node* scene;
+    
     //Gui Panel
     ofxPanel panel, panelFish;
     
@@ -100,14 +105,14 @@ class ofApp : public ofBaseApp{
     ofParameter<float> bbBGScale;
     ofParameter<int> bbSlope;
 
-    /*
-    ofParameterGroup panelFishGroup;
-    ofParameter<int> fishID;
-    ofParameter<int> fishControllerID;
-    ofParameter<int> fishControllerIndex;
-    ofParameter<int> fishGroupID;
-    */
-    
+    //ofParameterGroup panelFishGroup;
+
+    ofxIntField fishID;
+    ofxIntField fishControllerID;
+    ofxIntSlider fishControllerIndex;
+    ofxIntField fishGroupID;
+
+
     bool bShowGui = true;
 
     ofxJSONElement result;
@@ -130,7 +135,7 @@ class ofApp : public ofBaseApp{
     vector<bbcmd> arrCmds;
     vector<bbcmd> arrPlayedCmds;
 
-    vector<fish> arrFish;
+    vector<fish*> arrFish;
 
     ofJson stroke;
     ofTrueTypeFont ttf, ttf_side;
