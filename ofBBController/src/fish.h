@@ -37,7 +37,7 @@ class fish : public ofxInterface::Node {
 
 public:
 
-    void setup(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead, int groupIndex);
+    void setup(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead, int groupIndex, ofxPanel * panelFish);
 
     void draw(int _x, int _y, float _scaledSize);
     void update();
@@ -67,6 +67,8 @@ protected:
     ofVec2f loc;
     ofVec2f scaledSize;
     ofVec2f offset;
+
+    ofxPanel * panelFish;
 
     void drawLabel();
 
