@@ -63,7 +63,7 @@ void ofApp::setup(){
     isFlipping = false;
     
     //Open stairs image
-    imgStairs.load("stairs_.png");
+    imgStairs.load("stairs_2.png");
 
     //Add All Gui elements to set
     panelGroup.setName("Bass Layout Params");
@@ -81,7 +81,12 @@ void ofApp::setup(){
     panelGroup.add(bbBGY.set("Background Y",0,-ofGetHeight(),ofGetHeight()));
     panelGroup.add(bbBGScale.set("Background Scale",1,0,10));
 
+    panelGroup.add(bbShowDebug.set("Show Debug"));
+    panelGroup.add(bbFlatIndex.set("Flat Index", 0, 0, 21));
+    panelGroup.add(bbFlatOffset.set("Flat Offset", 0, -100, 100));
+    
     panelFish.setup();
+
     panelFish.add(fishID.setup("Bass ID",0,0,63));
     panelFish.add(fishControllerID.setup("Controller ID",0,0,21));
     panelFish.add(fishControllerIndex.setup("Motor Index",0,0,2));
@@ -441,9 +446,9 @@ void ofApp::draw(){
     {
         int _xIndex = i % bbCols.get();
         int _x = _xIndex * bbColSpacing.get() + bbOriginX.get();
-        int _y = (i / bbCols.get()) * bbRowSpacing.get() - (_xIndex > 4 ? _xIndex : _xIndex) * bbSlope.get() + bbOriginY.get();
-
-        arrFish[i]->draw(_x, _y, bbScale.get());
+        int _y = (i / bbCols.get()) * bbRowSpacing.get() - _xIndex * bbSlope.get() + (_xIndex > bbFlatIndex.get() ? bbFlatOffset.get() : 0) + bbOriginY.get();
+        
+        arrFish[i]->draw(_x, _y, bbScale.get(), bbShowDebug.get() );
     }
     //ofPopMatrix();
 

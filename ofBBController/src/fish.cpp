@@ -63,6 +63,8 @@ void fish::setup(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f
     ttf.load("mono.ttf", 8);
     ttf.setLineHeight(10);
 
+    bMoved = false;
+
 }
 
 void fish::onTouchDown(ofxInterface::TouchEvent &event)
@@ -87,11 +89,12 @@ void fish::onTouchUp(ofxInterface::TouchEvent &event)
 
 void fish::onTouchMove(ofxInterface::TouchEvent &event)
 {
-
+    bMoved = true;
+    
     ofVec2f local = toLocal(event.position);
     //offset = local;
     
-    //setPosition(local);
+    setPosition(local);
 
     //ofVec2f parentPos = ((Node*)parent)->toLocal(event.position);
     
@@ -154,33 +157,39 @@ void fish::update()
 
 void fish::drawLabel()
 {
+
     ofPushStyle();
     ofFill();
 
     ofDrawRectangle(getPosition(), 30, 20);
     ofSetColor(0);
-    
+
     ttf.drawString("id:" + ofToString(wallIndex) + "\nctrl:" + ofToString(controllerIndex) + "\nmotor:" + ofToString(driverIndex), getPosition().x, getPosition().y);
     //ttf.drawString("ctrl: " + ofToString(controllerIndex), getPosition().x, getPosition().y + );
     //ttf.drawString("motor: " + ofToString(driverIndex), getPosition().x, getPosition().y + );
-    
-    ofPopStyle();
 
+    ofPopStyle();
 }
 
-void fish::draw(int _x, int _y, float _scale)
+void fish::draw(int _x, int _y, float _scale, bool _showDebug)
 {
+    if (!bMoved)
+        
+        setPosition(_x, _y, 0);
+    else {
 
-    setPosition(_x, _y, 0);
-
+        _x = getPosition().x;
+        _y = getPosition().y;
+    }
+        
+        
     int _xf = _x - FISH_IMG_WIDTH * _scale * .5 + getSize().x * .5;
     int _yf = _y - FISH_IMG_HEIGHT * _scale * .5 + getSize().y * .5;
 
     //int _x = _x - FISH_IMG_WIDTH * .5;
     //int _yf = _y - FISH_IMG_HEIGHT * .5;
-    
     //Set the position
-    
+
     setSize(RENDER_SIZE * _scale, RENDER_SIZE * _scale);
 
     //ofLog() << _x << "," << _y;
@@ -192,10 +201,13 @@ void fish::draw(int _x, int _y, float _scale)
     arrBassImg[displayState].draw(_xf, _yf, _scale * FISH_IMG_WIDTH, _scale * FISH_IMG_HEIGHT);
     //arrBassImg[displayState].draw(loc, scaledSize.x, scaledSize.y);
 
-    ofNoFill();
-    ofDrawRectangle(getPosition().x, getPosition().y , getSize().x, getSize().y);
-    //ofDrawRectangle(getPosition().x - .5*getSize().x, getPosition().y - .5*getSize().y, getSize().x, getSize().y);
+    if (_showDebug) {
+        ofNoFill();
+        ofDrawRectangle(getPosition().x, getPosition().y , getSize().x, getSize().y);
+        //ofDrawRectangle(getPosition().x - .5*getSize().x, getPosition().y - .5*getSize().y, getSize().x, getSize().y);
     
-    drawLabel();
+        drawLabel();
+    }
+
 }
 

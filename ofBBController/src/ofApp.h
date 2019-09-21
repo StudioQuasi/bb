@@ -105,6 +105,9 @@ class ofApp : public ofBaseApp{
     ofParameter<float> bbBGScale;
     ofParameter<int> bbSlope;
 
+    ofParameter<bool> bbShowDebug;
+    ofParameter<int> bbFlatIndex;
+    ofParameter<int> bbFlatOffset;
     //ofParameterGroup panelFishGroup;
 
     ofxIntField fishID;

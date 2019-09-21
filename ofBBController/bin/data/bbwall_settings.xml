@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<Bass_Layout_Params>
+	<Columns>20</Columns>
+	<Rows>3</Rows>
+	<Col_Spacing>63</Col_Spacing>
+	<Row_Spacing>67</Row_Spacing>
+	<Bass_Scale>0.158281</Bass_Scale>
+	<Origin_X>195</Origin_X>
+	<Origin_Y>724</Origin_Y>
+	<Slope>42</Slope>
+	<Background_X>-30</Background_X>
+	<Background_Y>-25</Background_Y>
+	<Background_Scale>1.5625</Background_Scale>
+	<UnknownName>0</UnknownName>
+	<Flat_Index>9</Flat_Index>
+	<Flat_Offset>75</Flat_Offset>
+</Bass_Layout_Params>

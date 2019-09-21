@@ -39,7 +39,7 @@ public:
 
     void setup(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead, int groupIndex);
 
-    void draw(int _x, int _y, float _scaledSize);
+    void draw(int _x, int _y, float _scaledSize, bool _bShowDebug);
     void update();
 
     void setBodyState(int _mouthState, int _bodyState);
@@ -71,6 +71,8 @@ protected:
     void drawLabel();
 
     ofTrueTypeFont ttf;
+
+    bool bMoved;
 
     /*
     ofxPanel panel;
