@@ -7,7 +7,7 @@
 
 #include "fish.h"
 
-void fish::setup(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec, bool _isLead, int _groupIndex)
+void fish::setup(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec, bool _isLead, int _groupIndex, ofxPanel * _panelFish)
 {
     
     wallIndex = _wallIndex;
@@ -43,7 +43,7 @@ void fish::setup(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f
     panel.add(fishControllerID.setup("Controller",controllerIndex,0,21));
     panel.add(fishControllerIndex.setup("Driver Index",driverIndex,0,2));
      */
-    
+
     //panelGroup.add(fishControllerID.set("Controller ID",0,0,21));
     //panelGroup.add(fishControllerIndex.set("Bass Index",0,0,2));
     //panelGroup.add(fishControllerIndex.set("Group",0,0,2));
@@ -59,6 +59,8 @@ void fish::setup(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f
     ofAddListener(eventTouchDown, this, &fish::onTouchDown);
     ofAddListener(eventTouchUp, this, &fish::onTouchUp);
     ofAddListener(eventTouchMove, this, &fish::onTouchMove);
+
+    panelFish = _panelFish;
 
     ttf.load("mono.ttf", 8);
     ttf.setLineHeight(10);
@@ -76,6 +78,14 @@ void fish::onTouchDown(ofxInterface::TouchEvent &event)
     ofVec2f local = toLocal(event.position);
     
     ofLog() << "down";
+
+    panelFish[0].
+
+    panelFish->setPosition(
+        getPosition().x + getSize().x,
+        getPosition().y
+    );
+    
 }
 
 void fish::onTouchUp(ofxInterface::TouchEvent &event)

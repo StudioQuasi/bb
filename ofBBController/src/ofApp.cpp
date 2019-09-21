@@ -81,6 +81,7 @@ void ofApp::setup(){
     panelGroup.add(bbBGY.set("Background Y",0,-ofGetHeight(),ofGetHeight()));
     panelGroup.add(bbBGScale.set("Background Scale",1,0,10));
 
+<<<<<<< HEAD
     panelGroup.add(bbShowDebug.set("Show Debug"));
     panelGroup.add(bbFlatIndex.set("Flat Index", 0, 0, 21));
     panelGroup.add(bbFlatOffset.set("Flat Offset", 0, -100, 100));
@@ -91,6 +92,14 @@ void ofApp::setup(){
     panelFish.add(fishControllerID.setup("Controller ID",0,0,21));
     panelFish.add(fishControllerIndex.setup("Motor Index",0,0,2));
     panelFish.add(fishGroupID.setup("Group",0,0,2));
+=======
+    //panelGroup.set
+    panelFish = new ofxPanel();
+    panelFish->add(fishID.setup("Bass ID",0,0,63));
+    panelFish->add(fishControllerID.setup("Controller ID",0,0,21));
+    panelFish->add(fishControllerIndex.setup("Motor Index",0,0,2));
+    panelFish->add(fishGroupID.setup("Group",0,0,2));
+>>>>>>> 8ea9c41887ed5abcf8f97aa5c7f4aa2b26793163
 
     panel.setDefaultHeight(25);
     panel.setDefaultWidth(ofGetWidth()/5);
@@ -98,10 +107,10 @@ void ofApp::setup(){
     panel.setPosition(0, 200);
     panel.loadFromFile("bbwall_settings.xml");
 
-    panelFish.setDefaultHeight(25);
-    panelFish.setDefaultWidth(ofGetWidth()/25);
+    panelFish->setDefaultHeight(25);
+    panelFish->setDefaultWidth(ofGetWidth()/25);
     //panelFish.setup(panelFishGroup, "bbwall_fish_settings.xml");
-    panelFish.setPosition(150, 200);
+    panelFish->setPosition(150, 200);
     //panelFish.loadFromFile("bbwall_fish_settings.xml");
     
     //Read Layout File
@@ -220,7 +229,8 @@ void ofApp::createLayoutByParam() {
                                      _driverIndex,
                                      ofVec2f(_x, _y),
                                      isLead,
-                                     1
+                                     1,
+                                    panelFish
                                      );
             
             scene->addChild(_f);
@@ -264,7 +274,8 @@ void ofApp::readLayoutJsonFile() {
                                 _cmd["driverIndex"],
                                 ofVec2f(_cmd["pos"][0],_cmd["pos"][1]),
                                 _isLead,
-                                1
+                                1,
+                                panelFish
             );
 
             arrFish.push_back(
@@ -456,7 +467,7 @@ void ofApp::draw(){
     if (bShowGui)
     {
         panel.draw();
-        panelFish.draw();
+        panelFish->draw();
     }
 
 }

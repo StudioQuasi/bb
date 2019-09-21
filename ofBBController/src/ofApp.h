@@ -88,7 +88,8 @@ class ofApp : public ofBaseApp{
     ofxInterface::Node* scene;
     
     //Gui Panel
-    ofxPanel panel, panelFish;
+    ofxPanel panel;
+    ofxPanel * panelFish;
     
     ofParameterGroup panelGroup;
     
