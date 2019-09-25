@@ -90,9 +90,9 @@ class ofApp : public ofBaseApp{
     //Gui Panel
     ofxPanel panel;
     ofxPanel * panelFish;
-    
+
     ofParameterGroup panelGroup;
-    
+
     ofParameter<int> bbCols;
     ofParameter<int> bbRows;
     ofParameter<float> bbScale;

@@ -60,7 +60,7 @@ void fish::setup(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f
     ofAddListener(eventTouchUp, this, &fish::onTouchUp);
     ofAddListener(eventTouchMove, this, &fish::onTouchMove);
 
-    panelFish = _panelFish;
+    //panelFish = _panelFish;
 
     ttf.load("mono.ttf", 8);
     ttf.setLineHeight(10);
@@ -79,13 +79,14 @@ void fish::onTouchDown(ofxInterface::TouchEvent &event)
     
     ofLog() << "down";
 
+    /*
     panelFish[0].
 
     panelFish->setPosition(
         getPosition().x + getSize().x,
         getPosition().y
     );
-    
+    */
 }
 
 void fish::onTouchUp(ofxInterface::TouchEvent &event)
