@@ -57,9 +57,6 @@ const int NUM_BASS = 3;
 const byte BOARD_ID = 'a';
 
 
-//long mouthNext = 0;
-//long bodyNext = 0;
-
 int _low = 100;
 int _high = 0;
 

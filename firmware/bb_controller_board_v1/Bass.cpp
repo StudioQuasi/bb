@@ -9,7 +9,7 @@
 #define BACKWARD -1
 #define RELEASE 0
 
-#define TIMEOUT_MOUTH 3000
+#define TIMEOUT_MOUTH 10000
 #define TIMEOUT_BODY 30000
 
 const int offsetA = 1;
