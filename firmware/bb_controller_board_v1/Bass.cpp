@@ -9,7 +9,7 @@
 #define BACKWARD -1
 #define RELEASE 0
 
-#define TIMEOUT_MOUTH 10000
+#define TIMEOUT_MOUTH 3000
 #define TIMEOUT_BODY 30000
 
 const int offsetA = 1;
@@ -33,7 +33,6 @@ const int BODY_HEAD = 4;
 const int BODY_OFF = 5;
 
 const int MOUTH_CLOSING_TIME = 2000;
-
 const int MAX_MOTOR = 255;
 
 class Bass
@@ -56,6 +55,8 @@ class Bass
   long timerMouth = 0;
   long timerBody = 0;
 
+
+
   public:
 
     int MOUTH_OPEN = FORWARD;
@@ -65,7 +66,9 @@ class Bass
     int BODY_HEAD = BACKWARD;
 
     int lastCommand;
-    
+
+    byte GROUP_ID = NULL;
+  
     Bass(
       int AIN1, int AIN2, int PWMA, 
       int BIN1, int BIN2, int PWMB,
@@ -122,12 +125,11 @@ class Bass
           mouthClose();
         }
       }
-
     }
 
     void addToGroup(int _i)
     {
-      
+        GROUP_ID = _i;
     }
 
     void runMouth(int _dir, int _speed)

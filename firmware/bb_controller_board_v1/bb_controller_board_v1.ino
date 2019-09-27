@@ -57,6 +57,9 @@ const int NUM_BASS = 3;
 const byte BOARD_ID = 'a';
 
 
+//long mouthNext = 0;
+//long bodyNext = 0;
+
 int _low = 100;
 int _high = 0;
 
@@ -204,21 +207,7 @@ void testAnimation() {
 
   Serial.println("Flat");
   arrBass[i]->runBody(RELEASE,MAX_MOTOR);
-  delay(_delay);
   
-/*
-  Serial.println("BODY TAIL");
-  arrBass[i]->bodyTail();
-  delay(_delay);
-
-  Serial.println("BODY HEAD");
-  arrBass[i]->bodyHead();
-  delay(_delay);
-
-  Serial.println("BODY ");
-  arrBass[i]->runBody(RELEASE,255);
-  delay(_delay);
-  */
   }
 
 }
@@ -243,92 +232,123 @@ void serialEvent() {
 
     if (inChar == '\n') {
 
+      byte _groupID = NULL;
+      bool _isGroup = false;
+
       int _cmd = inputString[0] - '0';
       int _len = inputString.length();
 
-      if (_len == 1) {
+      if (_len == 2) {
+        _groupID = inputString[1];
+        _isGroup = true;
+      }
+
+      //JUST A COMMAND
+      if (_len == 1 || _len == 2) {
 
           //Parse String
           for (int i=0; i<NUM_BASS; i++)
           {
-            switch (_cmd) {
-              case CMD_OPEN:
-                Serial.println("MOUTH OPEN");
-                arrBass[i]->mouthOpen();
-                break;
-              case CMD_CLOSE:
-                Serial.println("MOUTH CLOSE");
-                arrBass[i]->mouthClose();
-                break;
-              case CMD_TAIL_ON:
-                
-                Serial.println("TAIL ON");
-                if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
-                  arrBass[i]->bodyTail();
-                }
-                
-                break;
-              case CMD_HEAD_ON:
-                Serial.println("HEAD ON");
-                arrBass[i]->bodyHead();
-                break;
-              case CMD_TAIL_OFF:
 
-                Serial.println("TAIL OFF");
-                if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
+            //If this is a group and we are in group, or all
+            if (_isGroup == false || _groupID == arrBass[i]->GROUP_ID)
+            {
+              switch (_cmd) {
+              
+                case CMD_OPEN:
+                  Serial.println("MOUTH OPEN");
+                  arrBass[i]->mouthOpen();
+                  break;
+                
+                case CMD_CLOSE:
+                  Serial.println("MOUTH CLOSE");
+                  arrBass[i]->mouthClose();
+                  break;
+                
+                case CMD_TAIL_ON:
+                
+                  Serial.println("TAIL ON");
+                  if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
+                    arrBass[i]->bodyTail();
+                  }
+                  break;
+                
+                case CMD_HEAD_ON:
+                  Serial.println("HEAD ON");
+                  arrBass[i]->bodyHead();
+                  break;
+                
+                case CMD_TAIL_OFF:
+
+                  Serial.println("TAIL OFF");
+                  if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
+                    arrBass[i]->runBody(RELEASE,MAX_MOTOR);
+                  }
+                  break;
+           
+                case CMD_BODY_OFF:
+
+                  Serial.println("BODY OFF");
                   arrBass[i]->runBody(RELEASE,MAX_MOTOR);
-                }
-                break;
-  
-              case CMD_BODY_OFF:
+                  break;
 
-                Serial.println("BODY OFF");
-                arrBass[i]->runBody(RELEASE,MAX_MOTOR);
-                break;
+              }
+
             }
           }
+    
       }
-      else if (_len > 1)
+      else if (_len > 2)
       {
-          //Num pairs
-          int _pairs = (_len-1) / 2;
 
-          for (int i=0; i<_pairs; i++)
-          {
-     
-            //Iterate over pairs
-            byte _boardNum = inputString[i*2+1];
-            int _bassIndex = inputString[i*2+2] - '0';
+          if (_cmd == CMD_LEARN_GROUP && _len == 4) {
+
+            byte _boardNum =  inputString[1];
+            int  _bassIndex = inputString[2];
+            byte _groupID = inputString[3];
 
             if (_boardNum == BOARD_ID) {
+              arrBass[_bassIndex]->addToGroup(_groupID);
+            }
+
+          }
+          else
+          {
+
+            //Num pairs
+            int _pairs = (_len-1) / 2;
+
+            for (int i=0; i<_pairs; i++)
+            {
+
+              //Iterate over pairs
+              byte _boardNum = inputString[i*2+1];
+              int  _bassIndex = inputString[i*2+2] - '0';
+
+              if (_boardNum == BOARD_ID) {
             
-              switch (_cmd) {
+                switch (_cmd) {
     
                 case CMD_OPEN:
                   arrBass[_bassIndex]->mouthOpen();
-                break;
+                  break;
                 case CMD_CLOSE:
                   arrBass[_bassIndex]->mouthClose();
-                break;
+                  break;
                 case CMD_TAIL_ON:
                   arrBass[_bassIndex]->bodyTail();
-                break;
+                  break;
                 case CMD_HEAD_ON:
                   arrBass[_bassIndex]->bodyHead();
-                break;
+                  break;
                 case CMD_BODY_OFF:
                   arrBass[_bassIndex]->runBody(RELEASE,MAX_MOTOR);
-                break;
-                case CMD_LEARN_GROUP:
-                  arrBass[_bassIndex]->addToGroup(0);
-  
+                  break;  
+                }
               }
             }
           }
-      
           //Parse String
-          /*
-          */
       }
       
       inputString = "";
@@ -337,62 +357,6 @@ void serialEvent() {
       
       inputString += inChar;
     }
-/*
-    switch (inChar) {
-
-      case '1':
-
-        Serial.println("mouth");
-        arrBass(0
-        runMotor(BASS_1_MOUTH, FORWARD, 255);
-        break;
-
-      case '2':
-
-        runMotor(BASS_2_MOUTH, FORWARD, 255);
-        break;
-
-      case '3':
-
-        runMotor(BASS_1_MOUTH, RELEASE, 0);
-        break;
-
-      case '4':
-
-        runMotor(BASS_2_MOUTH, RELEASE, 0);
-        break;
-
-      case '5':
-
-        runMotor(BASS_1_TAIL, BACKWARD, 255);
-        break;
-
-      case '6':
-
-        runMotor(BASS_2_TAIL, BACKWARD, 255);
-        break;
-        
-      case '7':
-
-        runMotor(BASS_1_TAIL, FORWARD, 255);
-        break;
-        
-      case '8':
-
-        runMotor(BASS_2_TAIL, FORWARD, 255);
-        break;
-             
-      case '9':
-
-        runMotor(BASS_1_TAIL, RELEASE, 0); 
-        break;
-
-      case '0':
-
-        runMotor(BASS_2_TAIL, RELEASE, 0);
-        break;
-    }
-*/
 
     if (inChar == 'a') {
       
