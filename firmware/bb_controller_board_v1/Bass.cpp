@@ -9,6 +9,9 @@
 #define BACKWARD -1
 #define RELEASE 0
 
+#define TIMEOUT_MOUTH 3000
+#define TIMEOUT_BODY 30000
+
 const int offsetA = 1;
 const int offsetB = 1;
 
@@ -19,9 +22,15 @@ const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
 const int CMD_TAIL_OFF = 5;
 
+const int CMD_LEARN_GROUP = 6;
+
 const int MOUTH_OPEN = 0;
 const int MOUTH_CLOSING = 1;
 const int MOUTH_CLOSED = 2;
+
+const int BODY_TAIL = 3;
+const int BODY_HEAD = 4;
+const int BODY_OFF = 5;
 
 const int MOUTH_CLOSING_TIME = 2000;
 
@@ -31,7 +40,9 @@ class Bass
 {
 
   int id;
+
   int state = 0;
+  int stateBody = 0;
 
   int mouthClosingIndex = 0;
 
@@ -41,6 +52,9 @@ class Bass
 
   int mouthMotorOrientation;
   int bodyMotorOrientation;
+
+  long timerMouth = 0;
+  long timerBody = 0;
 
   public:
 
@@ -82,19 +96,38 @@ class Bass
           BODY_TAIL = BACKWARD;
           BODY_HEAD = FORWARD;
         }
+ 
+    }
 
-/*
-        _motor[MOUTH_MOTOR]->drive(255);
-        _motor[BODY_MOTOR]->drive(255);
-        delay(1000);
-        
-        _motor[MOUTH_MOTOR]->drive(-255);
-        _motor[BODY_MOTOR]->drive(-255);
-        delay(1000);
-        
-        _motor[MOUTH_MOTOR]->brake();
-        _motor[BODY_MOTOR]->brake();
-*/
+
+    void update() {
+  
+      if (state == MOUTH_CLOSING) {
+
+        mouthClosingIndex = mouthClosingIndex + 1;
+        if (mouthClosingIndex > MOUTH_CLOSING_TIME) {
+          endMouthClose();
+        }
+      }
+
+      if (stateBody == BODY_HEAD || stateBody == BODY_TAIL) {
+
+        if (millis() > timerBody + TIMEOUT_BODY) {
+          runBody(RELEASE,MAX_MOTOR);
+        }
+      
+      } else if (state == MOUTH_OPEN) {
+
+        if (millis() > timerMouth + TIMEOUT_MOUTH) {
+          mouthClose();
+        }
+      }
+
+    }
+
+    void addToGroup(int _i)
+    {
+      
     }
 
     void runMouth(int _dir, int _speed)
@@ -108,6 +141,8 @@ class Bass
       
       //lastCommand = CMD_OPEN;
       runMotor(MOUTH_MOTOR, MOUTH_OPEN, MAX_MOTOR);
+
+      timerMouth = millis();
     }
 
     void mouthClose() {
@@ -121,18 +156,6 @@ class Bass
       
     }
 
-    void update() {
-  
-      if (state == MOUTH_CLOSING) {
-
-        mouthClosingIndex = mouthClosingIndex + 1;
-        if (mouthClosingIndex > MOUTH_CLOSING_TIME) {
-          endMouthClose();
-        }
-      }
-
-    }
-    
     void endMouthClose() {
 
       state = MOUTH_CLOSED;
@@ -148,6 +171,8 @@ class Bass
 
       lastCommand = CMD_BODY_OFF;
       runMotor(BODY_MOTOR, _dir, _speed);
+
+      stateBody = BODY_OFF;
     }
 
     void bodyTail() {
@@ -156,23 +181,28 @@ class Bass
         lastCommand = CMD_TAIL_ON;
         runMotor(BODY_MOTOR, BODY_TAIL, MAX_MOTOR);
       //}
+
+      stateBody = BODY_TAIL;
+      
+      timerBody = millis();
     }
 
     void bodyHead() {
 
       lastCommand = CMD_HEAD_ON;
       runMotor(BODY_MOTOR, BODY_HEAD, MAX_MOTOR);
+
+      stateBody = BODY_HEAD;
+
+      timerBody = millis();
     }
     
     void runMotor(int _index, int _dir, int _speed)
     { 
 
+      stateBody = BODY_OFF;
       int _s = _dir * _speed;
 
-      //Serial.println("Drive Motor");
-      //Serial.println(_index);
-
-      
       if (_dir == RELEASE) {
 
         //    Serial.println("RELEASE");

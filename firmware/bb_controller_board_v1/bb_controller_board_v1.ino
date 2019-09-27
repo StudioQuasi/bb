@@ -42,7 +42,6 @@ struct cmd {
 #define BIN2_2 A4
 #define PWMB_2 3
 
-
 const int STATE_LOAD_SONG = 0;
 const int STATE_RUN = 1;
 const int STATE_WAIT = 0;
@@ -55,7 +54,7 @@ const int BASS_3_MOUTH = 4;
 const int BASS_3_TAIL = 5;
 
 const int NUM_BASS = 3;
-const int BOARD_ID = 0;
+const byte BOARD_ID = 'a';
 
 
 //long mouthNext = 0;
@@ -86,7 +85,7 @@ String inputString = "";
 
 // Create the motor shield object with the default I2C address
 //Adafruit_MotorShield *AFMS[3];
-Bass *arrBass[5];
+Bass *arrBass[3];
 
 void setup() {
   
@@ -124,11 +123,7 @@ void setup() {
   */
 
   //Test all Bass
-  testLoop2();
-
-  //Set the pin modes
-  //pinMode(2, OUTPUT);
-  //pinMode(3, OUTPUT);
+  testAnimation();
 
   runState = STATE_RUN;
 }
@@ -181,14 +176,14 @@ void printMotorIndex(int _index)
   }
 }
 
-void testLoop2() {
+void testAnimation() {
 
   int _delay = 500;
   
   for (int i=0; i<NUM_BASS; i++)
   {
 
-    Serial.println(i);
+  Serial.println(i);
     
   Serial.println("MOUTH OPEN");
   arrBass[i]->mouthOpen();
@@ -198,8 +193,22 @@ void testLoop2() {
   arrBass[i]->mouthClose();
   delay(_delay);
 
-  
+  Serial.println("Tail");
+  arrBass[i]->bodyTail();
+  delay(_delay);
 
+  Serial.println("Flat");
+  arrBass[i]->runBody(RELEASE,MAX_MOTOR);
+  delay(_delay);
+
+  Serial.println("Head");
+  arrBass[i]->bodyHead();
+  delay(_delay);
+
+  Serial.println("Flat");
+  arrBass[i]->runBody(RELEASE,MAX_MOTOR);
+  delay(_delay);
+  
 /*
   Serial.println("BODY TAIL");
   arrBass[i]->bodyTail();
@@ -238,11 +247,9 @@ void serialEvent() {
     if (inChar == '\n') {
 
       int _cmd = inputString[0] - '0';
+      int _len = inputString.length();
 
-      //Serial.println("done");
-      //Serial.println(_cmd);
-
-      if (inputString.length() == 1) {
+      if (_len == 1) {
 
           //Parse String
           for (int i=0; i<NUM_BASS; i++)
@@ -284,32 +291,41 @@ void serialEvent() {
             }
           }
       }
-      else
+      else if (_len > 1)
       {
+          //Num pairs
+          int _pairs = (_len-1) / 2;
 
-          int _boardNum = inputString[1] - '0';
+          for (int i=0; i<_pairs; i++)
+          {
+     
+            //Iterate over pairs
+            byte _boardNum = inputString[i*2+1];
+            int _bassIndex = inputString[i*2+2] - '0';
 
-          if (_boardNum == BOARD_ID) {
-
-            int _bassIndex = 0;
+            if (_boardNum == BOARD_ID) {
             
-            switch (_cmd) {
+              switch (_cmd) {
     
-              case CMD_OPEN:
-                arrBass[_bassIndex]->mouthOpen();
+                case CMD_OPEN:
+                  arrBass[_bassIndex]->mouthOpen();
                 break;
-              case CMD_CLOSE:
-                arrBass[_bassIndex]->mouthClose();
+                case CMD_CLOSE:
+                  arrBass[_bassIndex]->mouthClose();
                 break;
-              case CMD_TAIL_ON:
-                arrBass[_bassIndex]->bodyTail();
+                case CMD_TAIL_ON:
+                  arrBass[_bassIndex]->bodyTail();
                 break;
-              case CMD_HEAD_ON:
-                arrBass[_bassIndex]->bodyHead();
+                case CMD_HEAD_ON:
+                  arrBass[_bassIndex]->bodyHead();
                 break;
-              case CMD_BODY_OFF:
-                arrBass[_bassIndex]->runBody(RELEASE,MAX_MOTOR);
+                case CMD_BODY_OFF:
+                  arrBass[_bassIndex]->runBody(RELEASE,MAX_MOTOR);
                 break;
+                case CMD_LEARN_GROUP:
+                  arrBass[_bassIndex]->addToGroup(0);
+  
+              }
             }
           }
       
