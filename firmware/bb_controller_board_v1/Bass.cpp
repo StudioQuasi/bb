@@ -9,7 +9,7 @@
 #define BACKWARD -1
 #define RELEASE 0
 
-#define TIMEOUT_MOUTH 3000
+#define TIMEOUT_MOUTH 30000
 #define TIMEOUT_BODY 30000
 
 const int offsetA = 1;
@@ -67,7 +67,7 @@ class Bass
 
     int lastCommand;
 
-    byte GROUP_ID = NULL;
+    byte GROUP_ID;
   
     Bass(
       int AIN1, int AIN2, int PWMA, 

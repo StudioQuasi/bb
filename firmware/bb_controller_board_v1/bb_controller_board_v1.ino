@@ -18,13 +18,13 @@ struct cmd {
 };
 
 //DEFINE THE MOTOR DRIVER PINS
-#define AIN2_0 12
-#define AIN1_0 13
-#define PWMA_0 11
+#define BIN2_0 12
+#define BIN1_0 13
+#define PWMB_0 11
 
-#define BIN1_0 8
-#define BIN2_0 7
-#define PWMB_0 10
+#define AIN1_0 8
+#define AIN2_0 7
+#define PWMA_0 10
 
 #define AIN1_1 A2
 #define AIN2_1 A3
@@ -54,7 +54,7 @@ const int BASS_3_MOUTH = 4;
 const int BASS_3_TAIL = 5;
 
 const int NUM_BASS = 3;
-const byte BOARD_ID = 'a';
+const byte BOARD_ID = 'q';
 
 
 //long mouthNext = 0;
@@ -86,6 +86,19 @@ String inputString = "";
 // Create the motor shield object with the default I2C address
 //Adafruit_MotorShield *AFMS[3];
 Bass *arrBass[3];
+
+void blinkT(int _num=1, int _delay=50) {
+
+  for (int i=0; i<_num; i++)
+  {
+
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(_delay);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(_delay);
+  }
+
+}
 
 void setup() {
   
@@ -210,8 +223,9 @@ void testAnimation() {
   
   }
 
-}
+  delay(_delay);
 
+}
 
 void loop() {
 
@@ -232,7 +246,7 @@ void serialEvent() {
 
     if (inChar == '\n') {
 
-      byte _groupID = NULL;
+      byte _groupID;
       bool _isGroup = false;
 
       int _cmd = inputString[0] - '0';
@@ -304,13 +318,20 @@ void serialEvent() {
           if (_cmd == CMD_LEARN_GROUP && _len == 4) {
 
             byte _boardNum =  inputString[1];
-            int  _bassIndex = inputString[2];
+            int  _bassIndex = inputString[2] - '0';
             byte _groupID = inputString[3];
 
             if (_boardNum == BOARD_ID) {
               arrBass[_bassIndex]->addToGroup(_groupID);
+
+              Serial.println("Add group");
+              Serial.println(_bassIndex);
+              Serial.println(_groupID);
+
             }
 
+            blinkT(5);
+    
           }
           else
           {
@@ -358,6 +379,7 @@ void serialEvent() {
       inputString += inChar;
     }
 
+    /*
     if (inChar == 'a') {
       
        digitalWrite(LED_BUILTIN, HIGH);
@@ -369,6 +391,8 @@ void serialEvent() {
        digitalWrite(LED_BUILTIN, LOW);
        
     }    
+    */
+    
   }
 }
 
