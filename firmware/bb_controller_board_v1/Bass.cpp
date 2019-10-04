@@ -24,15 +24,15 @@ const int CMD_TAIL_OFF = 5;
 
 const int CMD_LEARN_GROUP = 6;
 
-const int MOUTH_OPEN = 0;
-const int MOUTH_CLOSING = 1;
-const int MOUTH_CLOSED = 2;
+const int STATE_MOUTH_OPEN = 0;
+const int STATE_MOUTH_CLOSING = 1;
+const int STATE_MOUTH_CLOSED = 2;
 
 const int BODY_TAIL = 3;
 const int BODY_HEAD = 4;
 const int BODY_OFF = 5;
 
-const int MOUTH_CLOSING_TIME = 2000;
+const int MOUTH_CLOSING_TIME = 1000;
 const int MAX_MOTOR = 255;
 
 class Bass
@@ -105,8 +105,10 @@ class Bass
 
     void update() {
   
-      if (state == MOUTH_CLOSING) {
+      if (state == STATE_MOUTH_CLOSING) {
 
+        Serial.println("MC");
+        
         mouthClosingIndex = mouthClosingIndex + 1;
         if (mouthClosingIndex > MOUTH_CLOSING_TIME) {
           endMouthClose();
@@ -119,9 +121,13 @@ class Bass
           runBody(RELEASE,MAX_MOTOR);
         }
       
-      } else if (state == MOUTH_OPEN) {
+      } else if (state == STATE_MOUTH_OPEN) {
+
+        //Serial.println("M");
 
         if (millis() > timerMouth + TIMEOUT_MOUTH) {
+
+          //Serial.println("TIMEOUT");
           mouthClose();
         }
       }
@@ -139,7 +145,7 @@ class Bass
 
     void mouthOpen() {
 
-      state = MOUTH_OPEN;
+      state = STATE_MOUTH_OPEN;
       
       //lastCommand = CMD_OPEN;
       runMotor(MOUTH_MOTOR, MOUTH_OPEN, MAX_MOTOR);
@@ -153,14 +159,16 @@ class Bass
       runMotor(MOUTH_MOTOR, MOUTH_CLOSE, MAX_MOTOR);
       //runMotor(MOUTH_MOTOR, RELEASE, 0);
 
-      state = MOUTH_CLOSING;
+      Serial.println("C");
+      
+      state = STATE_MOUTH_CLOSING;
       mouthClosingIndex = 0;
       
     }
 
     void endMouthClose() {
 
-      state = MOUTH_CLOSED;
+      state = STATE_MOUTH_CLOSED;
       mouthClosingIndex = 0;
    
       //lastCommand = CMD_CLOSE;

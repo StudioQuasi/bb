@@ -17,6 +17,8 @@ struct cmd {
   bool _b2;
 };
 
+const byte BOARD_ID = 'q';
+
 //DEFINE THE MOTOR DRIVER PINS
 #define BIN2_0 12
 #define BIN1_0 13
@@ -54,8 +56,8 @@ const int BASS_3_MOUTH = 4;
 const int BASS_3_TAIL = 5;
 
 const int NUM_BASS = 3;
-const byte BOARD_ID = 'q';
 
+const int buttonPin = 3;     // the number of the pushbutton pin
 
 //long mouthNext = 0;
 //long bodyNext = 0;
@@ -115,16 +117,69 @@ void setup() {
   //Create Billys 
   // Shield Point, Mouth Index, Body Index, Mouth Dir, Body Dir
 
+
+  bool _mouthDirection1 = false;
+  bool _bodyDirection1 = true;
+
+  bool _mouthDirection2 = false;
+  bool _bodyDirection2 = true;
+
+  bool _mouthDirection3 = false;
+  bool _bodyDirection3 = true;
+  
+  //HERE WE HANDLE MOTOR CABLE ORIENTATION PER BOARD
+  switch (BOARD_ID) {
+
+    case 'h':
+    case 'u':
+    case 'r':
+    case 'j':
+      _mouthDirection1 = true;
+      _bodyDirection1 = false;
+    
+      _mouthDirection2 = true;
+      _bodyDirection2 = false;
+      
+      _mouthDirection3 = true;
+      _bodyDirection3 = false;
+      
+      break;
+      
+    case 'l':
+      _bodyDirection1 = false;
+      break;
+
+    case 'n':
+      _bodyDirection1 = false;
+      break;
+
+    case 'p':
+      _mouthDirection1 = true;
+      _mouthDirection2 = true;
+      break;
+
+    case 'q':
+
+      _mouthDirection3 = true;
+            
+      _bodyDirection2 = false;
+      _bodyDirection3 = false;
+
+      break;
+      
+  }
+
+  
   Serial.println("BASS 0");
-  arrBass[0] = new Bass(AIN1_0, AIN2_0, PWMA_0, BIN1_0, BIN2_0, PWMB_0, false, true);
+  arrBass[0] = new Bass(AIN1_0, AIN2_0, PWMA_0, BIN1_0, BIN2_0, PWMB_0, _mouthDirection1, _bodyDirection1);
   delay(500);
 
   Serial.println("BASS 1");
-  arrBass[1] = new Bass(AIN1_1, AIN2_1, PWMA_1, BIN1_1, BIN2_1, PWMB_1, false, true);
+  arrBass[1] = new Bass(AIN1_1, AIN2_1, PWMA_1, BIN1_1, BIN2_1, PWMB_1, _mouthDirection2, _bodyDirection2);
   delay(500);
 
   Serial.println("BASS 2");
-  arrBass[2] = new Bass(AIN1_2, AIN2_2, PWMA_2, BIN1_2, BIN2_2, PWMB_2, false, true);
+  arrBass[2] = new Bass(AIN1_2, AIN2_2, PWMA_2, BIN1_2, BIN2_2, PWMB_2, _mouthDirection3, _bodyDirection3);
   delay(500);
 
   /*
@@ -270,31 +325,31 @@ void serialEvent() {
               switch (_cmd) {
               
                 case CMD_OPEN:
-                  Serial.println("MOUTH OPEN");
+                  //Serial.println("MOUTH OPEN");
                   arrBass[i]->mouthOpen();
                   break;
                 
                 case CMD_CLOSE:
-                  Serial.println("MOUTH CLOSE");
+                  //Serial.println("MOUTH CLOSE");
                   arrBass[i]->mouthClose();
                   break;
                 
                 case CMD_TAIL_ON:
                 
-                  Serial.println("TAIL ON");
+                  //Serial.println("TAIL ON");
                   if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
                     arrBass[i]->bodyTail();
                   }
                   break;
                 
                 case CMD_HEAD_ON:
-                  Serial.println("HEAD ON");
+                  //Serial.println("HEAD ON");
                   arrBass[i]->bodyHead();
                   break;
                 
                 case CMD_TAIL_OFF:
 
-                  Serial.println("TAIL OFF");
+                  //Serial.println("TAIL OFF");
                   if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
                     arrBass[i]->runBody(RELEASE,MAX_MOTOR);
                   }
@@ -302,7 +357,7 @@ void serialEvent() {
            
                 case CMD_BODY_OFF:
 
-                  Serial.println("BODY OFF");
+                  //Serial.println("BODY OFF");
                   arrBass[i]->runBody(RELEASE,MAX_MOTOR);
                   break;
 
@@ -310,7 +365,6 @@ void serialEvent() {
 
             }
           }
-    
       }
       else if (_len > 2)
       {
