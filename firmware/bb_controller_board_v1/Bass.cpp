@@ -28,11 +28,14 @@ const int STATE_MOUTH_OPEN = 0;
 const int STATE_MOUTH_CLOSING = 1;
 const int STATE_MOUTH_CLOSED = 2;
 
-const int BODY_TAIL = 3;
-const int BODY_HEAD = 4;
-const int BODY_OFF = 5;
+const int STATE_BODY_TAIL = 3;
+const int STATE_BODY_HEAD = 4;
+const int STATE_BODY_OFF = 5;
+const int STATE_BODY_CLOSING = 6;
 
 const int MOUTH_CLOSING_TIME = 1000;
+const int BODY_CLOSING_TIME = 1000;
+
 const int MAX_MOTOR = 255;
 
 class Bass
@@ -40,10 +43,11 @@ class Bass
 
   int id;
 
-  int state = 0;
+  int stateMouth = 0;
   int stateBody = 0;
 
   int mouthClosingIndex = 0;
+  int bodyClosingIndex = 0;
 
   //Adafruit_MotorShield *AFMS;
   //Adafruit_DCMotor *_motor[2];
@@ -54,8 +58,6 @@ class Bass
 
   long timerMouth = 0;
   long timerBody = 0;
-
-
 
   public:
 
@@ -105,32 +107,36 @@ class Bass
 
     void update() {
   
-      if (state == STATE_MOUTH_CLOSING) {
-
-        Serial.println("MC");
+      if (stateMouth == STATE_MOUTH_CLOSING) {
         
         mouthClosingIndex = mouthClosingIndex + 1;
         if (mouthClosingIndex > MOUTH_CLOSING_TIME) {
           endMouthClose();
         }
-      }
-
-      if (stateBody == BODY_HEAD || stateBody == BODY_TAIL) {
-
-        if (millis() > timerBody + TIMEOUT_BODY) {
-          runBody(RELEASE,MAX_MOTOR);
-        }
-      
-      } else if (state == STATE_MOUTH_OPEN) {
-
-        //Serial.println("M");
+      } else if (stateMouth == STATE_MOUTH_OPEN) {
 
         if (millis() > timerMouth + TIMEOUT_MOUTH) {
-
-          //Serial.println("TIMEOUT");
           mouthClose();
         }
       }
+
+      if (stateBody == STATE_BODY_CLOSING) {
+
+        bodyClosingIndex = bodyClosingIndex + 1;
+ 
+        if (bodyClosingIndex > BODY_CLOSING_TIME) {
+          endBodyClose(); 
+        }
+
+      } else if (stateBody == STATE_BODY_HEAD || stateBody == STATE_BODY_TAIL) {
+
+        if (millis() > timerBody + TIMEOUT_BODY) {
+
+          bodyClose();
+          //runBody(RELEASE,MAX_MOTOR);
+        }
+      }
+
     }
 
     void addToGroup(int _i)
@@ -145,7 +151,7 @@ class Bass
 
     void mouthOpen() {
 
-      state = STATE_MOUTH_OPEN;
+      stateMouth = STATE_MOUTH_OPEN;
       
       //lastCommand = CMD_OPEN;
       runMotor(MOUTH_MOTOR, MOUTH_OPEN, MAX_MOTOR);
@@ -161,28 +167,47 @@ class Bass
 
       Serial.println("C");
       
-      state = STATE_MOUTH_CLOSING;
+      stateMouth = STATE_MOUTH_CLOSING;
       mouthClosingIndex = 0;
       
     }
 
-    void endMouthClose() {
+    void bodyClose() {
 
-      state = STATE_MOUTH_CLOSED;
-      mouthClosingIndex = 0;
-   
-      //lastCommand = CMD_CLOSE;
-      //runMotor(MOUTH_MOTOR, MOUTH_CLOSE, MAX_MOTOR);
-      runMotor(MOUTH_MOTOR, RELEASE, 0);
+      if (stateBody == STATE_BODY_TAIL) {
+        runMotor(BODY_MOTOR, BODY_HEAD, MAX_MOTOR);
+      } else {
+        runMotor(BODY_MOTOR, BODY_TAIL, MAX_MOTOR);
+      }
+           
+      stateBody = STATE_BODY_CLOSING;
+      bodyClosingIndex = 0;
+
     }
 
+    void endMouthClose() {
+
+      stateMouth = STATE_MOUTH_CLOSED;
+      mouthClosingIndex = 0;
+
+      runBody(RELEASE,MAX_MOTOR);
+    }
+
+    void endBodyClose() {
+
+      stateBody = STATE_BODY_OFF;
+      bodyClosingIndex = 0;
+
+      //
+    }
+    
     void runBody(int _dir, int _speed)
     {
 
       lastCommand = CMD_BODY_OFF;
       runMotor(BODY_MOTOR, _dir, _speed);
 
-      stateBody = BODY_OFF;
+      stateBody = STATE_BODY_OFF;
     }
 
     void bodyTail() {
@@ -192,7 +217,7 @@ class Bass
         runMotor(BODY_MOTOR, BODY_TAIL, MAX_MOTOR);
       //}
 
-      stateBody = BODY_TAIL;
+      stateBody = STATE_BODY_TAIL;
       
       timerBody = millis();
     }
@@ -202,7 +227,7 @@ class Bass
       lastCommand = CMD_HEAD_ON;
       runMotor(BODY_MOTOR, BODY_HEAD, MAX_MOTOR);
 
-      stateBody = BODY_HEAD;
+      stateBody = STATE_BODY_HEAD;
 
       timerBody = millis();
     }
@@ -210,7 +235,7 @@ class Bass
     void runMotor(int _index, int _dir, int _speed)
     { 
 
-      stateBody = BODY_OFF;
+      stateBody = STATE_BODY_OFF;
       int _s = _dir * _speed;
 
       if (_dir == RELEASE) {
