@@ -7,15 +7,18 @@
 
 #include "fish.h"
 
-void fish::setup(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f _vec, bool _isLead, int _groupIndex, ofxPanel * _panelFish)
+void fish::setup(int _wallIndex, char _controllerIndex, int _driverIndex, ofVec2f _vec, bool _isLead, int _groupIndex, ofxPanel * _panelFish)
 {
     
-    wallIndex = _wallIndex;
+    ofLog() << "SETUP FISH " << _controllerIndex;
+    
+    id = _wallIndex;
     controllerIndex = _controllerIndex;
     driverIndex = _driverIndex;
 
-    groupIndex = _groupIndex;
+    //groupIndex = _groupIndex;
     loc = _vec;
+    setPosition(_vec);
     
     offset = ofVec2f(0,0);
 
@@ -37,24 +40,7 @@ void fish::setup(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f
 
     isLead = _isLead;
 
-    /*
-    panel.setName("Bass ID");
-    panel.add(fishID.setup("ID",wallIndex,0,65));
-    panel.add(fishControllerID.setup("Controller",controllerIndex,0,21));
-    panel.add(fishControllerIndex.setup("Driver Index",driverIndex,0,2));
-     */
-
-    //panelGroup.add(fishControllerID.set("Controller ID",0,0,21));
-    //panelGroup.add(fishControllerIndex.set("Bass Index",0,0,2));
-    //panelGroup.add(fishControllerIndex.set("Group",0,0,2));
-
-    /*
-    panel.setDefaultHeight(25);
-    panel.setDefaultWidth(ofGetWidth()/10);
-    panel.setup(panelGroup, "bass_settings.xml");
-    panel.setPosition(150, 200);
-    panel.loadFromFile("bass_settings.xml");
-    */
+    isVisible = true;
 
     ofAddListener(eventTouchDown, this, &fish::onTouchDown);
     ofAddListener(eventTouchUp, this, &fish::onTouchUp);
@@ -67,6 +53,7 @@ void fish::setup(int _wallIndex, int _controllerIndex, int _driverIndex, ofVec2f
 
     bMoved = false;
 
+    groupID = NULL;
 }
 
 void fish::onTouchDown(ofxInterface::TouchEvent &event)
@@ -79,14 +66,7 @@ void fish::onTouchDown(ofxInterface::TouchEvent &event)
     
     ofLog() << "down";
 
-    /*
-    panelFish[0].
-
-    panelFish->setPosition(
-        getPosition().x + getSize().x,
-        getPosition().y
-    );
-    */
+    //isVisible = !isVisible;
 }
 
 void fish::onTouchUp(ofxInterface::TouchEvent &event)
@@ -104,10 +84,9 @@ void fish::onTouchMove(ofxInterface::TouchEvent &event)
     
     ofVec2f local = toLocal(event.position);
     //offset = local;
-    
-    setPosition(local);
 
-    //ofVec2f parentPos = ((Node*)parent)->toLocal(event.position);
+    ofVec2f parentPos = ((Node*)parent)->toLocal(event.position);
+    setPosition(parentPos);
     
     ofLog() << "move " << local;
 }
@@ -172,18 +151,30 @@ void fish::drawLabel()
     ofPushStyle();
     ofFill();
 
-    ofDrawRectangle(getPosition(), 30, 20);
-    ofSetColor(0);
+    string _label = "id:" + ofToString(id) + "\nc:" + controllerIndex + "\nm:" + ofToString(driverIndex);
 
-    ttf.drawString("id:" + ofToString(wallIndex) + "\nctrl:" + ofToString(controllerIndex) + "\nmotor:" + ofToString(driverIndex), getPosition().x, getPosition().y);
-    //ttf.drawString("ctrl: " + ofToString(controllerIndex), getPosition().x, getPosition().y + );
-    //ttf.drawString("motor: " + ofToString(driverIndex), getPosition().x, getPosition().y + );
+    int _height = 30;
+    
+    if (groupID != NULL) {
+        _label += "\ng:" + ofToString(groupID);
+        _height = 45;
+    }
 
+    ofSetColor(50,50,200);
+    ofDrawRectangle(getPosition().x,getPosition().y-10, 40, _height);
+    ofSetColor(255);
+
+    
+
+
+    ttf.drawString(_label, getPosition().x, getPosition().y);
+    
     ofPopStyle();
 }
 
-void fish::draw(int _x, int _y, float _scale, bool _showDebug)
+void fish::draw(float _scale, bool _showDebug)
 {
+    /*
     if (!bMoved)
         
         setPosition(_x, _y, 0);
@@ -192,7 +183,10 @@ void fish::draw(int _x, int _y, float _scale, bool _showDebug)
         _x = getPosition().x;
         _y = getPosition().y;
     }
-        
+    */
+    
+    int _x = getPosition().x;
+    int _y = getPosition().y;
         
     int _xf = _x - FISH_IMG_WIDTH * _scale * .5 + getSize().x * .5;
     int _yf = _y - FISH_IMG_HEIGHT * _scale * .5 + getSize().y * .5;
@@ -209,7 +203,8 @@ void fish::draw(int _x, int _y, float _scale, bool _showDebug)
     string _bassImg = "bass_" + ofToString(stateMouth) + "_" + ofToString(stateBody) + ".png";
 
     //Draw image
-    arrBassImg[displayState].draw(_xf, _yf, _scale * FISH_IMG_WIDTH, _scale * FISH_IMG_HEIGHT);
+    if (isVisible)
+        arrBassImg[displayState].draw(_xf, _yf, _scale * FISH_IMG_WIDTH, _scale * FISH_IMG_HEIGHT);
     //arrBassImg[displayState].draw(loc, scaledSize.x, scaledSize.y);
 
     if (_showDebug) {

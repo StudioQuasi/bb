@@ -37,9 +37,11 @@ class fish : public ofxInterface::Node {
 
 public:
 
-    void setup(int wallIndex, int controllerIndex, int driverIndex, ofVec2f loc, bool isLead, int groupIndex, ofxPanel * panelFish);
+    void setup(int wallIndex, char controllerIndex, int driverIndex, ofVec2f loc, bool isLead, int groupIndex, ofxPanel * panelFish);
 
-    void draw(int _x, int _y, float _scaledSize, bool _bShowDebug);
+    void draw(float _scaledSize, bool _bShowDebug);
+    //void draw(int _x, int _y, float _scaledSize, bool _bShowDebug);
+    
     void update();
 
     void setBodyState(int _mouthState, int _bodyState);
@@ -52,16 +54,16 @@ public:
     void onTouchMove(TouchEvent &event);
     void onTouchUp(TouchEvent &event);
 
+    char controllerIndex;
+    int driverIndex;
+    char groupID;
+    int id;
+
 protected:
 
     int stateMouth;
     int stateBody;
     int displayState;
-
-    int wallIndex;
-    int controllerIndex;
-    int driverIndex;
-    int groupIndex;
 
     ofImage arrBassImg[6];
     ofVec2f loc;
@@ -75,7 +77,8 @@ protected:
     ofTrueTypeFont ttf;
 
     bool bMoved;
-
+    bool isVisible;
+    
     /*
     ofxPanel panel;
     ofParameterGroup panelGroup;

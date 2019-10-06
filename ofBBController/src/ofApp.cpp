@@ -14,14 +14,38 @@ void ofApp::setup(){
 
     state = STATE_WAIT;
     
-    soundFileName = "smooth_operator.mp3"; //hallandoats.mp3";
-    cmdFileName = "smooth_operator.json";
-
-    layoutFile = "layout.json";
-
-    ofLog() << ofToDataPath(soundFileName);
+    //soundFileName = "smooth_operator.mp3"; //hallandoats.mp3";
+    //cmdFileName = "smooth_operator.json";
     
-    playerSound.load(ofToDataPath(soundFileName));
+    //Create Universal Groups
+    
+    //vector<fish*> _arrFish;
+
+    /*
+    _arrFish.push_back();
+    struct group {
+        char groupID;
+        vector<fish*> arrFish;
+        
+        group(
+              char _groupID,
+              vector<fish*> _arrFish
+              )
+        {
+            groupID = _groupID;
+            arrFish = _arrFish;
+        }
+    };*/
+    
+    arrSongs.push_back(song("hallandoats.mp3","hallandouts_good1.json"));
+    arrSongs.push_back(song("smooth_operator.mp3","smooth_operator.json"));
+    songIndex = 0;
+
+    layoutFile = "new_layout.json";
+
+    ofLog() << ofToDataPath(arrSongs[songIndex].songFile);
+    
+    //playerSound.load(ofToDataPath(arrSongs[songIndex].songFile));
     
     isPaused = false;
     
@@ -54,7 +78,7 @@ void ofApp::setup(){
     serial.listDevices();
     vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
 
-    int baud = 57600;
+    int baud = 9600;
     serial.setup(0, baud); //open the first device
     
     bTailOn = false;
@@ -63,31 +87,37 @@ void ofApp::setup(){
     isFlipping = false;
     
     //Open stairs image
-    imgStairs.load("stairs_2.png");
+    imgStairs.load("images/royalPalms_67Fish.jpg");
 
     //Add All Gui elements to set
     panelGroup.setName("Bass Layout Params");
+    
+    /*
     panelGroup.add(bbCols.set("Columns",10,1,50));
     panelGroup.add(bbRows.set("Rows",10,1,50));
     panelGroup.add(bbColSpacing.set("Col Spacing",20,0,300));
     panelGroup.add(bbRowSpacing.set("Row Spacing",20,0,300));
+    */
+    
+    panelGroup.add(masterScale.set("Master Scale",1,.1,10));
+    panelGroup.add(masterX.set("Master X",0,-ofGetWidth(),ofGetWidth()));
+    panelGroup.add(masterY.set("Master Y",0,-ofGetHeight(),ofGetHeight()));
     panelGroup.add(bbScale.set("Bass Scale",.1,.05,5));
 
-    panelGroup.add(bbOriginX.set("Origin X",0,0,ofGetWidth()));
-    panelGroup.add(bbOriginY.set("Origin Y",0,0,ofGetHeight()));
-    panelGroup.add(bbSlope.set("Slope",0,0,200));
+    //panelGroup.add(bbOriginX.set("Origin X",0,0,ofGetWidth()));
+    //panelGroup.add(bbOriginY.set("Origin Y",0,0,ofGetHeight()));
+    //panelGroup.add(bbSlope.set("Slope",0,0,200));
     
     panelGroup.add(bbBGX.set("Background X",0,-ofGetWidth(),ofGetWidth()));
     panelGroup.add(bbBGY.set("Background Y",0,-ofGetHeight(),ofGetHeight()));
     panelGroup.add(bbBGScale.set("Background Scale",1,0,10));
+    panelGroup.add(bbShowDebug.set("Show Debug"));
+
+    //panelGroup.add(bbFlatIndex.set("Flat Index", 0, 0, 21));
+    //panelGroup.add(bbFlatOffset.set("Flat Offset", 0, -100, 100));
 
     /*
-    panelGroup.add(bbShowDebug.set("Show Debug"));
-    panelGroup.add(bbFlatIndex.set("Flat Index", 0, 0, 21));
-    panelGroup.add(bbFlatOffset.set("Flat Offset", 0, -100, 100));
-    
     panelFish.setup();
-
     panelFish.add(fishID.setup("Bass ID",0,0,63));
     panelFish.add(fishControllerID.setup("Controller ID",0,0,21));
     panelFish.add(fishControllerIndex.setup("Motor Index",0,0,2));
@@ -114,9 +144,18 @@ void ofApp::setup(){
     //panelFish.loadFromFile("bbwall_fish_settings.xml");
     
     //Read Layout File
-    //readLayoutJsonFile();
-    createLayoutByParam();
+    readLayoutJsonFile();
+    
+    //Create All the groups - Move this to the individual song
+    vector<int> _idsX = {0,14,22,33,45,53};
+    group * _groupX = new group('x', _idsX);
+    assignGroup(_groupX);
+    
+    vector<int> _idsY = {4,18,26,37,48};
+    group * _groupY = new group('x', _idsX);
+    assignGroup(_groupY);
 
+    //createLayoutByParam();
 }
 
 //--------------------------------------------------------------
@@ -146,7 +185,7 @@ void ofApp::update(){
             //Start over song
             if (arrCmds.size() == nextCmdIndex && isLoop) {
 
-                readJsonFile();
+                loadAndPlaySong();
             }
 
         }
@@ -192,7 +231,7 @@ void ofApp::drawStairs()
 void ofApp::createLayoutByParam() {
     
     int _id = 0;
-    int _controllerIndex = 0;
+    char _controllerIndex;
     int _driverIndex = 0;
 
     int _x, _y;
@@ -240,7 +279,6 @@ void ofApp::createLayoutByParam() {
     }
 }
 
-
 void ofApp::readLayoutJsonFile() {
     
     ofFile file(ofToDataPath(layoutFile));
@@ -256,28 +294,33 @@ void ofApp::readLayoutJsonFile() {
         int _count = 0;
         bool _isLead = false;
 
-        for(auto & _cmd: js){
+        for(auto & _fish: js){
 
-            ofLog() << _cmd;
+            ofLog() << _fish;
             _isLead = false;
 
-            if (!_cmd["groups"].empty()) {
+            if (!_fish["groups"].empty()) {
                 ofLog() << "*** IS EMPTY";
                 _isLead = true;
             }
 
             fish * _f = new fish();
             
+            ofLog() << _fish["pos"][0] << " " << _fish["pos"][1];
+            
+            ofLog() << "Controller Index : " << _fish["controllerIndex"] << " " << ofToChar(_fish["controllerIndex"]);
+            
             _f->setup(
-                                _cmd["id"],
-                                _cmd["controllerIndex"],
-                                _cmd["driverIndex"],
-                                ofVec2f(_cmd["pos"][0],_cmd["pos"][1]),
+                                _count,
+                                ofToChar(_fish["controllerIndex"]),
+                                _fish["driverIndex"],
+                                ofVec2f(_fish["x"],_fish["y"]),
                                 _isLead,
                                 1,
                                 panelFish
             );
 
+            scene->addChild(_f);
             arrFish.push_back(
                 _f
             );
@@ -286,14 +329,58 @@ void ofApp::readLayoutJsonFile() {
         }
 
         ofLog() << "* Read Fish In" << _count;
-        
+
     }
 }
 
+void ofApp::writeLayoutJsonFile() {
+    
+    Json::Value arrFishJson(Json::arrayValue);
+    
+    for (int i=0; i<arrFish.size(); i++) {
+        
+        Json::Value _fish;
+        Json::Value _arrBB(Json::arrayValue);
+        
+        _fish["id"] = arrFish[i]->id;
+        _fish["controllerIndex"] = ofToString(arrFish[i]->controllerIndex);
+        _fish["driverIndex"] = arrFish[i]->driverIndex;
+        _fish["x"] = arrFish[i]->getPosition().x;
+        _fish["y"] = arrFish[i]->getPosition().y;
 
-void ofApp::readJsonFile() {
+        //_fish["pos"] = {0,1};
 
-    ofFile file(ofToDataPath(cmdFileName));
+        arrFishJson.append(_fish);
+    }
+    
+    ofLog() << arrFishJson;
+    ofLog() << "* Write " << arrFishJson.size();
+    
+    std::ofstream file_id;
+    file_id.open(ofToDataPath(layoutFile));
+    
+    Json::Value value_obj;
+    //populate 'value_obj' with the objects, arrays etc.
+    
+    Json::StyledWriter styledWriter;
+    file_id << styledWriter.write(arrFishJson);
+
+    file_id.close();
+}
+
+void ofApp::loadAndPlaySong() {
+
+    //Assign Groups
+    //for (int i=0; i<arrSongs[songIndex].arrGroup.size(); i++)
+    //{
+    //    assignGroup(arrSongs[songIndex].arrGroup[i]);
+    //}
+
+    //Load this song
+    playerSound.load(ofToDataPath(arrSongs[songIndex].songFile));
+    
+    //Load the commands
+    ofFile file(ofToDataPath(arrSongs[songIndex].cmdFile));
     ofJson js;
 
     if(file.exists()){
@@ -321,9 +408,8 @@ void ofApp::readJsonFile() {
             );
             _count++;
         }
-        
-        ofLog() << "* Read " << _count;
 
+        ofLog() << "* Read " << _count;
     }
     
     //Set state to Playback
@@ -380,21 +466,35 @@ void ofApp::writeJsonFile() {
 void ofApp::draw(){
 
     //ofSetColor(0);
+    ofPushMatrix();
     
-    //Draw backgtround image
-    imgStairs.draw(bbBGX.get(), bbBGY.get(), bbBGScale.get()*1102, bbBGScale.get()*702);
+        ofTranslate(masterX.get(), masterY.get());
+    
+        ofPushMatrix();
+    
+        ofScale(masterScale.get());
+    
+        //Draw backgtround image
+        imgStairs.draw(bbBGX.get(), bbBGY.get(), bbBGScale.get()*1102, bbBGScale.get()*702);
 
-    ttf.drawString("Billy Bass Wall", 20, 40);
-    ttf.drawString("\"" + soundFileName + "\"", 20, 90);
-
+        for (int i=0; i<arrFish.size(); i++)
+        {
+            arrFish[i]->draw(bbScale.get(), bbShowDebug.get() );
+        }
+    
+        ofPopMatrix();
+    ofPopMatrix();
+    
     float _t = 0;
     if (state == STATE_RECORD || state == STATE_PLAYBACK) {
         _t = ofGetElapsedTimef() - timeCode;
     }
-    
-    ttf.drawString(ofToString(_t), 20, 140);
 
     ofPushStyle();
+    
+    ofSetColor(0);
+    ttf.drawString(ofToString(_t), 20, 140);
+    
     switch (state) {
     
         case STATE_WAIT:
@@ -452,22 +552,18 @@ void ofApp::draw(){
     //Draw each fish
     //ofPushMatrix();
     //ofTranslate(bbOriginX.get(), bbOriginY.get());
-    
-    for (int i=0; i<arrFish.size(); i++)
-    {
-        int _xIndex = i % bbCols.get();
-        int _x = _xIndex * bbColSpacing.get() + bbOriginX.get();
-        int _y = (i / bbCols.get()) * bbRowSpacing.get() - _xIndex * bbSlope.get() + (_xIndex > bbFlatIndex.get() ? bbFlatOffset.get() : 0) + bbOriginY.get();
-        
-        arrFish[i]->draw(_x, _y, bbScale.get(), bbShowDebug.get() );
-    }
-    //ofPopMatrix();
 
+    ofPushStyle();
+    ofSetColor(0,255,0);
+    ttf.drawString("Billy Bass Wall", 20, 40);
+    ttf.drawString("\"" + arrSongs[songIndex].songFile + "\"", 20, 90);
+    ofPopStyle();
+    
     //Draw
     if (bShowGui)
     {
         panel.draw();
-        panelFish->draw();
+        //panelFish->draw();
     }
 
 }
@@ -478,7 +574,7 @@ string ofApp::buildCommandString(int _cmd, int _type)
 
     if (_type == 0) {
 
-        _scmd += ofToString(LEAD_BASS);
+        _scmd += "x"; //ofToString(LEAD_BASS);
     } else if (_type == 2) {
 
         _scmd += "0124";
@@ -489,7 +585,33 @@ string ofApp::buildCommandString(int _cmd, int _type)
     return _scmd;
 }
 
-void ofApp::writeCommand(int _cmdID, int _cmdType, bool _record)
+void ofApp::assignGroup(group * _group)
+{
+
+    //Write to the hardware
+    for (int i=0; i<_group->arrFishID.size(); i++)
+    {
+        
+         string _cmd = "6" +
+            ofToString(arrFish[_group->arrFishID[i]]->controllerIndex) +
+            ofToString(arrFish[_group->arrFishID[i]]->driverIndex) +
+            ofToString(_group->groupID);
+
+        ofLog() << _cmd;
+        
+        //Set Group ID
+        arrFish[_group->arrFishID[i]]->groupID = _group->groupID;
+        
+        ofLog() << arrFish[_group->arrFishID[i]]->groupID;
+
+        //Write the Bytes
+        serial.writeBytes(_cmd.c_str(), _cmd.length());
+
+    }
+
+}
+
+void ofApp::writeCommand(int _cmdID, int _cmdType, bool _record, char _groupID)
 {
 
     int _mouth = -1;
@@ -525,24 +647,24 @@ void ofApp::writeCommand(int _cmdID, int _cmdType, bool _record)
     }
 
     //Set visuals for all fish
-    setAllBodyState(_mouth, _body, _cmdID, _cmdType);
+    setAllBodyState(_mouth, _body, _cmdID, _cmdType, _groupID);
 
     //Write to the hardware
     serial.writeBytes(_cmd.c_str(), _cmd.length());
 
     //If is a subgroup
     bool _isGroup = false;
-
+    /*
     if (_cmdType == CMD_TYPE_LEAD) {
         _isGroup = true;
-    }
+    }*/
 
     if (_record && state == STATE_RECORD)
         arrCmds.push_back(bbcmd(_cmdID, _t, _cmd, _isGroup));
 
 }
 
-void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cmdType)
+void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cmdType, char _groupID)
 {
 
     for (int i=0; i<arrFish.size(); i++)
@@ -550,11 +672,14 @@ void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cm
         if (
             _cmdType == CMD_TYPE_ALL
             ||
-            (_cmdType == CMD_TYPE_LEAD && arrFish[i]->isLead)
-            ||
-            (_cmdType == CMD_TYPE_OTHERS && !arrFish[i]->isLead)
+            _groupID == arrFish[i]->groupID
         )
         {
+        //    (_cmdType == CMD_TYPE_LEAD && arrFish[i]->isLead)
+        //    ||
+        //    (_cmdType == CMD_TYPE_OTHERS && !arrFish[i]->isLead)
+        //)
+        //{
             if (arrFish[i]->getBodyState() == STATE_BODY_HEAD && (_cmdID == CMD_TAIL_ON || _cmdID == CMD_TAIL_OFF)) {
                 arrFish[i]->setBodyState(_mouthState, -1);
             } else {
@@ -566,6 +691,8 @@ void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cm
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+
+    char _groupID = NULL;
 
     if (_keyOff == true) {
         
@@ -588,8 +715,13 @@ void ofApp::keyPressed(int key){
                 
                 isPaused = !isPaused;
                 playerSound.setPaused(isPaused);
-            }
+                
+            } else if (state == STATE_PLAYBACK) {
 
+                playerSound.stop();
+                state = STATE_WAIT;
+            }
+            
             timeCode = ofGetElapsedTimef();
             break;
 
@@ -605,6 +737,7 @@ void ofApp::keyPressed(int key){
         case 'k':
         case 'l':
 
+
             if (state != STATE_PLAYBACK) {
 
                 animMouth.animateTo(1);
@@ -618,17 +751,21 @@ void ofApp::keyPressed(int key){
                     
                     _lastCmd = LAST_MOUTH_ALL;
                     _cmdType = CMD_TYPE_ALL;
+
                 } else if (key == 'j' ) {
                     
                     _lastCmd = LAST_MOUTH_LEAD;
                     _cmdType = CMD_TYPE_LEAD;
+                    
+                    _groupID = 'x';
+
                 } else {
 
                     _lastCmd = LAST_MOUTH_OTHERS;
                     _cmdType = CMD_TYPE_OTHERS;
                 }
 
-                writeCommand(_cmd, _cmdType, true);
+                writeCommand(_cmd, _cmdType, true, _groupID);
             }
             break;
 
@@ -694,10 +831,23 @@ void ofApp::keyPressed(int key){
             writeJsonFile();
             break;
             
+        case 'a':
+            
+            if (state == STATE_WAIT) {
+            
+                ofLog() << "Advance File";
+                songIndex++;
+                if (songIndex >= arrSongs.size()) {
+                    songIndex = 0;
+                }
+            }
+
+            break;
+
         case 'o':
             
             ofLog() << "Read layout json file.";
-            readJsonFile();
+            loadAndPlaySong();
             break;
             
         case 'p':
@@ -712,6 +862,11 @@ void ofApp::keyPressed(int key){
                 arrFish[i]->setBodyState(STATE_MOUTH_OPEN, -1);
             }
             break;
+        
+        case '1':
+
+            writeLayoutJsonFile();
+            break;
         }
     }
 }
@@ -721,7 +876,8 @@ void ofApp::keyPressed(int key){
 void ofApp::keyReleased(int key){
 
     _keyOff = true;
-    
+    char _groupID = NULL;
+
     switch (key) {
 
         case 'j':
@@ -736,17 +892,19 @@ void ofApp::keyReleased(int key){
 
                 if (key == 'k')
                     _cmdType = 1;
-                else if (key == 'j')
+                else if (key == 'j') {
                     _cmdType = 0;
+                    _groupID = 'x';
+                }
                 else
                     _cmdType = 2;
                     //_cmd = buildCommandString(CMD_MOUTH_CLOSE,2);
                     
                 animMouth.animateTo(0);
 
-                writeCommand(CMD_MOUTH_CLOSE, _cmdType, true);
-                //serial.writeBytes(_cmd.c_str(), _cmd.length());
+                writeCommand(CMD_MOUTH_CLOSE, _cmdType, true, _groupID);
 
+                //serial.writeBytes(_cmd.c_str(), _cmd.length());
                 //if (state == STATE_RECORD)
                 //   arrCmds.push_back(bbcmd(CMD_MOUTH_CLOSE, _t, _cmd));
             }

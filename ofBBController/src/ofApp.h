@@ -13,8 +13,6 @@ const int STATE_WAIT = 0;
 const int STATE_RECORD = 1;
 const int STATE_PLAYBACK = 2;
 
-
-
 const int CMD_MOUTH_OPEN = 0;
 const int CMD_MOUTH_CLOSE = 1;
 const int CMD_TAIL_ON = 2;
@@ -32,12 +30,48 @@ const int LAST_MOUTH_LEAD = 0;
 const int LAST_MOUTH_ALL = 1;
 const int LAST_MOUTH_OTHERS = 2;
 
-const float OFFSET_POSITION = .303;
+const float OFFSET_POSITION = 0; //.303;
 
 const int NUM_FISH = 63;
 const int NUM_CONTROLLER = 21;
 
 const bool isLoop = false;
+
+struct group {
+
+    char groupID;
+    vector<int> arrFishID;
+    
+    group(
+        char _groupID,
+        vector<int> _arrFishID
+    )
+    {
+        groupID = _groupID;
+        
+        arrFishID = _arrFishID;
+        //for (int i=0; i<5; i++) {
+        //    arrFish[i] = _arrFish[i];
+        //}
+    }
+};
+
+struct song {
+
+    string songFile;
+    string cmdFile;
+    vector<group*> arrGroup;
+
+    song(
+        string _songFile,
+        string _cmdFile
+    )
+    {
+        songFile = _songFile;
+        cmdFile = _cmdFile;
+    }
+
+};
 
 struct bbcmd {
 
@@ -83,7 +117,7 @@ class ofApp : public ofBaseApp{
 		
         string buildCommandString(int _cmd, int _type);
     
-    void setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cmdType);
+    void setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cmdType, char _groupID=NULL);
 
     ofxInterface::Node* scene;
     
@@ -96,6 +130,10 @@ class ofApp : public ofBaseApp{
     ofParameter<int> bbCols;
     ofParameter<int> bbRows;
     ofParameter<float> bbScale;
+    ofParameter<float> masterScale;
+    ofParameter<int> masterX;
+    ofParameter<int> masterY;
+    
     ofParameter<int> bbColSpacing;
     ofParameter<int> bbRowSpacing;
     ofParameter<int> bbOriginX;
@@ -121,13 +159,16 @@ class ofApp : public ofBaseApp{
 
     ofxJSONElement result;
 
-    void writeCommand(int _cmdID, int _cmdType, bool _record);
+    void assignGroup(group * _group);
+
+    void writeCommand(int _cmdID, int _cmdType, bool _record, char _groupID=NULL);
 
     void writeJsonFile();
-    void readJsonFile();
+    void loadAndPlaySong();
     
     void createLayoutByParam();
     void readLayoutJsonFile();
+    void writeLayoutJsonFile();
 
     void drawStairs();
 
@@ -138,17 +179,18 @@ class ofApp : public ofBaseApp{
 
     vector<bbcmd> arrCmds;
     vector<bbcmd> arrPlayedCmds;
-
     vector<fish*> arrFish;
+    vector<song> arrSongs;
+
+    int songIndex;
 
     ofJson stroke;
     ofTrueTypeFont ttf, ttf_side;
     ofPath path;
 
-    string soundFileName;
-    string cmdFileName;
+    //string soundFileName;
+    //string cmdFileName;
     string layoutFile;
-
     ofxAnimatableFloat animMouth;
     bool _keyOff = true;
     
@@ -160,9 +202,7 @@ class ofApp : public ofBaseApp{
 
     bool bTailOn;
     float nextTail;
-    
     bool isFlipping;
-    
     int _lastCmd;
     
     //Background stairs image
