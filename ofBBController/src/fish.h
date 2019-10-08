@@ -42,7 +42,7 @@ public:
     void draw(float _scaledSize, bool _bShowDebug);
     //void draw(int _x, int _y, float _scaledSize, bool _bShowDebug);
     
-    void update();
+    bool update();
 
     void setBodyState(int _mouthState, int _bodyState);
 
@@ -56,7 +56,10 @@ public:
 
     char controllerIndex;
     int driverIndex;
+    
+    vector<char> arrGroupID;
     char groupID;
+    
     int id;
 
 protected:
@@ -78,6 +81,8 @@ protected:
 
     bool bMoved;
     bool isVisible;
+    
+    float lastSpokeTime;
     
     /*
     ofxPanel panel;

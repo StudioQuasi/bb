@@ -1,0 +1,394 @@
+[
+   {
+      "controllerIndex" : "a",
+      "driverIndex" : 2,
+      "id" : 0,
+      "x" : 304,
+      "y" : 683
+   },
+   {
+      "controllerIndex" : "a",
+      "driverIndex" : 1,
+      "id" : 1,
+      "x" : 325,
+      "y" : 710
+   },
+   {
+      "controllerIndex" : "b",
+      "driverIndex" : 0,
+      "id" : 2,
+      "x" : 315,
+      "y" : 599
+   },
+   {
+      "controllerIndex" : "b",
+      "driverIndex" : 1,
+      "id" : 3,
+      "x" : 335,
+      "y" : 625
+   },
+   {
+      "controllerIndex" : "b",
+      "driverIndex" : 2,
+      "id" : 4,
+      "x" : 354,
+      "y" : 651
+   },
+   {
+      "controllerIndex" : "a",
+      "driverIndex" : 0,
+      "id" : 5,
+      "x" : 373,
+      "y" : 679
+   },
+   {
+      "controllerIndex" : "d",
+      "driverIndex" : 2,
+      "id" : 6,
+      "x" : 348,
+      "y" : 541
+   },
+   {
+      "controllerIndex" : "c",
+      "driverIndex" : 0,
+      "id" : 7,
+      "x" : 365,
+      "y" : 569
+   },
+   {
+      "controllerIndex" : "c",
+      "driverIndex" : 1,
+      "id" : 8,
+      "x" : 383,
+      "y" : 594
+   },
+   {
+      "controllerIndex" : "c",
+      "driverIndex" : 2,
+      "id" : 9,
+      "x" : 405,
+      "y" : 618
+   },
+   {
+      "controllerIndex" : "t",
+      "driverIndex" : 1,
+      "id" : 10,
+      "x" : 424,
+      "y" : 647
+   },
+   {
+      "controllerIndex" : "d",
+      "driverIndex" : 0,
+      "id" : 11,
+      "x" : 396,
+      "y" : 509
+   },
+   {
+      "controllerIndex" : "d",
+      "driverIndex" : 1,
+      "id" : 12,
+      "x" : 415,
+      "y" : 538
+   },
+   {
+      "controllerIndex" : "t",
+      "driverIndex" : 0,
+      "id" : 13,
+      "x" : 435,
+      "y" : 561
+   },
+   {
+      "controllerIndex" : "l",
+      "driverIndex" : 2,
+      "id" : 14,
+      "x" : 455,
+      "y" : 588
+   },
+   {
+      "controllerIndex" : "t",
+      "driverIndex" : 2,
+      "id" : 15,
+      "x" : 476,
+      "y" : 613
+   },
+   {
+      "controllerIndex" : "g",
+      "driverIndex" : 2,
+      "id" : 16,
+      "x" : 468,
+      "y" : 505
+   },
+   {
+      "controllerIndex" : "g",
+      "driverIndex" : 1,
+      "id" : 17,
+      "x" : 485,
+      "y" : 532
+   },
+   {
+      "controllerIndex" : "l",
+      "driverIndex" : 0,
+      "id" : 18,
+      "x" : 502,
+      "y" : 558
+   },
+   {
+      "controllerIndex" : "l",
+      "driverIndex" : 1,
+      "id" : 19,
+      "x" : 525,
+      "y" : 583
+   },
+   {
+      "controllerIndex" : "g",
+      "driverIndex" : 0,
+      "id" : 20,
+      "x" : 552,
+      "y" : 522
+   },
+   {
+      "controllerIndex" : "r",
+      "driverIndex" : 2,
+      "id" : 21,
+      "x" : 584,
+      "y" : 466
+   },
+   {
+      "controllerIndex" : "j",
+      "driverIndex" : 0,
+      "id" : 22,
+      "x" : 603,
+      "y" : 496
+   },
+   {
+      "controllerIndex" : "j",
+      "driverIndex" : 1,
+      "id" : 23,
+      "x" : 625,
+      "y" : 520
+   },
+   {
+      "controllerIndex" : "h",
+      "driverIndex" : 0,
+      "id" : 24,
+      "x" : 613,
+      "y" : 410
+   },
+   {
+      "controllerIndex" : "r",
+      "driverIndex" : 1,
+      "id" : 25,
+      "x" : 636,
+      "y" : 439
+   },
+   {
+      "controllerIndex" : "r",
+      "driverIndex" : 0,
+      "id" : 26,
+      "x" : 655,
+      "y" : 464
+   },
+   {
+      "controllerIndex" : "u",
+      "driverIndex" : 2,
+      "id" : 27,
+      "x" : 677,
+      "y" : 493
+   },
+   {
+      "controllerIndex" : "h",
+      "driverIndex" : 2,
+      "id" : 28,
+      "x" : 667,
+      "y" : 378
+   },
+   {
+       "controllerIndex" : "h",
+       "driverIndex" : 1,
+       "id" : 55,
+       "x" : 686,
+       "y" : 405
+   },
+   {
+      "controllerIndex" : "u",
+      "driverIndex" : 0,
+      "id" : 29,
+      "x" : 706,
+      "y" : 431
+   },
+   {
+      "controllerIndex" : "u",
+      "driverIndex" : 1,
+      "id" : 30,
+      "x" : 726,
+      "y" : 459
+   },
+   {
+      "controllerIndex" : "e",
+      "driverIndex" : 2,
+      "id" : 31,
+      "x" : 727,
+      "y" : 359
+   },
+   {
+      "controllerIndex" : "n",
+      "driverIndex" : 2,
+      "id" : 32,
+      "x" : 744,
+      "y" : 384
+   },
+   {
+      "controllerIndex" : "n",
+      "driverIndex" : 1,
+      "id" : 33,
+      "x" : 765,
+      "y" : 414
+   },
+   {
+      "controllerIndex" : "n",
+      "driverIndex" : 0,
+      "id" : 34,
+      "x" : 783,
+      "y" : 439
+   },
+   {
+      "controllerIndex" : "e",
+      "driverIndex" : 0,
+      "id" : 35,
+      "x" : 775,
+      "y" : 333
+   },
+   {
+      "controllerIndex" : "e",
+      "driverIndex" : 1,
+      "id" : 36,
+      "x" : 797,
+      "y" : 358
+   },
+   {
+      "controllerIndex" : "s",
+      "driverIndex" : 0,
+      "id" : 37,
+      "x" : 816,
+      "y" : 386
+   },
+   {
+      "controllerIndex" : "s",
+      "driverIndex" : 1,
+      "id" : 38,
+      "x" : 838,
+      "y" : 414
+   },
+   {
+      "controllerIndex" : "s",
+      "driverIndex" : 2,
+      "id" : 39,
+      "x" : 863,
+      "y" : 441
+   },
+   {
+      "controllerIndex" : "i",
+      "driverIndex" : 0,
+      "id" : 40,
+      "x" : 856,
+      "y" : 330
+   },
+   {
+      "controllerIndex" : "i",
+      "driverIndex" : 1,
+      "id" : 41,
+      "x" : 871,
+      "y" : 355
+   },
+   {
+      "controllerIndex" : "m",
+      "driverIndex" : 0,
+      "id" : 42,
+      "x" : 890,
+      "y" : 384
+   },
+   {
+      "controllerIndex" : "m",
+      "driverIndex" : 1,
+      "id" : 43,
+      "x" : 913,
+      "y" : 414
+   },
+   {
+      "controllerIndex" : "f",
+      "driverIndex" : 0,
+      "id" : 44,
+      "x" : 900,
+      "y" : 301
+   },
+   {
+      "controllerIndex" : "f",
+      "driverIndex" : 1,
+      "id" : 45,
+      "x" : 919,
+      "y" : 327
+   },
+   {
+      "controllerIndex" : "f",
+      "driverIndex" : 2,
+      "id" : 46,
+      "x" : 940,
+      "y" : 356
+   },
+   {
+      "controllerIndex" : "o",
+      "driverIndex" : 2,
+      "id" : 47,
+      "x" : 959,
+      "y" : 379
+   },
+   {
+      "controllerIndex" : "q",
+      "driverIndex" : 1,
+      "id" : 48,
+      "x" : 973,
+      "y" : 296
+   },
+   {
+      "controllerIndex" : "o",
+      "driverIndex" : 0,
+      "id" : 49,
+      "x" : 989,
+      "y" : 324
+   },
+   {
+      "controllerIndex" : "o",
+      "driverIndex" : 1,
+      "id" : 50,
+      "x" : 1010,
+      "y" : 350
+   },
+   {
+      "controllerIndex" : "p",
+      "driverIndex" : 2,
+      "id" : 51,
+      "x" : 1020,
+      "y" : 265
+   },
+   {
+      "controllerIndex" : "q",
+      "driverIndex" : 2,
+      "id" : 52,
+      "x" : 1043,
+      "y" : 296
+   },
+   {
+      "controllerIndex" : "p",
+      "driverIndex" : 0,
+      "id" : 53,
+      "x" : 1067,
+      "y" : 233
+   },
+   {
+      "controllerIndex" : "p",
+      "driverIndex" : 1,
+      "id" : 54,
+      "x" : 1092,
+      "y" : 265
+   }
+]

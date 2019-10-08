@@ -13,37 +13,8 @@ void ofApp::setup(){
     TouchManager::one().setup(scene);
 
     state = STATE_WAIT;
-    
-    //soundFileName = "smooth_operator.mp3"; //hallandoats.mp3";
-    //cmdFileName = "smooth_operator.json";
-    
-    //Create Universal Groups
-    
-    //vector<fish*> _arrFish;
-
-    /*
-    _arrFish.push_back();
-    struct group {
-        char groupID;
-        vector<fish*> arrFish;
-        
-        group(
-              char _groupID,
-              vector<fish*> _arrFish
-              )
-        {
-            groupID = _groupID;
-            arrFish = _arrFish;
-        }
-    };*/
-    
-    arrSongs.push_back(song("hallandoats.mp3","hallandouts_good1.json"));
-    arrSongs.push_back(song("smooth_operator.mp3","smooth_operator.json"));
-    songIndex = 0;
 
     layoutFile = "new_layout.json";
-
-    ofLog() << ofToDataPath(arrSongs[songIndex].songFile);
     
     //playerSound.load(ofToDataPath(arrSongs[songIndex].songFile));
     
@@ -74,6 +45,21 @@ void ofApp::setup(){
     
     nextCmdIndex = 0;
 
+    //Add Songs to Queue
+    vector<string> _tracksHall = {};
+    arrSongs.push_back(song("hallandoats.mp3","hallandouts_good1.json",_tracksHall));
+    
+    vector<string> _tracksSade = {};
+    arrSongs.push_back(song("smooth_operator.mp3","smooth_operator.json",_tracksSade));
+    
+    vector<string> _tracks = {"chorus.json","guy.json","lead1.json","lead2.json"};
+    arrSongs.push_back(song("shoop.mp3","out.json",_tracks));
+    
+    songIndex = 2;
+
+    //Load First Song
+    playerSound.load(ofToDataPath(arrSongs[songIndex].songFile));
+
     //Set up Serial
     serial.listDevices();
     vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
@@ -91,19 +77,21 @@ void ofApp::setup(){
 
     //Add All Gui elements to set
     panelGroup.setName("Bass Layout Params");
-    
+
     /*
     panelGroup.add(bbCols.set("Columns",10,1,50));
     panelGroup.add(bbRows.set("Rows",10,1,50));
     panelGroup.add(bbColSpacing.set("Col Spacing",20,0,300));
     panelGroup.add(bbRowSpacing.set("Row Spacing",20,0,300));
     */
-    
+
     panelGroup.add(masterScale.set("Master Scale",1,.1,10));
-    panelGroup.add(masterX.set("Master X",0,-ofGetWidth(),ofGetWidth()));
-    panelGroup.add(masterY.set("Master Y",0,-ofGetHeight(),ofGetHeight()));
+    panelGroup.add(masterX.set("Master X",0,-2*ofGetWidth(),2*ofGetWidth()));
+    panelGroup.add(masterY.set("Master Y",0,-2*ofGetHeight(),2*ofGetHeight()));
     panelGroup.add(bbScale.set("Bass Scale",.1,.05,5));
 
+    panelGroup.add(bbFlipSpeed.set("Flip Speed",1,.1,3));
+    
     //panelGroup.add(bbOriginX.set("Origin X",0,0,ofGetWidth()));
     //panelGroup.add(bbOriginY.set("Origin Y",0,0,ofGetHeight()));
     //panelGroup.add(bbSlope.set("Slope",0,0,200));
@@ -115,14 +103,6 @@ void ofApp::setup(){
 
     //panelGroup.add(bbFlatIndex.set("Flat Index", 0, 0, 21));
     //panelGroup.add(bbFlatOffset.set("Flat Offset", 0, -100, 100));
-
-    /*
-    panelFish.setup();
-    panelFish.add(fishID.setup("Bass ID",0,0,63));
-    panelFish.add(fishControllerID.setup("Controller ID",0,0,21));
-    panelFish.add(fishControllerIndex.setup("Motor Index",0,0,2));
-    panelFish.add(fishGroupID.setup("Group",0,0,2));
-    */
     
     //panelGroup.set
     panelFish = new ofxPanel();
@@ -145,16 +125,31 @@ void ofApp::setup(){
     
     //Read Layout File
     readLayoutJsonFile();
+
+    vector<int> _idsLead1 = {9,20,30,42}; //14,22,33,45,53};
+    arrGroups.push_back(new group('v', _idsLead1));
+    
+    vector<int> _idsLead2 = {0,14,22,34};
+    arrGroups.push_back(new group('y', _idsLead2));
     
     //Create All the groups - Move this to the individual song
-    vector<int> _idsX = {0,14,22,33,45,53};
-    group * _groupX = new group('x', _idsX);
-    assignGroup(_groupX);
-    
-    vector<int> _idsY = {4,18,26,37,48};
-    group * _groupY = new group('x', _idsX);
-    assignGroup(_groupY);
+    vector<int> _idsFlip1 = {0,1,6,7,8,9,10,16,17,18,19,21,22,23,28,29,30,31,36,37,38,39,40,45,46,47,48,53,52};
+    arrGroups.push_back(new group('w', _idsFlip1));
 
+    vector<int> _idsFlip2 = {2,3,4,5,11,12,13,14,15,20,24,25,26,27,32,33,34,35,41,42,43,44,49,50,51,54,55};
+    arrGroups.push_back(new group('z', _idsFlip2));
+
+
+    //Create the groups
+    if (bCreateGroups) {
+    
+        for (int i=1; i>=0; i--) {
+            assignGroup(arrGroups[i]);
+        }
+    }
+
+    //assignGroup(_groupLead1);
+    //assignGroup(_groupLead2);
     //createLayoutByParam();
 }
 
@@ -166,19 +161,19 @@ void ofApp::update(){
 
     float dt = 1.0f / 60.0f;
     animMouth.update(dt);
-    
+
     if (state == STATE_PLAYBACK && nextCmdIndex < arrCmds.size()) {
-        
+
         float _n = arrCmds[nextCmdIndex].timecode;
-        
+
         float _t = ofGetElapsedTimef() - timeCode;
 
         if (_t > _n) {
-            
+
             ofLog() << _t << " " << _n;
 
             arrPlayedCmds.push_back(arrCmds[nextCmdIndex]);
-            writeCommand(arrCmds[nextCmdIndex].cmd, arrCmds[nextCmdIndex].cmdType, false);
+            writeCommand(arrCmds[nextCmdIndex].cmd, false, arrCmds[nextCmdIndex].group);
 
             nextCmdIndex++;
 
@@ -193,33 +188,69 @@ void ofApp::update(){
 
     if (state != STATE_PLAYBACK) {
         
-        if (ofGetElapsedTimef() > nextTail && isFlipping) {
+        if (isFlipping)
+        {
             
-            float _t = ofGetElapsedTimef() - timeCode;
-            
-            if (bTailOn) {
-                
-                writeCommand(CMD_TAIL_ON, 1, true);
-                
-                nextTail = ofGetElapsedTimef() + 1.0;
-            }
-            else
+            if (isTailUp && ofGetElapsedTimef() > nextTailOff)
             {
-                writeCommand(CMD_TAIL_OFF, 1, true);
-                
-                nextTail = ofGetElapsedTimef() + 1.2;
+                writeCommand(CMD_TAIL_OFF, true, arrGroups[tailGroup]->groupID);
+                isTailUp = false;
             }
+        
+            if (ofGetElapsedTimef() > nextTail) {
+            
+                float _t = ofGetElapsedTimef() - timeCode;
+            
+                if (bTailOn) {
+                
+                    //writeCommand(CMD_TAIL_ON, true, arrGroups[2]->groupID);
+                    writeCommand(CMD_TAIL_ON, true, arrGroups[2]->groupID);
+                
+                    //writeCommand(CMD_TAIL_OFF, true, arrGroups[3]->groupID);
 
-            bTailOn = !bTailOn;
+                    tailGroup = 2;
+                    nextTail = ofGetElapsedTimef() + bbFlipSpeed.get();
+                }
+                else
+                {
+                    writeCommand(CMD_TAIL_ON, true, arrGroups[3]->groupID);
+                
+                    tailGroup = 3;
+                    nextTail = ofGetElapsedTimef() + bbFlipSpeed.get();
+                }
+                nextTailOff = ofGetElapsedTimef() + .2;
+
+                isTailUp = true;
+                bTailOn = !bTailOn;
+            }
+            
         }
     }
     
     //Update each fish
     for (int i=0; i<arrFish.size(); i++)
     {
-        arrFish[i]->update();
+        if (arrFish[i]->update() == true) {
+
+            writeCommand(CMD_BODY_OFF, true, arrFish[i]->groupID);
+            //arrGroups[_groupIndex]->bodyState = CMD_HEAD_ON;
+        }
     }
 
+}
+
+void ofApp::buttonPress() {
+
+    if (state == STATE_WAIT) {
+        
+        ofLog() << "Advance File";
+        songIndex++;
+        if (songIndex >= arrSongs.size()) {
+            songIndex = 0;
+        }
+        
+        loadAndPlaySong();
+    }
 }
 
 void ofApp::drawStairs()
@@ -391,11 +422,10 @@ void ofApp::loadAndPlaySong() {
         int _count = 0;
         for(auto & _cmd: js){
 
-            //ofLog() << _cmd;
-            int _cmdType = CMD_TYPE_ALL;
+            char _group = ofToChar(_cmd["group"]);
 
-            if (!_cmd["group"].empty()) {
-                _cmdType = CMD_TYPE_LEAD;
+            if (_group == '\x01') {
+                _group = NULL;
             }
 
             arrCmds.push_back(
@@ -403,7 +433,7 @@ void ofApp::loadAndPlaySong() {
                       _cmd["cmd"],
                       _cmd["timecode"],
                       _cmd["set"],
-                      _cmdType
+                      _group
                 )
             );
             _count++;
@@ -438,10 +468,7 @@ void ofApp::writeJsonFile() {
         _cmd["cmd"] = arrCmds[i].cmd;
         _cmd["timecode"] = arrCmds[i].timecode;
         _cmd["set"] = arrCmds[i].sCmd;
-
-        if (arrCmds[i].cmdType == CMD_TYPE_LEAD) {
-            _cmd["group"] = {0};
-        }
+        _cmd["group"] = ofToString(arrCmds[i].group);
 
         ofLog() << arrCmds[i].cmd << "\t" << arrCmds[i].timecode;
 
@@ -568,16 +595,13 @@ void ofApp::draw(){
 
 }
 
-string ofApp::buildCommandString(int _cmd, int _type)
+string ofApp::buildCommandString(int _cmd, char _group)
 {
     string _scmd = ofToString(_cmd);
 
-    if (_type == 0) {
+    if (_group != NULL) {
 
-        _scmd += "x"; //ofToString(LEAD_BASS);
-    } else if (_type == 2) {
-
-        _scmd += "0124";
+        _scmd += _group; //ofToString(LEAD_BASS);
     }
 
     _scmd += "\n";
@@ -585,39 +609,146 @@ string ofApp::buildCommandString(int _cmd, int _type)
     return _scmd;
 }
 
+void ofApp::testAllTails() {
+    
+    ofLog() << "* Test All Tails";
+    
+    //Write to the hardware
+    int assignIndex = 0;
+    int fishIndex = 0;
+    int currFish = 0;
+
+    float _nextTimeOn = 0;
+    float _nextTimeOff = 0;
+    bool isUp = false;
+
+    while (fishIndex < arrFish.size())
+    {
+
+        if (currFish > 0 && isUp && ofGetElapsedTimef() > _nextTimeOff)
+        {
+            isUp = false;
+            
+            string _cmd = "4" +
+            ofToString(arrFish[currFish]->controllerIndex) +
+            ofToString(arrFish[currFish]->driverIndex) +
+            "\n";
+         
+            //Write the Bytes
+            serial.writeBytes(_cmd.c_str(), _cmd.length());
+        }
+
+        if (ofGetElapsedTimef() > _nextTimeOn)
+        {
+            string _cmd = "2" +
+            ofToString(arrFish[fishIndex]->controllerIndex) +
+            ofToString(arrFish[fishIndex]->driverIndex) +
+            "\n";
+            
+            ofLog() << _cmd;
+
+            //Write the Bytes
+            serial.writeBytes(_cmd.c_str(), _cmd.length());
+
+            isUp = true;
+            currFish = fishIndex;
+            
+            /*
+            _cmd = "0" +
+            ofToString(arrFish[fishIndex]->controllerIndex) +
+            ofToString(arrFish[fishIndex]->driverIndex) +
+            "\n";
+            
+            ofLog() << _cmd;
+            
+            //Write the Bytes
+            serial.writeBytes(_cmd.c_str(), _cmd.length());
+            */
+            
+            /*
+            if (currFish >= 0) {
+                _cmd = "4" +
+                ofToString(arrFish[currFish]->controllerIndex) +
+                ofToString(arrFish[currFish]->driverIndex) +
+                "\n";
+            
+                //Write the Bytes
+                serial.writeBytes(_cmd.c_str(), _cmd.length());
+             
+                _cmd = "1" +
+                ofToString(arrFish[currFish]->controllerIndex) +
+                ofToString(arrFish[currFish]->driverIndex) +
+                "\n";
+                
+                //Write the Bytes
+                serial.writeBytes(_cmd.c_str(), _cmd.length());
+            }
+            */
+
+            _nextTimeOn = ofGetElapsedTimef() + .15;
+
+            _nextTimeOff = ofGetElapsedTimef() + .10;
+            fishIndex++;
+            
+        }
+        
+        /*
+        if (fishIndex > 0 && ofGetElapsedTimef() > _nextTimeOff)
+        {
+            string _cmd = "4" +
+            ofToString(arrFish[fishIndex - 1]->controllerIndex) +
+            ofToString(arrFish[fishIndex - 1]->driverIndex) +
+            "\n";
+                
+            //Write the Bytes
+            serial.writeBytes(_cmd.c_str(), _cmd.length());
+        }*/
+    }
+    
+}
+
 void ofApp::assignGroup(group * _group)
 {
+    ofLog() << "* Assign Group";
 
     //Write to the hardware
-    for (int i=0; i<_group->arrFishID.size(); i++)
+    int assignIndex = 0;
+    int fishIndex = 0;
+    float _nextTime = 0;
+
+    while (fishIndex < _group->arrFishID.size())
     {
         
-         string _cmd = "6" +
-            ofToString(arrFish[_group->arrFishID[i]]->controllerIndex) +
-            ofToString(arrFish[_group->arrFishID[i]]->driverIndex) +
-            ofToString(_group->groupID);
+        if (ofGetElapsedTimef() > _nextTime)
+        {
+            string _cmd = "6" +
+                ofToString(arrFish[_group->arrFishID[fishIndex]]->controllerIndex) +
+                ofToString(arrFish[_group->arrFishID[fishIndex]]->driverIndex) +
+                ofToString(_group->groupID) +
+                "\n";
 
-        ofLog() << _cmd;
-        
-        //Set Group ID
-        arrFish[_group->arrFishID[i]]->groupID = _group->groupID;
-        
-        ofLog() << arrFish[_group->arrFishID[i]]->groupID;
+            ofLog() << _cmd;
 
-        //Write the Bytes
-        serial.writeBytes(_cmd.c_str(), _cmd.length());
+            //Set Group ID
+            arrFish[_group->arrFishID[fishIndex]]->groupID = _group->groupID;
 
+            //Write the Bytes
+            serial.writeBytes(_cmd.c_str(), _cmd.length());
+            
+            _nextTime = ofGetElapsedTimef() + .5;
+            fishIndex++;
+        }
     }
 
 }
 
-void ofApp::writeCommand(int _cmdID, int _cmdType, bool _record, char _groupID)
+void ofApp::writeCommand(int _cmdID, bool _record, char _groupID)
 {
 
     int _mouth = -1;
     int _body = -1;
 
-    string _cmd = buildCommandString(_cmdID, _cmdType);
+    string _cmd = buildCommandString(_cmdID, _groupID);
 
     float _t = ofGetElapsedTimef() - timeCode;
 
@@ -647,10 +778,12 @@ void ofApp::writeCommand(int _cmdID, int _cmdType, bool _record, char _groupID)
     }
 
     //Set visuals for all fish
-    setAllBodyState(_mouth, _body, _cmdID, _cmdType, _groupID);
+    setAllBodyState(_mouth, _body, _cmdID, _groupID);
 
     //Write to the hardware
     serial.writeBytes(_cmd.c_str(), _cmd.length());
+
+    ofLog() << ">>>" << _cmd.c_str();
 
     //If is a subgroup
     bool _isGroup = false;
@@ -660,17 +793,17 @@ void ofApp::writeCommand(int _cmdID, int _cmdType, bool _record, char _groupID)
     }*/
 
     if (_record && state == STATE_RECORD)
-        arrCmds.push_back(bbcmd(_cmdID, _t, _cmd, _isGroup));
+        arrCmds.push_back(bbcmd(_cmdID, _t, _cmd, _groupID));
 
 }
 
-void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cmdType, char _groupID)
+void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, char _groupID)
 {
 
     for (int i=0; i<arrFish.size(); i++)
     {
         if (
-            _cmdType == CMD_TYPE_ALL
+            _groupID == NULL
             ||
             _groupID == arrFish[i]->groupID
         )
@@ -681,8 +814,10 @@ void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cm
         //)
         //{
             if (arrFish[i]->getBodyState() == STATE_BODY_HEAD && (_cmdID == CMD_TAIL_ON || _cmdID == CMD_TAIL_OFF)) {
+
                 arrFish[i]->setBodyState(_mouthState, -1);
             } else {
+
                 arrFish[i]->setBodyState(_mouthState, _bodyState);
             }
         }
@@ -690,6 +825,39 @@ void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cm
 }
 
 //--------------------------------------------------------------
+int ofApp::getKeyIndex(char _key)
+{
+
+    switch(_key) {
+        
+        case '6':
+        case 'y':
+        case 'h':
+        case 'n':
+            return -1;
+        
+        case '7':
+        case 'u':
+        case 'j':
+        case 'm':
+            return 0;
+            
+        case '8':
+        case 'i':
+        case 'k':
+        case ',':
+            return 1;
+            
+        case '9':
+        case 'o':
+        case 'l':
+        case '.':
+            return 2;
+    }
+
+    return NULL;
+}
+
 void ofApp::keyPressed(int key){
 
     char _groupID = NULL;
@@ -697,7 +865,11 @@ void ofApp::keyPressed(int key){
     if (_keyOff == true) {
         
         _keyOff = false;
-        
+    
+        int _groupIndex = getKeyIndex(key);
+        if (_groupIndex >= 0) {
+            _groupID = arrGroups[_groupIndex]->groupID;
+        }
     switch (key) {
             
         case 's':
@@ -705,7 +877,7 @@ void ofApp::keyPressed(int key){
             if (state == STATE_WAIT) {
                 
                 state = STATE_RECORD;
-                isFlipping = !isFlipping;
+                //isFlipping = !isFlipping;
 
                 playerSound.play();
                 playerSound.setPosition(OFFSET_POSITION);
@@ -733,11 +905,11 @@ void ofApp::keyPressed(int key){
             
             break;
 
-        case 'j':
-        case 'k':
-        case 'l':
-
-
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            
             if (state != STATE_PLAYBACK) {
 
                 animMouth.animateTo(1);
@@ -745,6 +917,8 @@ void ofApp::keyPressed(int key){
                 //float _t = ofGetElapsedTimef() - timeCode;
 
                 int _cmd = CMD_MOUTH_OPEN;
+                
+                /*
                 int _cmdType;
                 
                 if (key == 'k') {
@@ -764,110 +938,128 @@ void ofApp::keyPressed(int key){
                     _lastCmd = LAST_MOUTH_OTHERS;
                     _cmdType = CMD_TYPE_OTHERS;
                 }
+                 */
+                
+                if (key == '6') {
+                    isFlipping = true;
+                }
 
-                writeCommand(_cmd, _cmdType, true, _groupID);
+                if ((key == '7' || key == '8') && arrGroups[_groupIndex]->bodyState != CMD_HEAD_ON) {
+
+                    writeCommand(CMD_HEAD_ON, true, _groupID);
+                    arrGroups[_groupIndex]->bodyState = CMD_HEAD_ON;
+                    //setBodyState(-1, STATE_BODY_HEAD);
+                }
+
+                writeCommand(_cmd, true, _groupID);
             }
             break;
 
-        case 'u':
-        case 'i':
-
+        case 'h':
+        case 'j':
+        case 'k':
+        case 'l':
+            
             if (state != STATE_PLAYBACK) {
 
 
                 int _cmd = CMD_HEAD_ON;
+                
+                /*
                 int _cmdType;
                 
                 if (key == 'i') {
                     _cmdType = 1;
                 } else {
                     _cmdType = 0;
-                }
+                }*/
                 
-                writeCommand(_cmd, _cmdType, true);
+                if (_groupIndex >= 0) {
+                    arrGroups[_groupIndex]->bodyState = CMD_HEAD_ON;
+                }
+
+                writeCommand(_cmd, true, _groupID);
             }
             break;
 
-        case '7':
-        case '8':
-            
-            if (state != STATE_PLAYBACK) {
-                
-                int _cmd = CMD_TAIL_ON;
-                int _cmdType;
+
+        case 'y':
+        case 'u':
+        case 'i':
+        case 'o':
     
-                if (key == '8') {
-                    _cmdType = 1;
-                } else {
-                    _cmdType = 0;
-                }
-                
-                writeCommand(_cmd, _cmdType, true);
+            if (state != STATE_PLAYBACK) {
+
+                int _cmd = CMD_TAIL_ON;
+                writeCommand(_cmd, true, _groupID);
             }
             break;
 
+        case 'n':
         case 'm':
         case ',':
+        case '.':
             
             if (state != STATE_PLAYBACK) {
 
-                int _cmdType;
+                /*int _cmdType;
 
                 if (key == ',') {
                     _cmdType = 1;
                 } else {
                     _cmdType = 0;
-                }
+                }*/
                 
-                writeCommand(CMD_BODY_OFF, _cmdType, true);
-
+                if (_groupIndex >= 0) {
+                    arrGroups[_groupIndex]->bodyState = CMD_BODY_OFF;
+                }
+                writeCommand(CMD_HEAD_ON, true, _groupID);
+                writeCommand(CMD_BODY_OFF, true, _groupID);
             }
             break;
-            
-        case 'w':
 
+        case 'w':
             ofLog() << "Commands:";
 
             writeJsonFile();
             break;
-            
+
         case 'a':
             
-            if (state == STATE_WAIT) {
-            
-                ofLog() << "Advance File";
-                songIndex++;
-                if (songIndex >= arrSongs.size()) {
-                    songIndex = 0;
-                }
-            }
+            buttonPress();
 
             break;
 
-        case 'o':
+        case 'p':
             
             ofLog() << "Read layout json file.";
             loadAndPlaySong();
             break;
             
-        case 'p':
+        case 't':
             
             isFlipping = !isFlipping;
             break;
             
-        case 'x':
+        //case 'x':
             
-            for (int i=0; i<arrFish.size(); i++)
-            {
-                arrFish[i]->setBodyState(STATE_MOUTH_OPEN, -1);
-            }
-            break;
+        //    for (int i=0; i<arrFish.size(); i++)
+        //    {
+        //        arrFish[i]->setBodyState(STATE_MOUTH_OPEN, -1);
+        //    }
+        //    break;
         
         case '1':
 
             writeLayoutJsonFile();
             break;
+        
+        case '2':
+
+            testAllTails();
+            break;
         }
+    
     }
 }
 
@@ -878,17 +1070,24 @@ void ofApp::keyReleased(int key){
     _keyOff = true;
     char _groupID = NULL;
 
+    int _groupIndex = getKeyIndex(key);
+    if (_groupIndex >= 0) {
+        _groupID = arrGroups[_groupIndex]->groupID;
+    }
+    
     switch (key) {
 
-        case 'j':
-        case 'k':
-        case 'l':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
             
             if (state != STATE_PLAYBACK) {
                 
                 //float _t = ofGetElapsedTimef() - timeCode;
                 
-                int _cmdType;
+                /*
+                 int _cmdType;
 
                 if (key == 'k')
                     _cmdType = 1;
@@ -899,10 +1098,11 @@ void ofApp::keyReleased(int key){
                 else
                     _cmdType = 2;
                     //_cmd = buildCommandString(CMD_MOUTH_CLOSE,2);
-                    
+                */
+                
                 animMouth.animateTo(0);
 
-                writeCommand(CMD_MOUTH_CLOSE, _cmdType, true, _groupID);
+                writeCommand(CMD_MOUTH_CLOSE, true, _groupID);
 
                 //serial.writeBytes(_cmd.c_str(), _cmd.length());
                 //if (state == STATE_RECORD)

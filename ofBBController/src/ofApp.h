@@ -18,7 +18,7 @@ const int CMD_MOUTH_CLOSE = 1;
 const int CMD_TAIL_ON = 2;
 const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
-const int CMD_TAIL_OFF = 5;
+const int CMD_TAIL_OFF = 7;
 
 const int CMD_TYPE_ALL = 1;
 const int CMD_TYPE_LEAD = 0;
@@ -41,7 +41,8 @@ struct group {
 
     char groupID;
     vector<int> arrFishID;
-    
+    int bodyState;
+
     group(
         char _groupID,
         vector<int> _arrFishID
@@ -61,14 +62,18 @@ struct song {
     string songFile;
     string cmdFile;
     vector<group*> arrGroup;
+    vector<string> arrTracks;
+    int trackIndex;
 
     song(
         string _songFile,
-        string _cmdFile
+        string _cmdFile,
+        vector<string> _arrTracks
     )
     {
         songFile = _songFile;
         cmdFile = _cmdFile;
+        arrTracks = _arrTracks;
     }
 
 };
@@ -79,20 +84,20 @@ struct bbcmd {
     float timecode;
     string sCmd;
     Byte arrIndex[5];
-    int cmdType;
+    Byte group;
     
     bbcmd(
         int _cmdID,
         float _timecode,
         string _cmdString,
-        int _cmdType
+        Byte _group
     )
     {
 
         cmd = _cmdID;
         timecode = _timecode;
         sCmd = _cmdString;
-        cmdType = _cmdType;
+        group = _group;
     }
 };
 
@@ -115,9 +120,11 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
-        string buildCommandString(int _cmd, int _type);
+        string buildCommandString(int _cmd, char _type);
     
-    void setAllBodyState(int _mouthState, int _bodyState, int _cmdID, int _cmdType, char _groupID=NULL);
+    void buttonPress();
+    
+    void setAllBodyState(int _mouthState, int _bodyState, int _cmdID, char _groupID=NULL);
 
     ofxInterface::Node* scene;
     
@@ -139,6 +146,8 @@ class ofApp : public ofBaseApp{
     ofParameter<int> bbOriginX;
     ofParameter<int> bbOriginY;
 
+    ofParameter<float> bbFlipSpeed;
+    
     ofParameter<int> bbBGX;
     ofParameter<int> bbBGY;
     ofParameter<float> bbBGScale;
@@ -161,7 +170,7 @@ class ofApp : public ofBaseApp{
 
     void assignGroup(group * _group);
 
-    void writeCommand(int _cmdID, int _cmdType, bool _record, char _groupID=NULL);
+    void writeCommand(int _cmdID, bool _record, char _groupID=NULL);
 
     void writeJsonFile();
     void loadAndPlaySong();
@@ -172,6 +181,10 @@ class ofApp : public ofBaseApp{
 
     void drawStairs();
 
+    int getKeyIndex(char _key);
+
+    void testAllTails();
+
     int state;
     ofSoundPlayer playerSound;
     float timeCode;
@@ -181,6 +194,7 @@ class ofApp : public ofBaseApp{
     vector<bbcmd> arrPlayedCmds;
     vector<fish*> arrFish;
     vector<song> arrSongs;
+    vector<group*> arrGroups;
 
     int songIndex;
 
@@ -205,6 +219,12 @@ class ofApp : public ofBaseApp{
     bool isFlipping;
     int _lastCmd;
     
+    float nextTailOff;
+    bool isTailUp = false;
+    int tailGroup = 0;
+
     //Background stairs image
     ofImage imgStairs;
+
+    bool bCreateGroups = false;
 };

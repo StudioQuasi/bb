@@ -98,8 +98,11 @@ int fish::getBodyState()
 
 void fish::setBodyState(int _mouthState, int _bodyState)
 {
-    if (_mouthState != -1)
+    if (_mouthState != -1) {
         stateMouth = _mouthState;
+        
+        lastSpokeTime = ofGetElapsedTimef();
+    }
     
     if (_bodyState != -1)
         stateBody = _bodyState;
@@ -140,9 +143,13 @@ void fish::setBodyState(int _mouthState, int _bodyState)
     }
 }
 
-void fish::update()
+bool fish::update()
 {
-    
+    if (ofGetElapsedTimef() > lastSpokeTime + 1 && stateBody == STATE_BODY_HEAD) {
+        setBodyState(-1, STATE_BODY_OFF);
+        return true;
+    }
+    return false;
 }
 
 void fish::drawLabel()
