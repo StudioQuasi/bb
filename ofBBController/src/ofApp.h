@@ -74,6 +74,8 @@ struct song {
         songFile = _songFile;
         cmdFile = _cmdFile;
         arrTracks = _arrTracks;
+        
+        trackIndex = 0;
     }
 
 };
@@ -185,6 +187,8 @@ class ofApp : public ofBaseApp{
 
     void testAllTails();
 
+    //bool sortCmds(bbcmd & a, bbcmd & b);
+
     int state;
     ofSoundPlayer playerSound;
     float timeCode;
@@ -199,7 +203,7 @@ class ofApp : public ofBaseApp{
     int songIndex;
 
     ofJson stroke;
-    ofTrueTypeFont ttf, ttf_side;
+    ofTrueTypeFont ttf, ttf_side, ttf_small;
     ofPath path;
 
     //string soundFileName;
@@ -227,4 +231,5 @@ class ofApp : public ofBaseApp{
     ofImage imgStairs;
 
     bool bCreateGroups = false;
+
 };

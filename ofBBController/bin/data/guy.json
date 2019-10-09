@@ -1,0 +1,116 @@
+[
+   {
+      "cmd" : 3,
+      "group" : "v",
+      "set" : "3v\n",
+      "timecode" : 0.1665496826171875
+   },
+   {
+      "cmd" : 0,
+      "group" : "v",
+      "set" : "0v\n",
+      "timecode" : 0.5003204345703125
+   },
+   {
+      "cmd" : 1,
+      "group" : "v",
+      "set" : "1v\n",
+      "timecode" : 0.817108154296875
+   },
+   {
+      "cmd" : 0,
+      "group" : "v",
+      "set" : "0v\n",
+      "timecode" : 0.8834686279296875
+   },
+   {
+      "cmd" : 1,
+      "group" : "v",
+      "set" : "1v\n",
+      "timecode" : 1.500289916992188
+   },
+   {
+      "cmd" : 0,
+      "group" : "v",
+      "set" : "0v\n",
+      "timecode" : 1.633865356445312
+   },
+   {
+      "cmd" : 1,
+      "group" : "v",
+      "set" : "1v\n",
+      "timecode" : 1.78369140625
+   },
+   {
+      "cmd" : 0,
+      "group" : "v",
+      "set" : "0v\n",
+      "timecode" : 1.916671752929688
+   },
+   {
+      "cmd" : 1,
+      "group" : "v",
+      "set" : "1v\n",
+      "timecode" : 2.0823974609375
+   },
+   {
+      "cmd" : 0,
+      "group" : "v",
+      "set" : "0v\n",
+      "timecode" : 2.184158325195312
+   },
+   {
+      "cmd" : 1,
+      "group" : "v",
+      "set" : "1v\n",
+      "timecode" : 2.316482543945312
+   },
+   {
+      "cmd" : 0,
+      "group" : "v",
+      "set" : "0v\n",
+      "timecode" : 2.466766357421875
+   },
+   {
+      "cmd" : 1,
+      "group" : "v",
+      "set" : "1v\n",
+      "timecode" : 2.850753784179688
+   },
+   {
+      "cmd" : 0,
+      "group" : "v",
+      "set" : "0v\n",
+      "timecode" : 3.067413330078125
+   },
+   {
+      "cmd" : 1,
+      "group" : "v",
+      "set" : "1v\n",
+      "timecode" : 3.183334350585938
+   },
+   {
+      "cmd" : 0,
+      "group" : "v",
+      "set" : "0v\n",
+      "timecode" : 3.3341064453125
+   },
+   {
+      "cmd" : 1,
+      "group" : "v",
+      "set" : "1v\n",
+      "timecode" : 3.484222412109375
+   },
+   {
+      "cmd" : 3,
+      "group" : "v",
+      "set" : "3v\n",
+      "timecode" : 3.61700439453125
+   },
+   {
+      "cmd" : 4,
+      "group" : "v",
+      "set" : "4v\n",
+      "timecode" : 3.617050170898438
+   }
+]
