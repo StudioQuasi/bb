@@ -17,7 +17,7 @@ struct cmd {
   bool _b2;
 };
 
-const byte BOARD_ID = 'q';
+const byte BOARD_ID = 'p';
 
 //DEFINE THE MOTOR DRIVER PINS
 #define BIN2_0 12
@@ -134,6 +134,8 @@ void setup() {
     case 'u':
     case 'r':
     case 'j':
+    case 'i':
+    case 'f':
       _mouthDirection1 = true;
       _bodyDirection1 = false;
     
@@ -146,10 +148,8 @@ void setup() {
       break;
       
     case 'l':
-      _bodyDirection1 = false;
-      break;
-
     case 'n':
+    case 'd':
       _bodyDirection1 = false;
       break;
 
@@ -164,6 +164,15 @@ void setup() {
             
       _bodyDirection2 = false;
       _bodyDirection3 = false;
+
+      break;
+
+    case 'm':
+
+      _mouthDirection1 = true;
+      _bodyDirection1 = false;
+
+      _mouthDirection2 = true;
 
       break;
       
@@ -351,16 +360,23 @@ void serialEvent() {
 
                   //Serial.println("TAIL OFF");
                   if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
-                    arrBass[i]->runBody(RELEASE,MAX_MOTOR);
+                    //arrBass[i]->runBody(RELEASE,MAX_MOTOR);
+                    arrBass[i]->bodyClose();
                   }
                   break;
            
                 case CMD_BODY_OFF:
 
                   //Serial.println("BODY OFF");
-                  arrBass[i]->runBody(RELEASE,MAX_MOTOR);
+                  //arrBass[i]->runBody(RELEASE,MAX_MOTOR);
+                  arrBass[i]->bodyClose();
                   break;
 
+                case CMD_BODY_RELEASE:
+
+                  //Serial.println("BODY OFF");
+                  arrBass[i]->runBody(RELEASE,MAX_MOTOR);
+                  break;
               }
 
             }
@@ -417,7 +433,7 @@ void serialEvent() {
                   arrBass[_bassIndex]->bodyHead();
                   break;
                 case CMD_BODY_OFF:
-                  arrBass[_bassIndex]->runBody(RELEASE,MAX_MOTOR);
+                  arrBass[_bassIndex]->bodyClose();
                   break;  
                 }
               }

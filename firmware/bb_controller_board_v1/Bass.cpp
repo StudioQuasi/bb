@@ -21,6 +21,7 @@ const int CMD_TAIL_ON = 2;
 const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
 const int CMD_TAIL_OFF = 5;
+const int CMD_BODY_RELEASE = 7;
 
 const int CMD_LEARN_GROUP = 6;
 
@@ -34,7 +35,8 @@ const int STATE_BODY_OFF = 5;
 const int STATE_BODY_CLOSING = 6;
 
 const int MOUTH_CLOSING_TIME = 1000;
-const int BODY_CLOSING_TIME = 1000;
+const int BODY_TAIL_CLOSING_TIME = 3000;
+const int BODY_HEAD_CLOSING_TIME = 12000;
 
 const int MAX_MOTOR = 255;
 
@@ -59,6 +61,8 @@ class Bass
   long timerMouth = 0;
   long timerBody = 0;
 
+  int THIS_BODY_CLOSING_TIME;
+  
   public:
 
     int MOUTH_OPEN = FORWARD;
@@ -124,7 +128,7 @@ class Bass
 
         bodyClosingIndex = bodyClosingIndex + 1;
  
-        if (bodyClosingIndex > BODY_CLOSING_TIME) {
+        if (bodyClosingIndex > THIS_BODY_CLOSING_TIME) {
           endBodyClose(); 
         }
 
@@ -132,8 +136,8 @@ class Bass
 
         if (millis() > timerBody + TIMEOUT_BODY) {
 
-          bodyClose();
-          //runBody(RELEASE,MAX_MOTOR);
+          //bodyClose();
+          runBody(RELEASE,MAX_MOTOR);
         }
       }
 
@@ -175,8 +179,11 @@ class Bass
     void bodyClose() {
 
       if (stateBody == STATE_BODY_TAIL) {
+        THIS_BODY_CLOSING_TIME = BODY_TAIL_CLOSING_TIME;
         runMotor(BODY_MOTOR, BODY_HEAD, MAX_MOTOR);
-      } else {
+      } else if ( stateBody == STATE_BODY_HEAD) {
+        
+        THIS_BODY_CLOSING_TIME = BODY_HEAD_CLOSING_TIME;
         runMotor(BODY_MOTOR, BODY_TAIL, MAX_MOTOR);
       }
            
@@ -190,7 +197,7 @@ class Bass
       stateMouth = STATE_MOUTH_CLOSED;
       mouthClosingIndex = 0;
 
-      runBody(RELEASE,MAX_MOTOR);
+      runMouth(RELEASE,MAX_MOTOR);
     }
 
     void endBodyClose() {
@@ -198,6 +205,7 @@ class Bass
       stateBody = STATE_BODY_OFF;
       bodyClosingIndex = 0;
 
+      runBody(RELEASE,MAX_MOTOR);
       //
     }
     
