@@ -329,8 +329,9 @@ void serialEvent() {
           {
 
             //If this is a group and we are in group, or all
-            if (_isGroup == false || _groupID == arrBass[i]->GROUP_ID)
+            if (_isGroup == false || _groupID == arrBass[i]->isGroup(_groupID))
             {
+
               switch (_cmd) {
               
                 case CMD_OPEN:
@@ -358,13 +359,18 @@ void serialEvent() {
                 
                 case CMD_TAIL_OFF:
 
-                  //Serial.println("TAIL OFF");
                   if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
-                    //arrBass[i]->runBody(RELEASE,MAX_MOTOR);
                     arrBass[i]->bodyClose();
                   }
                   break;
-           
+
+                case CMD_TAIL_RELEASE:
+
+                  if (arrBass[i]->lastCommand != CMD_HEAD_ON) {
+                    arrBass[i]->runBody(RELEASE,MAX_MOTOR);
+                  }
+                  break;
+               
                 case CMD_BODY_OFF:
 
                   //Serial.println("BODY OFF");
@@ -385,23 +391,25 @@ void serialEvent() {
       else if (_len > 2)
       {
 
-          if (_cmd == CMD_LEARN_GROUP && _len == 4) {
+          if ((_cmd == CMD_CLEAR_GROUP || _cmd == CMD_LEARN_GROUP) && _len == 4) {
 
             byte _boardNum =  inputString[1];
             int  _bassIndex = inputString[2] - '0';
             byte _groupID = inputString[3];
 
             if (_boardNum == BOARD_ID) {
-              arrBass[_bassIndex]->addToGroup(_groupID);
 
+              if (_cmd == CMD_CLEAR_GROUP) 
+                arrBass[_bassIndex]->clearGroup(_groupID);
+              else
+                arrBass[_bassIndex]->addToGroup(_groupID);
+              
               Serial.println("Add group");
               Serial.println(_bassIndex);
               Serial.println(_groupID);
-
             }
 
-            blinkT(5);
-    
+            blinkT(3);
           }
           else
           {

@@ -22,8 +22,10 @@ const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
 const int CMD_TAIL_OFF = 5;
 const int CMD_BODY_RELEASE = 7;
+const int CMD_TAIL_RELEASE = 8;
 
 const int CMD_LEARN_GROUP = 6;
+const int CMD_CLEAR_GROUP = 9;
 
 const int STATE_MOUTH_OPEN = 0;
 const int STATE_MOUTH_CLOSING = 1;
@@ -73,8 +75,9 @@ class Bass
 
     int lastCommand;
 
-    byte GROUP_ID;
-  
+    char arrGroupID[5] = {};
+    int groupIndex = 0;
+
     Bass(
       int AIN1, int AIN2, int PWMA, 
       int BIN1, int BIN2, int PWMB,
@@ -105,6 +108,9 @@ class Bass
           BODY_TAIL = BACKWARD;
           BODY_HEAD = FORWARD;
         }
+
+  
+        groupIndex = 0;
  
     }
 
@@ -143,9 +149,29 @@ class Bass
 
     }
 
+    bool isGroup(char _group) {
+
+      for (int i=0; i<groupIndex; i++)
+      {
+        if (arrGroupID[i] == _group)
+          return true;
+      }
+      return false;
+    }
+
     void addToGroup(int _i)
     {
-        GROUP_ID = _i;
+      if (groupIndex < 5)
+        arrGroupID[groupIndex++] = _i;
+    }
+
+    void clearGroup(int _i)
+    {
+
+      arrGroupID[5] = {};
+
+      arrGroupID[0] = _i;
+      groupIndex = 1;
     }
 
     void runMouth(int _dir, int _speed)
