@@ -40,6 +40,7 @@ void ofApp::setup(){
     arrStateNames[0] = "WAIT";
     arrStateNames[1] = "RECORD";
     arrStateNames[2] = "PLAYBACK";
+    arrStateNames[3] = "PAUSED";
     
     nextCmdIndex = 0;
 
@@ -50,13 +51,18 @@ void ofApp::setup(){
     vector<string> _tracksSade = {};
     arrSongs.push_back(song("smooth_operator.mp3","smooth_operator.json",_tracksSade));
     
-    vector<string> _tracks = {"chorus.json","guy.json","lead1.json","lead2.json"};
-    arrSongs.push_back(song("shoop.mp3","out.json",_tracks));
+    vector<string> _tracksS = {"chorus.json","guy.json","lead1.json","lead2.json"};
+    arrSongs.push_back(song("shoop.mp3","out.json",_tracksS));
     
-    songIndex = 2;
+    vector<string> _tracksSA = {"sa_chorus.json","sa_lead1.json","sa_lead2.json","sa_lead3.json", "sa_chorus_1.json"};
+    arrSongs.push_back(song("stayingalive.mp3","out.json",_tracksSA));
+
+    songIndex = 3;
 
     //Load First Song
     playerSound.load(ofToDataPath(arrSongs[songIndex].songFile));
+
+    songLength = getSongLength();
 
     //Set up Serial
     serial.listDevices();
@@ -97,12 +103,20 @@ void ofApp::setup(){
     panelGroup.add(bbBGX.set("Background X",0,-ofGetWidth(),ofGetWidth()));
     panelGroup.add(bbBGY.set("Background Y",0,-ofGetHeight(),ofGetHeight()));
     panelGroup.add(bbBGScale.set("Background Scale",1,0,10));
-    panelGroup.add(bbShowDebug.set("Show Debug"));
+    panelGroup.add(bbShowDebug.set("Show Debug",false));
+
+    panelGroup.add(bbSongMute.set("Mute Song",false));
+    panelGroup.add(bbTimelineActive.set("Timeline Active",true));
+    panelGroup.add(bbTimelineScale.set("Timeline Scale",1,1,25));
+    panelGroup.add(bbTimelineSlide.set("Timeline Slide",0,0,1));
+    panelGroup.add(bbTimelineScrub.set("Timeline Scrub",0,0,1));
+
+    //bbTimelineScrub.
 
     //panelGroup.add(bbFlatIndex.set("Flat Index", 0, 0, 21));
     //panelGroup.add(bbFlatOffset.set("Flat Offset", 0, -100, 100));
-    
     //panelGroup.set
+
     panelFish = new ofxPanel();
     panelFish->add(fishID.setup("Bass ID",0,0,63));
     panelFish->add(fishControllerID.setup("Controller ID",0,0,21));
@@ -124,6 +138,38 @@ void ofApp::setup(){
     //Read Layout File
     readLayoutJsonFile();
 
+    vector<int> _idsSALead1 = {5,19,27,40,51};
+    vector<int> _idsSALead2 = {4,18,26,39,50};
+    vector<int> _idsSALead3 = {3,17,25,38,49};
+    vector<int> _idsSALead4 = {2,16,24,37};
+
+    arrGroups.push_back(new group('v', _idsSALead1));
+    arrGroups.push_back(new group('w', _idsSALead2));
+    arrGroups.push_back(new group('x', _idsSALead3));
+    arrGroups.push_back(new group('y', _idsSALead4));
+    
+    vector<int> _idsSAC1 = {0,1};
+    vector<int> _idsSAC2 = {6,7,8,9,10,11,12,13,14,15};
+    vector<int> _idsSAC3 = {20,21,22,23};
+    vector<int> _idsSAC4 = {24,25,26,27,28,29,30,31};
+
+    arrGroups.push_back(new group('z', _idsSAC1));
+    arrGroups.push_back(new group('a', _idsSAC2));
+    arrGroups.push_back(new group('b', _idsSAC3));
+    arrGroups.push_back(new group('c', _idsSAC4));
+
+    vector<int> _clearArr = {
+        0,1,2,3,4,5,6,7,8,9,10,
+        11,12,13,14,15,16,17,18,19,20,
+        21,22,23,24,25,26,27,28,29,30,
+        31,32,33,34,35,36,37,38,39,40,
+        41,42,43,44,45,46,47,48,49,50,
+        51,52,53,54,55
+    };
+    
+    group * _clearGroup = new group('-', _clearArr);
+    
+    /*
     vector<int> _idsLead1 = {9,20,30,42}; //14,22,33,45,53};
     arrGroups.push_back(new group('v', _idsLead1));
     
@@ -136,16 +182,24 @@ void ofApp::setup(){
 
     vector<int> _idsFlip2 = {2,3,4,5,11,12,13,14,15,20,24,25,26,27,32,33,34,35,41,42,43,44,49,50,51,54,55};
     arrGroups.push_back(new group('z', _idsFlip2));
+    */
+
+    assignGroup(_clearGroup);
 
     //Create the groups
-    for (int i=3; i>=0; i--) {
+    for (int i=7; i>=0; i--) {
         assignGroup(arrGroups[i]);
     }
+
+    //Create the timeline
+    mainTimeline = new timeline(ofGetWidth(), 100);
+
+    mainTimeline->setRange(songLength, arrCmds);
 
 }
 
 //--------------------------------------------------------------
-void ofApp::update(){
+void ofApp::update() {
 
     //Update the touch manager
     TouchManager::one().update();
@@ -157,7 +211,8 @@ void ofApp::update(){
 
         float _n = arrCmds[nextCmdIndex].timecode;
 
-        float _t = ofGetElapsedTimef() - timeCode;
+        //float _t = ofGetElapsedTimef() - timeCode;
+        float _t = playerSound.getPositionMS() * .001;
 
         if (_t > _n) {
 
@@ -167,65 +222,72 @@ void ofApp::update(){
             writeCommand(arrCmds[nextCmdIndex].cmd, false, arrCmds[nextCmdIndex].group);
 
             nextCmdIndex++;
-
-            //Start over song
-            if (arrCmds.size() == nextCmdIndex && isLoop) {
-
-                loadAndPlaySong();
-            }
-
         }
     }
 
-    if (state != STATE_PLAYBACK) {
+    if (state == STATE_RECORD) {
 
         if (isFlipping)
         {
-
-            if (isTailUp && ofGetElapsedTimef() > nextTailOff)
-            {
-                writeCommand(CMD_TAIL_OFF, true, arrGroups[tailGroup]->groupID);
-                isTailUp = false;
-            }
-
             if (ofGetElapsedTimef() > nextTail) {
-
-                float _t = ofGetElapsedTimef() - timeCode;
-
-                if (bTailOn) {
-
-                    //writeCommand(CMD_TAIL_ON, true, arrGroups[2]->groupID);
-                    writeCommand(CMD_TAIL_ON, true, arrGroups[2]->groupID);
                 
+                float _t = ofGetElapsedTimef() - timeCode;
+                
+                if (bTailOn) {
+                    
+                    //writeCommand(CMD_TAIL_ON, true, arrGroups[2]->groupID);
+                    writeCommand(CMD_TAIL_ON, true, NULL);
+                    
                     //writeCommand(CMD_TAIL_OFF, true, arrGroups[3]->groupID);
-
+                    
                     tailGroup = 2;
                     nextTail = ofGetElapsedTimef() + bbFlipSpeed.get();
                 }
                 else
                 {
-                    writeCommand(CMD_TAIL_ON, true, arrGroups[3]->groupID);
-                
+                    
+                    writeCommand(CMD_TAIL_OFF, true, NULL);
+                    
                     tailGroup = 3;
                     nextTail = ofGetElapsedTimef() + bbFlipSpeed.get();
                 }
                 nextTailOff = ofGetElapsedTimef() + .2;
-
+                
                 isTailUp = true;
                 bTailOn = !bTailOn;
             }
         }
     }
-    
-    //Update each fish
-    for (int i=0; i<arrFish.size(); i++)
-    {
-        if (arrFish[i]->update() == true) {
 
-            writeCommand(CMD_BODY_OFF, true, arrFish[i]->groupID);
-            //arrGroups[_groupIndex]->bodyState = CMD_HEAD_ON;
+    if ( serial.available() > 0) {
+
+        char _in = serial.readByte();
+        
+        if (_in == '1') {
+            ofLog() << "READ BUTTON";
+            ofLog() << _in;
+            buttonPress();
         }
+
     }
+
+    //Mute spongs
+    if (bbSongMute.get() != bSongMute) {
+
+        playerSound.setVolume(bSongMute);
+        bSongMute = bbSongMute.get();
+    }
+
+    //Update Timeline
+    if (state == STATE_PLAYBACK) {
+
+        bbTimelineScrub.set(playerSound.getPosition());
+    } else if (state == STATE_PAUSED) {
+
+        playerSound.setPosition(bbTimelineScrub.get());
+    }
+
+    mainTimeline->update(playerSound.getPosition(), bbTimelineSlide.get());
 
 }
 
@@ -233,13 +295,19 @@ void ofApp::buttonPress() {
 
     if (state == STATE_WAIT) {
         
-        ofLog() << "Advance File";
+        /*ofLog() << "Advance File";
         songIndex++;
         if (songIndex >= arrSongs.size()) {
             songIndex = 0;
-        }
+        }*/
         
         loadAndPlaySong();
+        
+    } else if (state == STATE_PLAYBACK) {
+        
+        playerSound.stop();
+        state = STATE_WAIT;
+        arrCmds.clear();
     }
 }
 
@@ -300,6 +368,17 @@ void ofApp::createLayoutByParam() {
     }
 }
 
+float ofApp::getSongLength() {
+
+    playerSound.play();
+    playerSound.setPosition(0.9999999f);
+    float ms = playerSound.getPositionMS() * .001;
+    playerSound.setPosition(0);
+    playerSound.stop();
+    
+    return ms;
+}
+
 void ofApp::readLayoutJsonFile() {
     
     ofFile file(ofToDataPath(layoutFile));
@@ -344,7 +423,6 @@ void ofApp::readLayoutJsonFile() {
             arrFish.push_back(
                 _f
             );
-
             _count++;
         }
 
@@ -404,7 +482,12 @@ void ofApp::loadAndPlaySong() {
 
     //Clear the commands
     arrCmds.clear();
+    arrTracks.clear();
 
+    //Clear all the fish
+    string _cmd = buildCommandString(CMD_BODY_OFF, NULL);
+    serial.writeBytes(_cmd.c_str(), _cmd.length());
+    
     //Load the each command file
     for (int i=0; i<arrSongs[songIndex].arrTracks.size(); i++)
     {
@@ -438,6 +521,9 @@ void ofApp::loadAndPlaySong() {
                 _count++;
             }
 
+            //Push on track
+            arrTracks.push_back(arrCmds);
+
             ofLog() << "* Read " << _count;
         }
     }
@@ -447,13 +533,16 @@ void ofApp::loadAndPlaySong() {
 
     //Set state to Playback
     state = STATE_PLAYBACK;
-    
+
     timeCode = ofGetElapsedTimef();
-    
+
+    songLength = getSongLength();
+    mainTimeline->setRange(songLength, arrTracks[arrSongs[songIndex].trackIndex]);
+
     playerSound.stop();
     playerSound.play();
     playerSound.setPosition(OFFSET_POSITION);
-    
+
     nextCmdIndex = 0;
     arrPlayedCmds.clear();
 
@@ -615,6 +704,9 @@ void ofApp::draw(){
         //panelFish->draw();
     }
 
+    //Draw Timeline
+    mainTimeline->draw(bbTimelineScale.get(), bbTimelineSlide.get());
+
 }
 
 string ofApp::buildCommandString(int _cmd, char _group)
@@ -706,7 +798,7 @@ void ofApp::assignGroup(group * _group)
         
             if (ofGetElapsedTimef() > _nextTime)
             {
-            string _cmd = "6" +
+            string _cmd = ofToString(CMD_SET_GROUP) +
                 ofToString(arrFish[_group->arrFishID[fishIndex]]->controllerIndex) +
                 ofToString(arrFish[_group->arrFishID[fishIndex]]->driverIndex) +
                 ofToString(_group->groupID) +
@@ -882,6 +974,9 @@ void ofApp::keyPressed(int key){
         case 'r':
             
             playerSound.stop();
+            playerSound.setPosition(0);
+            playerSound.unload();
+            
             state = STATE_WAIT;
             arrCmds.clear();
             
@@ -897,19 +992,16 @@ void ofApp::keyPressed(int key){
                 animMouth.animateTo(1);
                 
                 //float _t = ofGetElapsedTimef() - timeCode;
-
                 int _cmd = CMD_MOUTH_OPEN;
                 
                 if (key == '6') {
-                    //isFlipping = true;
                 }
-
-                /*
-                if ((key == '7' || key == '8') && arrGroups[_groupIndex]->bodyState != CMD_HEAD_ON) {
+                
+                if ((key == '7' || key == '8' | key == '9') && arrGroups[_groupIndex]->bodyState != CMD_HEAD_ON) {
 
                     writeCommand(CMD_HEAD_ON, true, _groupID);
                     arrGroups[_groupIndex]->bodyState = CMD_HEAD_ON;
-                }*/
+                }
 
                 writeCommand(_cmd, true, _groupID);
             }
@@ -984,7 +1076,21 @@ void ofApp::keyPressed(int key){
         case 'p':
             
             ofLog() << "Read layout json file.";
-            loadAndPlaySong();
+            
+            if (state == STATE_PLAYBACK) {
+                
+                playerSound.setPaused(true);
+                state = STATE_PAUSED;
+
+            } else if (state == STATE_PAUSED) {
+                
+                playerSound.setPaused(false);
+                state = STATE_PLAYBACK;
+
+            } else if (state == STATE_WAIT) {
+                
+                loadAndPlaySong();
+            }
             break;
             
         case 't':

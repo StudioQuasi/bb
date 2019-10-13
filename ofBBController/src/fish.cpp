@@ -120,8 +120,7 @@ void fish::setBodyState(int _mouthState, int _bodyState)
                 displayState = DISPLAY_STATE_CLOSE_TAIL;
                 break;
                 
-            case STATE_BODY_HEAD:
-                displayState = DISPLAY_STATE_CLOSE_HEAD;
+            case STATE_BODY_HEAD:                displayState = DISPLAY_STATE_CLOSE_HEAD;
                 break;
         }
 
