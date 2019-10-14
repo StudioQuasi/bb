@@ -8,17 +8,20 @@
 #include "controller.h"
 #include "fish.h"
 #include "ofxInterface.h"
+#include "timeline.h"
 
 const int STATE_WAIT = 0;
 const int STATE_RECORD = 1;
 const int STATE_PLAYBACK = 2;
+const int STATE_PAUSED = 3;
 
 const int CMD_MOUTH_OPEN = 0;
 const int CMD_MOUTH_CLOSE = 1;
 const int CMD_TAIL_ON = 2;
 const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
-const int CMD_TAIL_OFF = 7;
+const int CMD_TAIL_OFF = 5;
+const int CMD_SET_GROUP = 6;
 
 const int CMD_TYPE_ALL = 1;
 const int CMD_TYPE_LEAD = 0;
@@ -51,9 +54,6 @@ struct group {
         groupID = _groupID;
         
         arrFishID = _arrFishID;
-        //for (int i=0; i<5; i++) {
-        //    arrFish[i] = _arrFish[i];
-        //}
     }
 };
 
@@ -77,30 +77,6 @@ struct song {
         
         trackIndex = 0;
     }
-
-};
-
-struct bbcmd {
-
-    int cmd;
-    float timecode;
-    string sCmd;
-    Byte arrIndex[5];
-    Byte group;
-    
-    bbcmd(
-        int _cmdID,
-        float _timecode,
-        string _cmdString,
-        Byte _group
-    )
-    {
-
-        cmd = _cmdID;
-        timecode = _timecode;
-        sCmd = _cmdString;
-        group = _group;
-    }
 };
 
 class ofApp : public ofBaseApp{
@@ -122,6 +98,8 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
+        void resetCmdIndex();
+    
         string buildCommandString(int _cmd, char _type);
     
     void buttonPress();
@@ -158,14 +136,19 @@ class ofApp : public ofBaseApp{
     ofParameter<bool> bbShowDebug;
     ofParameter<int> bbFlatIndex;
     ofParameter<int> bbFlatOffset;
-    //ofParameterGroup panelFishGroup;
+    
+    ofParameter<bool> bbSongMute;
+    ofParameter<bool> bbTimelineActive;
+    ofParameter<float> bbTimelineScale;
+    ofParameter<float> bbTimelineSlide;
+    ofParameter<float> bbTimelineScrub;
 
     ofxIntField fishID;
     ofxIntField fishControllerID;
     ofxIntSlider fishControllerIndex;
     ofxIntField fishGroupID;
 
-
+    bool bSongMute = false;
     bool bShowGui = true;
 
     ofxJSONElement result;
@@ -176,29 +159,30 @@ class ofApp : public ofBaseApp{
 
     void writeJsonFile();
     void loadAndPlaySong();
-    
     void createLayoutByParam();
     void readLayoutJsonFile();
     void writeLayoutJsonFile();
 
     void drawStairs();
-
     int getKeyIndex(char _key);
 
     void testAllTails();
 
+    float getSongLength();
     //bool sortCmds(bbcmd & a, bbcmd & b);
 
     int state;
     ofSoundPlayer playerSound;
+    float songLength;
     float timeCode;
     bool isPaused;
 
-    vector<bbcmd> arrCmds;
-    vector<bbcmd> arrPlayedCmds;
+    vector<bbcmd*> arrCmds;
+    vector<bbcmd*> arrPlayedCmds;
     vector<fish*> arrFish;
     vector<song> arrSongs;
     vector<group*> arrGroups;
+    vector<vector<bbcmd*>> arrTracks;
 
     int songIndex;
 
@@ -206,14 +190,12 @@ class ofApp : public ofBaseApp{
     ofTrueTypeFont ttf, ttf_side, ttf_small;
     ofPath path;
 
-    //string soundFileName;
-    //string cmdFileName;
     string layoutFile;
     ofxAnimatableFloat animMouth;
     bool _keyOff = true;
     
     string arrCmdNames[5];
-    string arrStateNames[3];
+    string arrStateNames[4];
     
     int nextCmdIndex;
     ofSerial    serial;
@@ -231,5 +213,7 @@ class ofApp : public ofBaseApp{
     ofImage imgStairs;
 
     bool bCreateGroups = false;
+    
+    timeline * mainTimeline;
 
 };

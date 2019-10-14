@@ -7,24 +7,32 @@
 
 #include "timeline.h"
 
-timeline::timeline(int _w, int _h)
+timeline::timeline(int _w, int _h, ofxInterface::Node* _scene)
 {
     tWidth = _w;
     tHeight = _h;
 
+    scene = _scene;
+
     ttf.load("mono.ttf", TIME_SIZE);
-    
     ttfCmd.load("mono.ttf", CMD_SIZE);
 }
 
-void timeline::setRange(float _range, vector<bbcmd> _arrCmd)
+void timeline::setRange(float _range, vector<bbcmd*> _arrCmd)
 {
 
     timeRange = _range;
-
-    tArrCmd = _arrCmd;
     
-    ofLog() << "TL " << _arrCmd.size() << " - " << tArrCmd.size();
+    for (int i=0; i<_arrCmd.size(); i++)
+    {
+        bang * _b = new bang(_arrCmd[i]);
+        
+        tArrBang.push_back(_b);
+
+        scene->addChild(_b);
+    }
+
+    //ofLog() << "TL " << _arrCmd.size() << " - " << tArrBang.size();
 
     bracketSize = tWidth * (TIME_SEGMENT/_range);
     
@@ -65,7 +73,7 @@ void timeline::draw(float _scale, float _offset)
     int _t = TIME_SEGMENT;
 
     int tBracket = bracketSize;
-
+    
     while (tBracket < tWidth) {
         
         float _scaledBracket = _scale * tBracket + _offsetX;
@@ -77,12 +85,17 @@ void timeline::draw(float _scale, float _offset)
         _t += TIME_SEGMENT;
     }
 
-    for (int i=0; i<tArrCmd.size(); i++)
+    for (int i=0; i<tArrBang.size(); i++)
     {
-        _loc = tWidth * (tArrCmd[i].timecode / timeRange) * _scale + _offsetX;
-        
-        ofDrawRectangle(_loc-.5*TIME_SIZE, _locActionLine-TIME_SIZE, TIME_SIZE, TIME_SIZE);
-        ttfCmd.drawString(ofToString(tArrCmd[i].cmd), _loc - .3*TIME_SIZE, _locActionLine - CMD_SIZE*.2);
+
+        _loc = tWidth * (tArrBang[i]->getTimecode() / timeRange) * _scale + _offsetX;
+        //ofDrawRectangle(_loc-.5*TIME_SIZE, _locActionLine-TIME_SIZE, TIME_SIZE, TIME_SIZE);
+
+        tArrBang[i]->setPosition(_loc,_locActionLine);
+        tArrBang[i]->scale = _scale;
+        //ttfCmd.drawString(ofToString(tArrBang[i]->getCmd()), _loc - .3*TIME_SIZE, _locActionLine - CMD_SIZE*.2);
+
+        tArrBang[i]->draw();
 
         ofDrawLine(_loc, _locActionLine, _loc, _locActionLine + 20);
     }

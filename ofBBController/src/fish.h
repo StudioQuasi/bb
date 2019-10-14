@@ -83,7 +83,7 @@ protected:
     bool isVisible;
     
     float lastSpokeTime;
-    
+
     /*
     ofxPanel panel;
     ofParameterGroup panelGroup;
@@ -91,7 +91,7 @@ protected:
     ofxIntField fishID;
     ofxIntField fishControllerID;
     ofxIntSlider fishControllerIndex;
-     */
+    */
 
 };
 

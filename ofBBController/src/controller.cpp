@@ -21,10 +21,8 @@ controller::controller(int _controllerIndex, fish* _arrFish[3])
 
 controller::~controller()
 {
-    
 }
 
 void controller::draw()
 {
-    
 }

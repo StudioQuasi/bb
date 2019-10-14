@@ -54,7 +54,7 @@ void ofApp::setup(){
     vector<string> _tracksS = {"chorus.json","guy.json","lead1.json","lead2.json"};
     arrSongs.push_back(song("shoop.mp3","out.json",_tracksS));
     
-    vector<string> _tracksSA = {"sa_chorus.json","sa_lead1.json","sa_lead2.json","sa_lead3.json", "sa_chorus_1.json"};
+    vector<string> _tracksSA = {"sa_01_chorus.json","sa_01_lead.json"};
     arrSongs.push_back(song("stayingalive.mp3","out.json",_tracksSA));
 
     songIndex = 3;
@@ -192,13 +192,28 @@ void ofApp::setup(){
     }
 
     //Create the timeline
-    mainTimeline = new timeline(ofGetWidth(), 100);
+    mainTimeline = new timeline(ofGetWidth(), 100, scene);
 
     mainTimeline->setRange(songLength, arrCmds);
 
 }
 
 //--------------------------------------------------------------
+void ofApp::resetCmdIndex() {
+
+    int _curIndex = 0;
+    float _t = playerSound.getPositionMS() * .001;
+    ofLog() << "* Orig Index : " << nextCmdIndex;
+
+    while (_t > arrCmds[_curIndex]->timecode) {
+            _curIndex++;
+    }
+
+    nextCmdIndex = _curIndex;
+    ofLog() << "Post Index : " << nextCmdIndex;
+}
+
+
 void ofApp::update() {
 
     //Update the touch manager
@@ -209,19 +224,18 @@ void ofApp::update() {
 
     if (state == STATE_PLAYBACK && nextCmdIndex < arrCmds.size()) {
 
-        float _n = arrCmds[nextCmdIndex].timecode;
+        float _n = arrCmds[nextCmdIndex]->timecode;
 
         //float _t = ofGetElapsedTimef() - timeCode;
         float _t = playerSound.getPositionMS() * .001;
 
         if (_t > _n) {
 
-            ofLog() << _t << " " << _n;
-
+            //ofLog() << _t << " " << _n;
             arrPlayedCmds.push_back(arrCmds[nextCmdIndex]);
-            writeCommand(arrCmds[nextCmdIndex].cmd, false, arrCmds[nextCmdIndex].group);
-
+            writeCommand(arrCmds[nextCmdIndex]->cmd, false, arrCmds[nextCmdIndex]->group);
             nextCmdIndex++;
+
         }
     }
 
@@ -361,9 +375,8 @@ void ofApp::createLayoutByParam() {
                                     panelFish
                                      );
             
-            scene->addChild(_f);
+            //scene->addChild(_f);
             arrFish.push_back(_f);
-
         }
     }
 }
@@ -419,7 +432,7 @@ void ofApp::readLayoutJsonFile() {
                                 panelFish
             );
 
-            scene->addChild(_f);
+            //scene->addChild(_f);
             arrFish.push_back(
                 _f
             );
@@ -466,9 +479,9 @@ void ofApp::writeLayoutJsonFile() {
     file_id.close();
 }
 
-bool sortCmds(bbcmd & a, bbcmd & b) {
-    
-    if (a.timecode < b.timecode) {
+bool sortCmds(bbcmd * a, bbcmd * b) {
+
+    if (a->timecode < b->timecode) {
         return true;
     } else {
         return false;
@@ -496,6 +509,8 @@ void ofApp::loadAndPlaySong() {
         ofFile file(ofToDataPath(arrSongs[songIndex].arrTracks[i]));
         ofJson js;
 
+        vector<bbcmd*> _arrCmd;
+
         if(file.exists()){
         
             file >> js;
@@ -509,14 +524,14 @@ void ofApp::loadAndPlaySong() {
                     _group = NULL;
                 }
 
-                arrCmds.push_back(
-                    bbcmd(
-                      _cmd["cmd"],
-                      _cmd["timecode"],
-                      _cmd["set"],
-                      _group
-                    )
+                bbcmd * _bbcmd = new bbcmd(
+                    _cmd["cmd"],
+                    _cmd["timecode"],
+                    _cmd["set"],
+                    _group
                 );
+
+                arrCmds.push_back(_bbcmd);
             
                 _count++;
             }
@@ -563,12 +578,12 @@ void ofApp::writeJsonFile() {
         Json::Value _cmd;
         Json::Value _arrBB(Json::arrayValue);
 
-        _cmd["cmd"] = arrCmds[i].cmd;
-        _cmd["timecode"] = arrCmds[i].timecode;
-        _cmd["set"] = arrCmds[i].sCmd;
-        _cmd["group"] = ofToString(arrCmds[i].group);
+        _cmd["cmd"] = arrCmds[i]->cmd;
+        _cmd["timecode"] = arrCmds[i]->timecode;
+        _cmd["set"] = arrCmds[i]->sCmd;
+        _cmd["group"] = ofToString(arrCmds[i]->group);
 
-        ofLog() << arrCmds[i].cmd << "\t" << arrCmds[i].timecode;
+        ofLog() << arrCmds[i]->cmd << "\t" << arrCmds[i]->timecode;
 
         arrCommands.append(_cmd);
     }
@@ -656,7 +671,7 @@ void ofApp::draw(){
     {
         for (int i=arrCmds.size()-1; i>=0; i--) {
 
-            _s = ofToString(arrCmdNames[arrCmds[i].cmd]) + "  " + ofToString(arrCmds[i].timecode);
+            _s = ofToString(arrCmdNames[arrCmds[i]->cmd]) + "  " + ofToString(arrCmds[i]->timecode);
 
             ttf_side.drawString(_s, ofGetWidth()*.8, _offset);
             _offset += 25;
@@ -667,7 +682,7 @@ void ofApp::draw(){
     {
         for (int i=arrPlayedCmds.size()-1; i>=0; i--) {
             
-            _s = ofToString(arrCmdNames[arrPlayedCmds[i].cmd]) + "  " + ofToString(arrPlayedCmds[i].timecode);
+            _s = ofToString(arrCmdNames[arrPlayedCmds[i]->cmd]) + "  " + ofToString(arrPlayedCmds[i]->timecode);
             
             ttf_side.drawString(_s, ofGetWidth()*.8, _offset);
             _offset += 25;
@@ -857,7 +872,7 @@ void ofApp::writeCommand(int _cmdID, bool _record, char _groupID)
     //Write to the hardware
     serial.writeBytes(_cmd.c_str(), _cmd.length());
 
-    ofLog() << ">>>" << _cmd.c_str();
+    //ofLog() << ">>>" << _cmd.c_str();
 
     //If is a subgroup
     bool _isGroup = false;
@@ -867,7 +882,7 @@ void ofApp::writeCommand(int _cmdID, bool _record, char _groupID)
     }*/
 
     if (_record && state == STATE_RECORD)
-        arrCmds.push_back(bbcmd(_cmdID, _t, _cmd, _groupID));
+        arrCmds.push_back(new bbcmd(_cmdID, _t, _cmd, _groupID));
 
 }
 
@@ -1085,6 +1100,7 @@ void ofApp::keyPressed(int key){
             } else if (state == STATE_PAUSED) {
                 
                 playerSound.setPaused(false);
+                resetCmdIndex();
                 state = STATE_PLAYBACK;
 
             } else if (state == STATE_WAIT) {
