@@ -73,6 +73,8 @@ void bang::onTouchDown(ofxInterface::TouchEvent &event)
 
     anchorX = toLocal(event.position).x;
     anchorTimecodeX = getTimecode();
+    
+    tcmd->isDelete = true;
 }
 
 void bang::onTouchUp(ofxInterface::TouchEvent &event)

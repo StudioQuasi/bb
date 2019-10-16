@@ -53,7 +53,27 @@ void fish::setup(int _wallIndex, char _controllerIndex, int _driverIndex, ofVec2
 
     bMoved = false;
 
-    groupID = NULL;
+    arrGroupID.clear();
+}
+
+bool fish::inGroup(int _gid)
+{
+    for (int i=0; i<arrGroupID.size(); i++)
+    {
+        if (_gid == arrGroupID[i])
+            return true;
+    }
+    return false;
+}
+
+void fish::addGroup(int _id)
+{
+    arrGroupID.push_back(_id);
+}
+
+void fish::clearGroup()
+{
+    arrGroupID.clear();
 }
 
 void fish::onTouchDown(ofxInterface::TouchEvent &event)
@@ -165,8 +185,14 @@ void fish::drawLabel()
 
     int _height = 30;
     
-    if (groupID != NULL) {
-        _label += "\ng:" + ofToString(groupID);
+    if (arrGroupID.size() > 0) {
+        
+        string _g = "";
+        for (int i=0; i<arrGroupID.size(); i++) {
+            _g += ofToString(arrGroupID[i]) + ",";
+        }
+
+        _label += "\ng:" + _g;
         _height = 45;
     }
 

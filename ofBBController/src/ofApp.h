@@ -14,6 +14,7 @@ const int STATE_WAIT = 0;
 const int STATE_RECORD = 1;
 const int STATE_PLAYBACK = 2;
 const int STATE_PAUSED = 3;
+const int STATE_JUKEBOX = 4;
 
 const int CMD_MOUTH_OPEN = 0;
 const int CMD_MOUTH_CLOSE = 1;
@@ -21,7 +22,11 @@ const int CMD_TAIL_ON = 2;
 const int CMD_HEAD_ON = 3;
 const int CMD_BODY_OFF = 4;
 const int CMD_TAIL_OFF = 5;
+const int CMD_BODY_RELEASE = 7;
+const int CMD_TAIL_RELEASE = 8;
+
 const int CMD_SET_GROUP = 6;
+const int CMD_INIT_GROUP = 9;
 
 const int CMD_TYPE_ALL = 1;
 const int CMD_TYPE_LEAD = 0;
@@ -45,7 +50,8 @@ struct group {
     char groupID;
     vector<int> arrFishID;
     int bodyState;
-
+    float lastSpeak;
+    
     group(
         char _groupID,
         vector<int> _arrFishID
@@ -62,7 +68,7 @@ struct song {
     string songFile;
     string cmdFile;
     vector<group*> arrGroup;
-    vector<string> arrTracks;
+    vector<string> arrTrackPaths;
     int trackIndex;
 
     song(
@@ -73,7 +79,7 @@ struct song {
     {
         songFile = _songFile;
         cmdFile = _cmdFile;
-        arrTracks = _arrTracks;
+        arrTrackPaths = _arrTracks;
         
         trackIndex = 0;
     }
@@ -137,6 +143,8 @@ class ofApp : public ofBaseApp{
     ofParameter<int> bbFlatIndex;
     ofParameter<int> bbFlatOffset;
     
+    ofParameter<bool> showTimeline;
+    ofParameter<bool> isRecording;
     ofParameter<bool> bbSongMute;
     ofParameter<bool> bbTimelineActive;
     ofParameter<float> bbTimelineScale;
@@ -153,12 +161,16 @@ class ofApp : public ofBaseApp{
 
     ofxJSONElement result;
 
-    void assignGroup(group * _group);
+    void assignGroup(group * _group, bool _init);
 
     void writeCommand(int _cmdID, bool _record, char _groupID=NULL);
 
     void writeJsonFile();
-    void loadAndPlaySong();
+    
+    void loadTrack(string _file);
+    void loadAndPlaySong(bool allTracks);
+    
+
     void createLayoutByParam();
     void readLayoutJsonFile();
     void writeLayoutJsonFile();
@@ -174,7 +186,7 @@ class ofApp : public ofBaseApp{
     int state;
     ofSoundPlayer playerSound;
     float songLength;
-    float timeCode;
+    //float timeCode;
     bool isPaused;
 
     vector<bbcmd*> arrCmds;
@@ -195,8 +207,8 @@ class ofApp : public ofBaseApp{
     bool _keyOff = true;
     
     string arrCmdNames[5];
-    string arrStateNames[4];
-    
+    string arrStateNames[5];
+
     int nextCmdIndex;
     ofSerial    serial;
 

@@ -41,12 +41,14 @@ void ofApp::setup(){
     arrStateNames[1] = "RECORD";
     arrStateNames[2] = "PLAYBACK";
     arrStateNames[3] = "PAUSED";
+    arrStateNames[4] = "JUKEBOX";
     
     nextCmdIndex = 0;
 
     //Add Songs to Queue
-    vector<string> _tracksHall = {};
-    arrSongs.push_back(song("hallandoats.mp3","hallandouts_good1.json",_tracksHall));
+    vector<string> _tracksTH = {"th_chrous.json","th_lead1.json","th_lead2.json"};
+    //arrSongs.push_back(song("hallandoats.mp3","hallandouts_good1.json",_tracksHall));
+    arrSongs.push_back(song("talking_heads_once.mp3","talkingheads.json",_tracksTH));
     
     vector<string> _tracksSade = {};
     arrSongs.push_back(song("smooth_operator.mp3","smooth_operator.json",_tracksSade));
@@ -57,7 +59,7 @@ void ofApp::setup(){
     vector<string> _tracksSA = {"sa_01_chorus.json","sa_01_lead.json"};
     arrSongs.push_back(song("stayingalive.mp3","out.json",_tracksSA));
 
-    songIndex = 3;
+    songIndex = 0;
 
     //Load First Song
     playerSound.load(ofToDataPath(arrSongs[songIndex].songFile));
@@ -82,13 +84,6 @@ void ofApp::setup(){
     //Add All Gui elements to set
     panelGroup.setName("Bass Layout Params");
 
-    /*
-    panelGroup.add(bbCols.set("Columns",10,1,50));
-    panelGroup.add(bbRows.set("Rows",10,1,50));
-    panelGroup.add(bbColSpacing.set("Col Spacing",20,0,300));
-    panelGroup.add(bbRowSpacing.set("Row Spacing",20,0,300));
-    */
-
     panelGroup.add(masterScale.set("Master Scale",1,.1,10));
     panelGroup.add(masterX.set("Master X",0,-2*ofGetWidth(),2*ofGetWidth()));
     panelGroup.add(masterY.set("Master Y",0,-2*ofGetHeight(),2*ofGetHeight()));
@@ -100,13 +95,14 @@ void ofApp::setup(){
     //panelGroup.add(bbOriginY.set("Origin Y",0,0,ofGetHeight()));
     //panelGroup.add(bbSlope.set("Slope",0,0,200));
     
-    panelGroup.add(bbBGX.set("Background X",0,-ofGetWidth(),ofGetWidth()));
-    panelGroup.add(bbBGY.set("Background Y",0,-ofGetHeight(),ofGetHeight()));
-    panelGroup.add(bbBGScale.set("Background Scale",1,0,10));
+    //panelGroup.add(bbBGX.set("Background X",0,-ofGetWidth(),ofGetWidth()));
+    //panelGroup.add(bbBGY.set("Background Y",0,-ofGetHeight(),ofGetHeight()));
+    //panelGroup.add(bbBGScale.set("Background Scale",1,0,10));
     panelGroup.add(bbShowDebug.set("Show Debug",false));
 
+    panelGroup.add(showTimeline.set("Show timeline", true));
+    panelGroup.add(isRecording.set("Is recording",false));
     panelGroup.add(bbSongMute.set("Mute Song",false));
-    panelGroup.add(bbTimelineActive.set("Timeline Active",true));
     panelGroup.add(bbTimelineScale.set("Timeline Scale",1,1,25));
     panelGroup.add(bbTimelineSlide.set("Timeline Slide",0,0,1));
     panelGroup.add(bbTimelineScrub.set("Timeline Scrub",0,0,1));
@@ -143,20 +139,28 @@ void ofApp::setup(){
     vector<int> _idsSALead3 = {3,17,25,38,49};
     vector<int> _idsSALead4 = {2,16,24,37};
 
-    arrGroups.push_back(new group('v', _idsSALead1));
-    arrGroups.push_back(new group('w', _idsSALead2));
-    arrGroups.push_back(new group('x', _idsSALead3));
-    arrGroups.push_back(new group('y', _idsSALead4));
+    arrGroups.push_back(new group('A', _idsSALead1));
+    arrGroups.push_back(new group('B', _idsSALead2));
+    arrGroups.push_back(new group('C', _idsSALead3));
+    //arrGroups.push_back(new group('D', _idsSALead4));
     
-    vector<int> _idsSAC1 = {0,1};
-    vector<int> _idsSAC2 = {6,7,8,9,10,11,12,13,14,15};
-    vector<int> _idsSAC3 = {20,21,22,23};
-    vector<int> _idsSAC4 = {24,25,26,27,28,29,30,31};
+    vector<int> _idsChorus1 = {0,1,2,3,4,5};
+    vector<int> _idsChorus2 = {6,7,8,9,10,11,12,13,14,15};
+    vector<int> _idsChorus3 = {16,17,18,19,20};
+    vector<int> _idsChorus4 = {21,22,23,24,25,26,27};
+    vector<int> _idsChorus5 = {28,29,30,31,32,33,34,35};
+    vector<int> _idsChorus6 = {36,37,38,39,40,41,42,43,44};
+    vector<int> _idsChorus7 = {45,46,47,48,49,50,51};
+    vector<int> _idsChorus8 = {52,53,54,55};
 
-    arrGroups.push_back(new group('z', _idsSAC1));
-    arrGroups.push_back(new group('a', _idsSAC2));
-    arrGroups.push_back(new group('b', _idsSAC3));
-    arrGroups.push_back(new group('c', _idsSAC4));
+    arrGroups.push_back(new group('D', _idsChorus1));
+    arrGroups.push_back(new group('E', _idsChorus2));
+    arrGroups.push_back(new group('F', _idsChorus3));
+    arrGroups.push_back(new group('G', _idsChorus4));
+    arrGroups.push_back(new group('H', _idsChorus5));
+    arrGroups.push_back(new group('I', _idsChorus6));
+    arrGroups.push_back(new group('J', _idsChorus7));
+    arrGroups.push_back(new group('K', _idsChorus8));
 
     vector<int> _clearArr = {
         0,1,2,3,4,5,6,7,8,9,10,
@@ -184,11 +188,14 @@ void ofApp::setup(){
     arrGroups.push_back(new group('z', _idsFlip2));
     */
 
-    assignGroup(_clearGroup);
+    //assignGroup(_clearGroup);
 
     //Create the groups
-    for (int i=7; i>=0; i--) {
-        assignGroup(arrGroups[i]);
+    bool _initGroup = true;
+    for (int i=0; i<arrGroups.size(); i++) {
+
+        assignGroup(arrGroups[i], _initGroup);
+        _initGroup = false;
     }
 
     //Create the timeline
@@ -205,7 +212,7 @@ void ofApp::resetCmdIndex() {
     float _t = playerSound.getPositionMS() * .001;
     ofLog() << "* Orig Index : " << nextCmdIndex;
 
-    while (_t > arrCmds[_curIndex]->timecode) {
+    while (_curIndex < arrCmds.size() && _t > arrCmds[_curIndex]->timecode) {
             _curIndex++;
     }
 
@@ -216,13 +223,15 @@ void ofApp::resetCmdIndex() {
 
 void ofApp::update() {
 
+    ofSetWindowTitle(ofToString(ofGetFrameRate()));
+
     //Update the touch manager
-    TouchManager::one().update();
+    //TouchManager::one().update();
 
     float dt = 1.0f / 60.0f;
     animMouth.update(dt);
 
-    if (state == STATE_PLAYBACK && nextCmdIndex < arrCmds.size()) {
+    if ((state == STATE_PLAYBACK || state == STATE_JUKEBOX) && nextCmdIndex < arrCmds.size()) {
 
         float _n = arrCmds[nextCmdIndex]->timecode;
 
@@ -235,23 +244,21 @@ void ofApp::update() {
             arrPlayedCmds.push_back(arrCmds[nextCmdIndex]);
             writeCommand(arrCmds[nextCmdIndex]->cmd, false, arrCmds[nextCmdIndex]->group);
             nextCmdIndex++;
-
         }
     }
 
-    if (state == STATE_RECORD) {
+    if (state == STATE_PLAYBACK) {
 
         if (isFlipping)
         {
             if (ofGetElapsedTimef() > nextTail) {
                 
-                float _t = ofGetElapsedTimef() - timeCode;
+                //float _t = ofGetElapsedTimef() - timeCode;
                 
                 if (bTailOn) {
                     
                     //writeCommand(CMD_TAIL_ON, true, arrGroups[2]->groupID);
                     writeCommand(CMD_TAIL_ON, true, NULL);
-                    
                     //writeCommand(CMD_TAIL_OFF, true, arrGroups[3]->groupID);
                     
                     tailGroup = 2;
@@ -293,15 +300,27 @@ void ofApp::update() {
     }
 
     //Update Timeline
-    if (state == STATE_PLAYBACK) {
+    if (state == STATE_PLAYBACK || state == STATE_JUKEBOX) {
 
         bbTimelineScrub.set(playerSound.getPosition());
+
     } else if (state == STATE_PAUSED) {
 
         playerSound.setPosition(bbTimelineScrub.get());
     }
 
-    mainTimeline->update(playerSound.getPosition(), bbTimelineSlide.get());
+    //Update Groups
+    for (int i=0; i<arrGroups.size(); i++)
+    {
+
+        if (ofGetElapsedTimef() > arrGroups[i]->lastSpeak + 1 && arrGroups[i]->bodyState == STATE_BODY_HEAD) {
+            arrGroups[i]->bodyState = STATE_BODY_OFF;
+            writeCommand(CMD_BODY_OFF, true, arrGroups[i]->groupID);
+        }
+    }
+
+    if (showTimeline.get())
+        mainTimeline->update(playerSound.getPosition(), bbTimelineSlide.get());
 
 }
 
@@ -314,11 +333,11 @@ void ofApp::buttonPress() {
         if (songIndex >= arrSongs.size()) {
             songIndex = 0;
         }*/
-        
-        loadAndPlaySong();
-        
-    } else if (state == STATE_PLAYBACK) {
-        
+
+        loadAndPlaySong(true);
+
+    } else if (state == STATE_JUKEBOX) {
+
         playerSound.stop();
         state = STATE_WAIT;
         arrCmds.clear();
@@ -488,71 +507,80 @@ bool sortCmds(bbcmd * a, bbcmd * b) {
     }
 }
 
-void ofApp::loadAndPlaySong() {
+void ofApp::loadTrack(string _file)
+{
+    ofFile file(ofToDataPath(_file));
+    ofJson js;
+
+    if(file.exists()) {
+        
+        file >> js;
+        
+        int _count = 0;
+        for(auto & _cmd: js){
+            
+            char _group = ofToChar(_cmd["group"]);
+            
+            if (_group == '\x01') {
+                _group = NULL;
+            }
+            
+            bbcmd * _bbcmd = new bbcmd(
+                                       _cmd["cmd"],
+                                       _cmd["timecode"],
+                                       _cmd["set"],
+                                       _group
+                                       );
+            
+            arrCmds.push_back(_bbcmd);
+            _count++;
+        }
+        
+        ofLog() << "* Read " << _count;
+    }
+}
+
+void ofApp::loadAndPlaySong(bool _allTracks) {
 
     //Load this song
     playerSound.load(ofToDataPath(arrSongs[songIndex].songFile));
-
+    
+    //timeCode = ofGetElapsedTimef();
+    songLength = getSongLength();
+    
     //Clear the commands
     arrCmds.clear();
-    arrTracks.clear();
+    //arrTracks.clear();
 
     //Clear all the fish
     string _cmd = buildCommandString(CMD_BODY_OFF, NULL);
     serial.writeBytes(_cmd.c_str(), _cmd.length());
     
     //Load the each command file
-    for (int i=0; i<arrSongs[songIndex].arrTracks.size(); i++)
+    if (_allTracks)
     {
-        ofLog() << "* Load track : " << arrSongs[songIndex].arrTracks[i];
+        state = STATE_JUKEBOX;
 
-        ofFile file(ofToDataPath(arrSongs[songIndex].arrTracks[i]));
-        ofJson js;
-
-        vector<bbcmd*> _arrCmd;
-
-        if(file.exists()){
-        
-            file >> js;
-
-            int _count = 0;
-            for(auto & _cmd: js){
-
-                char _group = ofToChar(_cmd["group"]);
-
-                if (_group == '\x01') {
-                    _group = NULL;
-                }
-
-                bbcmd * _bbcmd = new bbcmd(
-                    _cmd["cmd"],
-                    _cmd["timecode"],
-                    _cmd["set"],
-                    _group
-                );
-
-                arrCmds.push_back(_bbcmd);
-            
-                _count++;
-            }
-
-            //Push on track
-            arrTracks.push_back(arrCmds);
-
-            ofLog() << "* Read " << _count;
+        for (int i=0; i<arrSongs[songIndex].arrTrackPaths.size(); i++)
+        {
+            loadTrack(arrSongs[songIndex].arrTrackPaths[i]);
         }
-    }
+    
+    } else {
 
+        //Set state to Playback
+        state = STATE_PLAYBACK;
+
+        int _trackIndex = arrSongs[songIndex].trackIndex;
+        
+        loadTrack(arrSongs[songIndex].arrTrackPaths[_trackIndex]);
+        
+    }
+    
     //Sort the Array of cmds
     ofSort(arrCmds, &sortCmds);
 
-    //Set state to Playback
-    state = STATE_PLAYBACK;
-
-    timeCode = ofGetElapsedTimef();
-
-    songLength = getSongLength();
-    mainTimeline->setRange(songLength, arrTracks[arrSongs[songIndex].trackIndex]);
+    mainTimeline->setRange(songLength, arrCmds);
 
     playerSound.stop();
     playerSound.play();
@@ -563,13 +591,11 @@ void ofApp::loadAndPlaySong() {
 
 }
 
-
-
 void ofApp::writeJsonFile() {
 
     song _s = arrSongs[songIndex];
     
-    string _track = _s.arrTracks[_s.trackIndex];
+    string _track = _s.arrTrackPaths[_s.trackIndex];
 
     Json::Value arrCommands(Json::arrayValue);
     
@@ -615,7 +641,7 @@ void ofApp::draw(){
         ofScale(masterScale.get());
     
         //Draw backgtround image
-        imgStairs.draw(bbBGX.get(), bbBGY.get(), bbBGScale.get()*1102, bbBGScale.get()*702);
+        imgStairs.draw(-10, -105, 1.457*1102, 1.457*702);
 
         for (int i=0; i<arrFish.size(); i++)
         {
@@ -626,27 +652,29 @@ void ofApp::draw(){
 
     ofPopMatrix();
 
-    float _t = 0;
-    if (state == STATE_RECORD || state == STATE_PLAYBACK) {
-        _t = ofGetElapsedTimef() - timeCode;
+    float _t = playerSound.getPositionMS() * .001;
+    ofPushStyle();
+
+    if (isRecording.get()) {
+        ofSetColor(255,0,0);
+    } else {
+        ofSetColor(0);
     }
 
-    ofPushStyle();
-    
-    ofSetColor(0);
     ttf.drawString(ofToString(_t), 20, 250);
-    
+
     switch (state) {
-    
+
         case STATE_WAIT:
             ofSetColor(0);
             break;
-            
+
         case STATE_RECORD:
             ofSetColor(255,0,0);
             break;
-            
+
         case STATE_PLAYBACK:
+        case STATE_JUKEBOX:
             ofSetColor(50,250,50);
             break;
     }
@@ -667,7 +695,7 @@ void ofApp::draw(){
     
     ofSetColor(50);
 
-    if (state == STATE_RECORD)
+    if (state == STATE_JUKEBOX || state == STATE_PLAYBACK)
     {
         for (int i=arrCmds.size()-1; i>=0; i--) {
 
@@ -677,13 +705,13 @@ void ofApp::draw(){
             _offset += 25;
         }
     }
-    
-    if (state == STATE_PLAYBACK)
+
+    if (state == STATE_JUKEBOX || state == STATE_PLAYBACK)
     {
         for (int i=arrPlayedCmds.size()-1; i>=0; i--) {
-            
+
             _s = ofToString(arrCmdNames[arrPlayedCmds[i]->cmd]) + "  " + ofToString(arrPlayedCmds[i]->timecode);
-            
+    
             ttf_side.drawString(_s, ofGetWidth()*.8, _offset);
             _offset += 25;
         }
@@ -698,16 +726,16 @@ void ofApp::draw(){
     ofSetColor(0,255,0);
     ttf.drawString("Billy Bass Wall", 20, 40);
     ttf.drawString("\"" + arrSongs[songIndex].songFile + "\"", 20, 90);
-    
-    for (int i=0; i<arrSongs[songIndex].arrTracks.size(); i++)
+
+    for (int i=0; i<arrSongs[songIndex].arrTrackPaths.size(); i++)
     {
-        
+
         if (i == arrSongs[songIndex].trackIndex)
             ofSetColor(255,0,0);
         else
             ofSetColor(0,0,0);
 
-        ttf_side.drawString("\"" + arrSongs[songIndex].arrTracks[i] + "\"", 20, 120 + i*20);
+        ttf_side.drawString("\"" + arrSongs[songIndex].arrTrackPaths[i] + "\"", 20, 120 + i*20);
     }
 
     ofPopStyle();
@@ -720,7 +748,8 @@ void ofApp::draw(){
     }
 
     //Draw Timeline
-    mainTimeline->draw(bbTimelineScale.get(), bbTimelineSlide.get());
+    if (showTimeline.get())
+        mainTimeline->draw(bbTimelineScale.get(), bbTimelineSlide.get());
 
 }
 
@@ -791,7 +820,7 @@ void ofApp::testAllTails() {
     }
 }
 
-void ofApp::assignGroup(group * _group)
+void ofApp::assignGroup(group * _group, bool _init)
 {
     ofLog() << "* Assign Group";
 
@@ -799,12 +828,17 @@ void ofApp::assignGroup(group * _group)
     int assignIndex = 0;
     int fishIndex = 0;
     float _nextTime = 0;
-
+    
     for (int i=0; i<_group->arrFishID.size(); i++)
     {
         //Set Group ID
-        arrFish[_group->arrFishID[i]]->groupID = _group->groupID;
+        if (_init)
+            arrFish[_group->arrFishID[i]]->clearGroup();
+
+        arrFish[_group->arrFishID[i]]->addGroup(_group->groupID);
     }
+
+    char _g = _init ? CMD_INIT_GROUP : CMD_SET_GROUP;
 
     if (bCreateGroups)
     {
@@ -839,7 +873,7 @@ void ofApp::writeCommand(int _cmdID, bool _record, char _groupID)
 
     string _cmd = buildCommandString(_cmdID, _groupID);
 
-    float _t = ofGetElapsedTimef() - timeCode;
+    //float _t = ofGetElapsedTimef() - timeCode;
 
     switch (_cmdID) {
 
@@ -872,18 +906,16 @@ void ofApp::writeCommand(int _cmdID, bool _record, char _groupID)
     //Write to the hardware
     serial.writeBytes(_cmd.c_str(), _cmd.length());
 
-    //ofLog() << ">>>" << _cmd.c_str();
-
     //If is a subgroup
     bool _isGroup = false;
-    /*
-    if (_cmdType == CMD_TYPE_LEAD) {
-        _isGroup = true;
-    }*/
 
-    if (_record && state == STATE_RECORD)
+    if (_record && isRecording.get()) { // state == STATE_RECORD)
+        //a
+        
+        float _t = playerSound.getPositionMS() * .001;
         arrCmds.push_back(new bbcmd(_cmdID, _t, _cmd, _groupID));
-
+        //arrTracks[songIndex].push_back(new bbcmd(_cmdID, _t, _cmd, _groupID));
+    }
 }
 
 void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, char _groupID)
@@ -894,7 +926,7 @@ void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, char _g
         if (
             _groupID == NULL
             ||
-            _groupID == arrFish[i]->groupID
+            arrFish[i]->inGroup(_groupID)
         )
         {
         //    (_cmdType == CMD_TYPE_LEAD && arrFish[i]->isLead)
@@ -916,35 +948,72 @@ void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, char _g
 //--------------------------------------------------------------
 int ofApp::getKeyIndex(char _key)
 {
+    int _out = -1;
 
     switch(_key) {
-        
+
+        case '4':
+        case 'r':
+        case 'f':
+        case 'v':
+            _out = -1;
+            break;
+
+        case '5':
+        case 't':
+        case 'g':
+        case 'b':
+            _out = 0;
+            break;
+
         case '6':
         case 'y':
         case 'h':
         case 'n':
-            return -1;
+            _out = 1;
+            break;
         
         case '7':
         case 'u':
         case 'j':
         case 'm':
-            return 0;
+            _out = 2;
+            break;
             
         case '8':
         case 'i':
         case 'k':
         case ',':
-            return 1;
+            _out = 3;
+            break;
             
         case '9':
         case 'o':
         case 'l':
         case '.':
-            return 2;
+            _out = 4;
+            break;
+            
+        case '0':
+        case 'p':
+        case ';':
+        case '/':
+            _out = 5;
+            break;
+            
+        case '-':
+        case '[':
+        case '\'':
+        case ']':
+            _out = 6;
+            break;
     }
 
-    return NULL;
+    if (_out >= 0) {
+        _out += 3;
+    }
+
+    return _out;
 }
 
 void ofApp::keyPressed(int key){
@@ -959,76 +1028,63 @@ void ofApp::keyPressed(int key){
         if (_groupIndex >= 0) {
             _groupID = arrGroups[_groupIndex]->groupID;
         }
+        
     switch (key) {
-            
-        case 's':
-            
-            if (state == STATE_WAIT) {
-                
-                state = STATE_RECORD;
-                //isFlipping = !isFlipping;
 
-                playerSound.play();
-                playerSound.setPosition(OFFSET_POSITION);
+        case '4':
 
-            } else if (state == STATE_RECORD) {
+            if (state != STATE_PLAYBACK || isRecording.get()) {
                 
-                
-                isPaused = !isPaused;
-                playerSound.setPaused(isPaused);
-                
-            } else if (state == STATE_PLAYBACK) {
+                animMouth.animateTo(1);
 
-                playerSound.stop();
-                state = STATE_WAIT;
+                //float _t = ofGetElapsedTimef() - timeCode;
+                int _cmd = CMD_MOUTH_OPEN;
+                writeCommand(_cmd, true, _groupID);
             }
-            
-            timeCode = ofGetElapsedTimef();
             break;
 
-        case 'r':
-            
-            playerSound.stop();
-            playerSound.setPosition(0);
-            playerSound.unload();
-            
-            state = STATE_WAIT;
-            arrCmds.clear();
-            
-            break;
-
+        case '5':
         case '6':
         case '7':
         case '8':
         case '9':
+        case '0':
+        case '-':
             
-            if (state != STATE_PLAYBACK) {
+            if (state != STATE_PLAYBACK || isRecording.get()) {
 
                 animMouth.animateTo(1);
                 
                 //float _t = ofGetElapsedTimef() - timeCode;
                 int _cmd = CMD_MOUTH_OPEN;
                 
-                if (key == '6') {
-                }
-                
-                if ((key == '7' || key == '8' | key == '9') && arrGroups[_groupIndex]->bodyState != CMD_HEAD_ON) {
+                if (
+                    (
+                     (key >= '1' && key <= '9') || key == '0' || key == '-'
+                    )
+                    && arrGroups[_groupIndex]->bodyState != CMD_HEAD_ON
+                )
+                {
 
                     writeCommand(CMD_HEAD_ON, true, _groupID);
                     arrGroups[_groupIndex]->bodyState = CMD_HEAD_ON;
+                    arrGroups[_groupIndex]->lastSpeak = ofGetElapsedTimef();
                 }
 
                 writeCommand(_cmd, true, _groupID);
             }
             break;
 
+        case 'f':
+        case 'g':
         case 'h':
         case 'j':
         case 'k':
         case 'l':
+        case ';':
+        case ']':
             
-            if (state != STATE_PLAYBACK) {
-
+            if (state != STATE_PLAYBACK || isRecording.get()) {
 
                 int _cmd = CMD_HEAD_ON;
                 
@@ -1040,55 +1096,67 @@ void ofApp::keyPressed(int key){
             }
             break;
 
-
+        case 'r':
+        case 't':
         case 'y':
         case 'u':
         case 'i':
         case 'o':
+        case 'p':
+        case '[':
     
-            if (state != STATE_PLAYBACK) {
+            if (state != STATE_PLAYBACK || isRecording.get()) {
 
                 int _cmd = CMD_TAIL_ON;
                 writeCommand(_cmd, true, _groupID);
             }
             break;
 
+        case 'v':
+        case 'b':
         case 'n':
         case 'm':
         case ',':
         case '.':
+        case '/':
+        case '\'':
             
-            if (state != STATE_PLAYBACK) {
-
-                /*int _cmdType;
-
-                if (key == ',') {
-                    _cmdType = 1;
-                } else {
-                    _cmdType = 0;
-                }*/
+            if (state != STATE_PLAYBACK || isRecording.get()) {
                 
                 if (_groupIndex >= 0) {
                     arrGroups[_groupIndex]->bodyState = CMD_BODY_OFF;
                 }
-                writeCommand(CMD_HEAD_ON, true, _groupID);
+                //writeCommand(CMD_HEAD_ON, true, _groupID);
                 writeCommand(CMD_BODY_OFF, true, _groupID);
             }
             break;
 
+        //Stop video
+        case 'e':
+            
+            playerSound.stop();
+            playerSound.setPosition(0);
+            playerSound.unload();
+            
+            state = STATE_WAIT;
+            arrCmds.clear();
+            
+            break;
+        
+        //Write a track
         case 'w':
             ofLog() << "Commands:";
-
             writeJsonFile();
             break;
 
-        case 'a':
+        //Press Button
+        case 'c':
             
             buttonPress();
-
             break;
 
-        case 'p':
+        //Load or pause a track
+        case 'q':
             
             ofLog() << "Read layout json file.";
             
@@ -1100,44 +1168,55 @@ void ofApp::keyPressed(int key){
             } else if (state == STATE_PAUSED) {
                 
                 playerSound.setPaused(false);
+                mainTimeline->setRange(songLength, arrCmds);
+
                 resetCmdIndex();
                 state = STATE_PLAYBACK;
 
             } else if (state == STATE_WAIT) {
                 
-                loadAndPlaySong();
+                loadAndPlaySong(false);
             }
             break;
             
-        case 't':
+        //Toggle flipping
+        case 'x':
             
             isFlipping = !isFlipping;
             break;
-            
-        //case 'x':
-            
-        //    for (int i=0; i<arrFish.size(); i++)
-        //    {
-        //        arrFish[i]->setBodyState(STATE_MOUTH_OPEN, -1);
-        //    }
-        //    break;
         
-        case '1':
-
-            writeLayoutJsonFile();
-            break;
-        
-        case '2':
-
-            testAllTails();
+        //Play jukebox
+        case 'a':
+            
+            if (state == STATE_JUKEBOX) {
+                
+                playerSound.setPaused(true);
+                state = STATE_PAUSED;
+                
+            } else if (state == STATE_PAUSED) {
+                
+                playerSound.setPaused(false);
+                mainTimeline->setRange(songLength, arrCmds);
+                
+                resetCmdIndex();
+                state = STATE_JUKEBOX;
+                
+            } else if (state == STATE_WAIT) {
+                
+                mainTimeline->setRange(songLength, arrCmds);
+                loadAndPlaySong(true);
+            }
+            
             break;
             
         case '3':
 
             arrSongs[songIndex].trackIndex++;
-            if (arrSongs[songIndex].trackIndex >= arrSongs[songIndex].arrTracks.size()) {
+            if (arrSongs[songIndex].trackIndex >= arrSongs[songIndex].arrTrackPaths.size()) {
                 arrSongs[songIndex].trackIndex = 0;
             }
+            
+            loadAndPlaySong(false);
             break;
 
         }
@@ -1154,31 +1233,32 @@ void ofApp::keyReleased(int key){
 
     int _groupIndex = getKeyIndex(key);
     if (_groupIndex >= 0) {
+
         _groupID = arrGroups[_groupIndex]->groupID;
+        arrGroups[_groupIndex]->lastSpeak = ofGetElapsedTimef();
     }
     
-    switch (key) {
+    if (state != STATE_JUKEBOX)
+    {
+        switch (key) {
 
-        case '6':
-        case '7':
-        case '8':
-        case '9':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '0':
+            case '-':
+            case '=':
             
-            if (state != STATE_PLAYBACK) {
-                
-                //float _t = ofGetElapsedTimef() - timeCode;
-                
                 animMouth.animateTo(0);
 
-                writeCommand(CMD_MOUTH_CLOSE, true, _groupID);
-
-                //serial.writeBytes(_cmd.c_str(), _cmd.length());
-                //if (state == STATE_RECORD)
-                //   arrCmds.push_back(bbcmd(CMD_MOUTH_CLOSE, _t, _cmd));
-            }
-            break;
-            
+                writeCommand(CMD_MOUTH_CLOSE, isRecording.get(), _groupID);
+                break;
+        }
     }
+
 }
 
 //--------------------------------------------------------------

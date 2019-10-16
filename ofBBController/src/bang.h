@@ -23,6 +23,7 @@ struct bbcmd {
     string sCmd;
     Byte arrIndex[5];
     Byte group;
+    bool isDelete;
     
     bbcmd(
           int _cmdID,
@@ -36,6 +37,7 @@ struct bbcmd {
         timecode = _timecode;
         sCmd = _cmdString;
         group = _group;
+        isDelete = false;
     }
 };
 

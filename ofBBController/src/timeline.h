@@ -24,7 +24,7 @@ public:
     void draw(float _scale, float _offset);
 
     void update(float _t, float _scrub);
-    void setRange(float _range, vector<bbcmd*> _arrCmd);
+    void setRange(float _range, vector<bbcmd*> &_arrCmd);
 
 protected:
     
@@ -39,7 +39,7 @@ protected:
     int pixelLoc;
     int bracketSize;
     
-    //vector<bbcmd> tArrCmd;
+    vector<bbcmd*> tArrCmd;
     vector<bang*> tArrBang;
     
     ofTrueTypeFont ttf, ttfCmd;

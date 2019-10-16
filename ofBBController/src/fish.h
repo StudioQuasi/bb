@@ -48,18 +48,21 @@ public:
 
     int getBodyState();
     
+    void addGroup(int _id);
+    bool inGroup(int _groupID);
+    void clearGroup();
+
+
     bool isLead;
-    
     void onTouchDown(TouchEvent &event);
     void onTouchMove(TouchEvent &event);
     void onTouchUp(TouchEvent &event);
 
     char controllerIndex;
     int driverIndex;
-    
+
     vector<char> arrGroupID;
-    char groupID;
-    
+
     int id;
 
 protected:

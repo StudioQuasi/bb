@@ -18,31 +18,36 @@ timeline::timeline(int _w, int _h, ofxInterface::Node* _scene)
     ttfCmd.load("mono.ttf", CMD_SIZE);
 }
 
-void timeline::setRange(float _range, vector<bbcmd*> _arrCmd)
+void timeline::setRange(float _range, vector<bbcmd*> &_arrCmd)
 {
+    tArrBang.clear();
 
     timeRange = _range;
     
     for (int i=0; i<_arrCmd.size(); i++)
     {
-        bang * _b = new bang(_arrCmd[i]);
-        
-        tArrBang.push_back(_b);
+        if (_arrCmd[i]->isDelete) {
 
-        scene->addChild(_b);
+            _arrCmd.erase( _arrCmd.begin() + i);
+
+        } else {
+
+            bang * _b = new bang(_arrCmd[i]);
+        
+            tArrBang.push_back(_b);
+
+            scene->addChild(_b);
+        }
     }
 
     //ofLog() << "TL " << _arrCmd.size() << " - " << tArrBang.size();
-
     bracketSize = tWidth * (TIME_SEGMENT/_range);
-    
 }
 
 void timeline::update(float _loc, float _scrub)
 {
+
     timeLoc = _loc;
-    
-    
 }
 
 void timeline::draw(float _scale, float _offset)
