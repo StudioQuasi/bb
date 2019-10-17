@@ -43,6 +43,8 @@ const float OFFSET_POSITION = 0; //.303;
 const int NUM_FISH = 63;
 const int NUM_CONTROLLER = 21;
 
+const int KEY_OFFSET = 0;
+
 const bool isLoop = false;
 
 struct group {
@@ -70,6 +72,7 @@ struct song {
     vector<group*> arrGroup;
     vector<string> arrTrackPaths;
     int trackIndex;
+    float fadePoint;
 
     song(
         string _songFile,
@@ -144,8 +147,10 @@ class ofApp : public ofBaseApp{
     ofParameter<int> bbFlatOffset;
     
     ofParameter<bool> showTimeline;
+    ofParameter<bool> isDrawBang;
     ofParameter<bool> isRecording;
     ofParameter<bool> bbSongMute;
+    ofParameter<bool> autoSleep;
     ofParameter<bool> bbTimelineActive;
     ofParameter<float> bbTimelineScale;
     ofParameter<float> bbTimelineSlide;

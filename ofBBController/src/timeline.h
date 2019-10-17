@@ -21,7 +21,7 @@ public:
 
     timeline(int _x, int _y, ofxInterface::Node* scene);
 
-    void draw(float _scale, float _offset);
+    void draw(float _scale, float _offset, bool _showBang);
 
     void update(float _t, float _scrub);
     void setRange(float _range, vector<bbcmd*> &_arrCmd);

@@ -46,7 +46,7 @@ void ofApp::setup(){
     nextCmdIndex = 0;
 
     //Add Songs to Queue
-    vector<string> _tracksTH = {"th_chrous.json","th_lead1.json","th_lead2.json"};
+    vector<string> _tracksTH = {"th_chrous.json","th_lead1.json","th_lead2.json", "th_beat.json"};
     //arrSongs.push_back(song("hallandoats.mp3","hallandouts_good1.json",_tracksHall));
     arrSongs.push_back(song("talking_heads_once.mp3","talkingheads.json",_tracksTH));
     
@@ -70,7 +70,7 @@ void ofApp::setup(){
     serial.listDevices();
     vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
 
-    int baud = 9600;
+    int baud = 19200;
     serial.setup(0, baud); //open the first device
     
     bTailOn = false;
@@ -100,7 +100,9 @@ void ofApp::setup(){
     //panelGroup.add(bbBGScale.set("Background Scale",1,0,10));
     panelGroup.add(bbShowDebug.set("Show Debug",false));
 
+    panelGroup.add(autoSleep.set("Auto sleep lead",false));
     panelGroup.add(showTimeline.set("Show timeline", true));
+    panelGroup.add(isDrawBang.set("Draw Bang",true));
     panelGroup.add(isRecording.set("Is recording",false));
     panelGroup.add(bbSongMute.set("Mute Song",false));
     panelGroup.add(bbTimelineScale.set("Timeline Scale",1,1,25));
@@ -152,6 +154,19 @@ void ofApp::setup(){
     vector<int> _idsChorus6 = {36,37,38,39,40,41,42,43,44};
     vector<int> _idsChorus7 = {45,46,47,48,49,50,51};
     vector<int> _idsChorus8 = {52,53,54,55};
+
+    vector<int> _idsChorusA = {0,1,2,3,4,5,
+    16,17,18,19,20,
+    28,29,30,31,32,33,34,35,
+    45,46,47,48,49,50,51};
+    
+    vector<int> _idsChorusB = {6,7,8,9,10,11,12,13,14,15,
+    21,22,23,24,25,26,27,
+    36,37,38,39,40,41,42,43,44,
+    52,53,54,55};
+    
+    arrGroups.push_back(new group('L', _idsChorusA));
+    arrGroups.push_back(new group('M', _idsChorusB));
 
     arrGroups.push_back(new group('D', _idsChorus1));
     arrGroups.push_back(new group('E', _idsChorus2));
@@ -241,7 +256,7 @@ void ofApp::update() {
         if (_t > _n) {
 
             //ofLog() << _t << " " << _n;
-            arrPlayedCmds.push_back(arrCmds[nextCmdIndex]);
+            //arrPlayedCmds.push_back(arrCmds[nextCmdIndex]);
             writeCommand(arrCmds[nextCmdIndex]->cmd, false, arrCmds[nextCmdIndex]->group);
             nextCmdIndex++;
         }
@@ -310,14 +325,15 @@ void ofApp::update() {
     }
 
     //Update Groups
-    for (int i=0; i<arrGroups.size(); i++)
-    {
+    if (autoSleep.get())
 
-        if (ofGetElapsedTimef() > arrGroups[i]->lastSpeak + 1 && arrGroups[i]->bodyState == STATE_BODY_HEAD) {
-            arrGroups[i]->bodyState = STATE_BODY_OFF;
-            writeCommand(CMD_BODY_OFF, true, arrGroups[i]->groupID);
+        for (int i=0; i<arrGroups.size(); i++)
+        {
+            if (ofGetElapsedTimef() > arrGroups[i]->lastSpeak + 1 && arrGroups[i]->bodyState == STATE_BODY_HEAD) {
+                arrGroups[i]->bodyState = STATE_BODY_OFF;
+                writeCommand(CMD_BODY_OFF, true, arrGroups[i]->groupID);
+            }
         }
-    }
 
     if (showTimeline.get())
         mainTimeline->update(playerSound.getPosition(), bbTimelineSlide.get());
@@ -695,7 +711,7 @@ void ofApp::draw(){
     
     ofSetColor(50);
 
-    if (state == STATE_JUKEBOX || state == STATE_PLAYBACK)
+    if (false) //state == STATE_JUKEBOX || state == STATE_PLAYBACK)
     {
         for (int i=arrCmds.size()-1; i>=0; i--) {
 
@@ -706,7 +722,7 @@ void ofApp::draw(){
         }
     }
 
-    if (state == STATE_JUKEBOX || state == STATE_PLAYBACK)
+    if (false) //state == STATE_JUKEBOX || state == STATE_PLAYBACK)
     {
         for (int i=arrPlayedCmds.size()-1; i>=0; i--) {
 
@@ -748,9 +764,9 @@ void ofApp::draw(){
     }
 
     //Draw Timeline
-    if (showTimeline.get())
-        mainTimeline->draw(bbTimelineScale.get(), bbTimelineSlide.get());
-
+    if (showTimeline.get()) {
+        mainTimeline->draw(bbTimelineScale.get(), bbTimelineSlide.get(), isDrawBang.get() );
+    }
 }
 
 string ofApp::buildCommandString(int _cmd, char _group)
@@ -893,7 +909,9 @@ void ofApp::writeCommand(int _cmdID, bool _record, char _groupID)
             _body = STATE_BODY_HEAD;
             break;
             
+        case CMD_BODY_RELEASE:
         case CMD_BODY_OFF:
+        case CMD_TAIL_RELEASE:
         case CMD_TAIL_OFF:
             _body = STATE_BODY_OFF;
             break;
@@ -934,7 +952,9 @@ void ofApp::setAllBodyState(int _mouthState, int _bodyState, int _cmdID, char _g
         //    (_cmdType == CMD_TYPE_OTHERS && !arrFish[i]->isLead)
         //)
         //{
-            if (arrFish[i]->getBodyState() == STATE_BODY_HEAD && (_cmdID == CMD_TAIL_ON || _cmdID == CMD_TAIL_OFF)) {
+            if (arrFish[i]->getBodyState() == STATE_BODY_HEAD &&
+                (_cmdID == CMD_TAIL_ON || _cmdID == CMD_TAIL_OFF || _cmdID == CMD_TAIL_RELEASE)
+            ) {
 
                 arrFish[i]->setBodyState(_mouthState, -1);
             } else {
@@ -1010,7 +1030,7 @@ int ofApp::getKeyIndex(char _key)
     }
 
     if (_out >= 0) {
-        _out += 3;
+        _out += KEY_OFFSET;
     }
 
     return _out;
@@ -1067,6 +1087,16 @@ void ofApp::keyPressed(int key){
                 {
 
                     writeCommand(CMD_HEAD_ON, true, _groupID);
+                    if (_groupID == 'L') {
+                        
+                        arrGroups[4]->bodyState = CMD_BODY_RELEASE;
+                        writeCommand(CMD_BODY_RELEASE, true, 'M');
+                    } else if (_groupID == 'M') {
+                        
+                        arrGroups[3]->bodyState = CMD_BODY_RELEASE;
+                        writeCommand(CMD_BODY_RELEASE, true, 'L');
+                    }
+
                     arrGroups[_groupIndex]->bodyState = CMD_HEAD_ON;
                     arrGroups[_groupIndex]->lastSpeak = ofGetElapsedTimef();
                 }
@@ -1180,6 +1210,14 @@ void ofApp::keyPressed(int key){
             break;
             
         //Toggle flipping
+        case 'd':
+            arrCmds.clear();
+            break;
+            
+        case 'z':
+            testAllTails();
+            break;
+            
         case 'x':
             
             isFlipping = !isFlipping;
@@ -1216,7 +1254,7 @@ void ofApp::keyPressed(int key){
                 arrSongs[songIndex].trackIndex = 0;
             }
             
-            loadAndPlaySong(false);
+            //loadAndPlaySong(false);
             break;
 
         }
