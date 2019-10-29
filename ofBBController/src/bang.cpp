@@ -53,14 +53,14 @@ int bang::getCmd()
     return tcmd->cmd;
 }
 
-float bang::getTimecode()
+int bang::getTimecode()
 {
-    return tcmd->timecode;
+    return tcmd->timecodeL;
 }
 
-void bang::setTimecode(float _t)
+void bang::setTimecode(int _t)
 {
-    tcmd->timecode = _t;
+    tcmd->timecodeL = _t;
 }
 
 void bang::onTouchDown(ofxInterface::TouchEvent &event)

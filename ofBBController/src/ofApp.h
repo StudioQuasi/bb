@@ -47,20 +47,26 @@ const int KEY_OFFSET = 0;
 
 const bool isLoop = false;
 
+//const int MAX_DIFF = 50;
+
 struct group {
 
     char groupID;
     vector<int> arrFishID;
     int bodyState;
+    
     float lastSpeak;
     
+    int lastCmd;
+    int lastBody;
+
     group(
         char _groupID,
         vector<int> _arrFishID
     )
     {
         groupID = _groupID;
-        
+
         arrFishID = _arrFishID;
     }
 };
@@ -72,18 +78,27 @@ struct song {
     vector<group*> arrGroup;
     vector<string> arrTrackPaths;
     int trackIndex;
-    float fadePoint;
+    int fadePoint;
+    bool isFade;
 
     song(
         string _songFile,
         string _cmdFile,
-        vector<string> _arrTracks
+        vector<string> _arrTracks,
+        float _fadePoint
     )
     {
         songFile = _songFile;
         cmdFile = _cmdFile;
         arrTrackPaths = _arrTracks;
         
+        if (_fadePoint > 0) {
+            fadePoint = _fadePoint * 1000;
+            isFade = true;
+        } else {
+            isFade = false;
+        }
+
         trackIndex = 0;
     }
 };
@@ -146,10 +161,18 @@ class ofApp : public ofBaseApp{
     ofParameter<int> bbFlatIndex;
     ofParameter<int> bbFlatOffset;
     
+    ofParameter<bool> bShowDisplay;
+
+    ofParameter<bool> isCreateGroups;
+
     ofParameter<bool> showTimeline;
     ofParameter<bool> isDrawBang;
     ofParameter<bool> isRecording;
     ofParameter<bool> bbSongMute;
+    ofParameter<int> songTweak;
+    ofParameter<float> songVolume;
+    ofParameter<int> maxDiff;
+
     ofParameter<bool> autoSleep;
     ofParameter<bool> bbTimelineActive;
     ofParameter<float> bbTimelineScale;
@@ -168,6 +191,8 @@ class ofApp : public ofBaseApp{
 
     void assignGroup(group * _group, bool _init);
 
+    void playbackCommand();
+    void displayCommand(int _cmdID, char _groupID);
     void writeCommand(int _cmdID, bool _record, char _groupID=NULL);
 
     void writeJsonFile();
@@ -209,9 +234,11 @@ class ofApp : public ofBaseApp{
 
     string layoutFile;
     ofxAnimatableFloat animMouth;
+    ofxAnimatableFloat animFadeOut;
+
     bool _keyOff = true;
-    
-    string arrCmdNames[5];
+
+    string arrCmdNames[9];
     string arrStateNames[5];
 
     int nextCmdIndex;
@@ -221,7 +248,7 @@ class ofApp : public ofBaseApp{
     float nextTail;
     bool isFlipping;
     int _lastCmd;
-    
+
     float nextTailOff;
     bool isTailUp = false;
     int tailGroup = 0;
@@ -229,8 +256,10 @@ class ofApp : public ofBaseApp{
     //Background stairs image
     ofImage imgStairs;
 
-    bool bCreateGroups = false;
-    
+    //bool bCreateGroups = false;
+
     timeline * mainTimeline;
 
+    void nextSong();
+    
 };

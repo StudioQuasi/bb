@@ -20,14 +20,17 @@ struct bbcmd {
     
     int cmd;
     float timecode;
+    int timecodeL;
     string sCmd;
     Byte arrIndex[5];
     Byte group;
     bool isDelete;
+    int groupIndex;
     
     bbcmd(
           int _cmdID,
           float _timecode,
+          int _timecodeL,
           string _cmdString,
           Byte _group
           )
@@ -38,6 +41,7 @@ struct bbcmd {
         sCmd = _cmdString;
         group = _group;
         isDelete = false;
+        timecodeL = _timecodeL;
     }
 };
 
@@ -56,8 +60,8 @@ public:
     void onTouchUp(TouchEvent &event);
 
     int getCmd();
-    float getTimecode();
-    void setTimecode(float _t);
+    int getTimecode();
+    void setTimecode(int _t);
     
     float scale;
 

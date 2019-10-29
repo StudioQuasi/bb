@@ -64,6 +64,7 @@ public:
     vector<char> arrGroupID;
 
     int id;
+    int initGroup;
 
 protected:
 

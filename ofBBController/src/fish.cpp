@@ -54,6 +54,8 @@ void fish::setup(int _wallIndex, char _controllerIndex, int _driverIndex, ofVec2
     bMoved = false;
 
     arrGroupID.clear();
+    
+    initGroup = false;
 }
 
 bool fish::inGroup(int _gid)

@@ -93,7 +93,7 @@ void timeline::draw(float _scale, float _offset, bool _drawBang)
 
     for (int i=0; i<tArrBang.size(); i++)
     {
-        _loc = tWidth * (tArrBang[i]->getTimecode() / timeRange) * _scale + _offsetX;
+        _loc = tWidth * (.001 * tArrBang[i]->getTimecode() / timeRange) * _scale + _offsetX;
 
         if (_drawBang) {
 
