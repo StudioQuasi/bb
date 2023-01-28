@@ -14,7 +14,7 @@ void ofApp::setup(){
 
     state = STATE_WAIT;
 
-    layoutFile = "new_layout.json";
+    layoutFile = "layout_6.json";
 
     isPaused = false;
     
@@ -91,7 +91,7 @@ void ofApp::setup(){
     serial.listDevices();
     vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
 
-    int baud = 57600; //19200;
+    int baud = 9600; //19200;
     serial.setup(0, baud); //open the first device
     
     bTailOn = false;
@@ -235,15 +235,16 @@ void ofApp::setup(){
         51,52,53,54,55
     };
 
-    //assignGroup(_clearGroup);
 
     //Create the groups
+    /*
     bool _initGroup = true;
     for (int i=0; i<arrGroups.size(); i++) {
 
         assignGroup(arrGroups[i], _initGroup);
         _initGroup = false;
     }
+     */
 
     //Create the timeline
     mainTimeline = new timeline(ofGetWidth(), 100, scene);
@@ -251,7 +252,7 @@ void ofApp::setup(){
     mainTimeline->setRange(songLength, arrCmds);
 
     //Output Log
-    ofLogToFile("log.txt", true);
+    //ofLogToFile("log.txt", true);
 
 }
 
@@ -437,6 +438,7 @@ void ofApp::update() {
 
     if (showTimeline.get())
         mainTimeline->update(playerSound.getPosition(), bbTimelineSlide.get());
+
 }
 
 void ofApp::buttonPress() {
@@ -1083,14 +1085,14 @@ void ofApp::writeCommand(int _cmdID, bool _record, char _groupID)
 
     //Write to the hardware
     serial.writeBytes(_cmd.c_str(), _cmd.length());
-    ofLog() << _cmd.c_str();
+    ofLog() << ">>> " << _cmd.c_str();
 
     if (_record && isRecording.get()) { // state == STATE_RECORD)
 
         long _l = playerSound.getPositionMS();
         float _t = playerSound.getPositionMS() * .001;
         
-        ofLog() << _l << "," << _t;
+        //ofLog() << _l << "," << _t;
 
         
         arrCmds.push_back(new bbcmd(_cmdID, _t, _l, _cmd, _groupID));
@@ -1234,6 +1236,8 @@ void ofApp::keyPressed(int key){
 
     char _groupID = NULL;
 
+    ofLog() << "key " << key;
+    
     if (_keyOff == true) {
         
         _keyOff = false;

@@ -1,0 +1,44 @@
+[
+   {
+      "controllerIndex" : "a",
+      "driverIndex" : 2,
+      "id" : 0,
+      "x" : 304,
+      "y" : 683
+   },
+   {
+      "controllerIndex" : "a",
+      "driverIndex" : 1,
+      "id" : 1,
+      "x" : 325,
+      "y" : 710
+   },
+   {
+      "controllerIndex" : "b",
+      "driverIndex" : 0,
+      "id" : 2,
+      "x" : 315,
+      "y" : 599
+   },
+   {
+      "controllerIndex" : "b",
+      "driverIndex" : 1,
+      "id" : 3,
+      "x" : 335,
+      "y" : 625
+   },
+   {
+      "controllerIndex" : "c",
+      "driverIndex" : 0,
+      "id" : 4,
+      "x" : 354,
+      "y" : 651
+   },
+   {
+      "controllerIndex" : "c",
+      "driverIndex" : 1,
+      "id" : 5,
+      "x" : 373,
+      "y" : 679
+   }
+]

@@ -1,0 +1,544 @@
+
+
+--------------------------------------- 2023-01-27-13-56-51-468
+
+
+--------------------------------------- 2023-01-27-14-14-24-762
+
+
+--------------------------------------- 2023-01-27-14-16-10-577
+
+
+--------------------------------------- 2023-01-27-14-18-24-764
+
+
+--------------------------------------- 2023-01-27-14-18-45-917
+[notice ] Start Load
+[notice ] End Load
+[notice ] * Read 183
+[notice ] * Read 308
+[notice ] * Read 122
+[notice ] * Read 247
+[notice ] * Read 0
+[notice ] Start Play
+[notice ] Commands:
+[notice ] []
+
+[notice ] * Write 0
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 3
+
+[notice ] 3A
+
+[notice ] 4
+
+[notice ] 3A
+
+[notice ] 3
+
+[notice ] 3
+
+
+
+--------------------------------------- 2023-01-27-14-26-40-232
+
+
+--------------------------------------- 2023-01-27-14-33-27-031
+
+
+--------------------------------------- 2023-01-27-14-36-01-896
+[notice ] 3
+
+[notice ] 3
+
+[notice ] 3
+
+[notice ] 3A
+
+[notice ] 3
+
+[notice ] 2
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3A
+
+[notice ] 3
+
+[notice ] 2
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 3A
+
+[notice ] 4A
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 2
+
+[notice ] 2
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 3A
+
+[notice ] 3
+
+[notice ] 2
+
+[notice ] 3A
+
+[notice ] 4A
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 3
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+
+
+--------------------------------------- 2023-01-27-14-39-35-436
+[notice ] 3
+
+[notice ] 2
+
+[notice ] 3
+
+[notice ] 3A
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 3
+
+[notice ] 4
+
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+[notice ] 0
+
+[notice ] 0,0
+[notice ] 1
+
+[notice ] 0,0
+
+
+--------------------------------------- 2023-01-27-14-45-44-837
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+
+
+--------------------------------------- 2023-01-27-14-47-47-351
+[notice ] key 52
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] key 52
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] key 52
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] key 52
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] key 52
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] key 52
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] key 52
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] key 52
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] key 52
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] key 52
+[notice ] >>> 0
+
+[notice ] >>> 1
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 102
+[notice ] >>> 3
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 102
+[notice ] >>> 3
+
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 102
+[notice ] >>> 3
+
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 102
+[notice ] >>> 3
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 102
+[notice ] >>> 3
+
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 102
+[notice ] >>> 3
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 114
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 114
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 114
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 114
+[notice ] key 118
+[notice ] >>> 4
+
+[notice ] key 114
+[notice ] key 114
+[notice ] >>> 2
+
+[notice ] key 118
