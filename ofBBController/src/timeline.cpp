@@ -41,13 +41,11 @@ void timeline::setRange(float _range, vector<bbcmd*> &_arrCmd)
         }
     }
 
-    //ofLog() << "TL " << _arrCmd.size() << " - " << tArrBang.size();
     bracketSize = tWidth * (TIME_SEGMENT/_range);
 }
 
 void timeline::update(float _loc, float _scrub)
 {
-
     timeLoc = _loc;
 }
 
@@ -108,6 +106,7 @@ void timeline::draw(float _scale, float _offset, bool _drawBang)
     
     ofSetLineWidth(1);
     ofSetColor(255,0,0);
+    
     ofDrawLine(_locPosX,_locTimelineY,_locPosX,ofGetHeight());
 
     ofPopStyle();

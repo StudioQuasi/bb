@@ -61,10 +61,11 @@ void ofApp::setup(){
     arrStateNames[4] = "JUKEBOX";
     
     nextCmdIndex = 0;
-    
-    vector<string> _tracksChoices = {"choices_chorus.json","choices_lead1.json","choices_lead2.json", "choices_beat.json", "choices_accenta.json", "choices_test.json"};
-    arrSongs.push_back(song("choices.mp3","",_tracksChoices, 165));
-    
+
+    vector<string> _tracksChoices = {"fish_flapping/fish_flapping.json"};
+    arrSongs.push_back(song("fish_flapping/fish_flapping.mp3","",_tracksChoices, 165));
+
+    /*
     vector<string> _tracksLou = {"walk_lead.json","walk_chorus.json"};
     arrSongs.push_back(song("mobydick.mp3","",_tracksLou, 222));
     //arrSongs.push_back(song("walkonthewildside.mp3","",_tracksLou, 222));
@@ -78,6 +79,7 @@ void ofApp::setup(){
     
     vector<string> _tracksSA = {"sa_beat_2.json", "sa_lead1.json", "sa_lead2.json", "sa_lead3.json", "sa_chorus_new.json"};
     arrSongs.push_back(song("stayingalive.mp3","out.json",_tracksSA, 101));
+    */
 
     //vector<string> _mt_se = {"mt_se_lead.json", "mt_se_beat.json"};
     //arrSongs.push_back(song("straight_edge.mp3","out.json",_mt_se, 0));
@@ -92,11 +94,18 @@ void ofApp::setup(){
     vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
 
     int baud = 9600; //19200;
-    serial.setup(0, baud); //open the first device
-    
+
+    for (int i=0; i<deviceList.size(); i++) {
+
+        if (deviceList[i].getDeviceName() == "ass") {
+            serial.setup(i, baud); //open the first device
+            isSerial = true;
+        }
+    }
+
     bTailOn = false;
     nextTail = 0;
-    
+
     isFlipping = false;
     
     //Open stairs image
@@ -124,7 +133,7 @@ void ofApp::setup(){
     panelGroup.add(isCreateGroups.set("Create Groups",false));
 
     panelGroup.add(maxDiff.set("Max diff",50,0,200));
-    panelGroup.add(songVolume.set("Song volume",1.0,0,1.0));
+    panelGroup.add(songVolume.set("Song volume",0.2,0,1.0));
     panelGroup.add(songTweak.set("Song Tweak",0,-500,500));
     panelGroup.add(bbSongMute.set("Mute Song",false));
     
@@ -167,9 +176,11 @@ void ofApp::setup(){
     vector<int> _mt3 = {4,3,9,10,0,1,5,2,8,14,7,15};
     vector<int> _mt4 = {4,3,9,10,0,1,5,2,8,14,15,6,7,12,13,18,19,17,11,16,20};
 
+    /*
     arrGroups.push_back(new group('A', _idsSALead1));
     arrGroups.push_back(new group('B', _idsSALead2));
     arrGroups.push_back(new group('C', _idsSALead3));
+    */
 
     vector<int> idsAllBut = {
         0,1,
@@ -213,6 +224,7 @@ void ofApp::setup(){
         49,50,51,
         54,55};
 
+    /*
     arrGroups.push_back(new group('D', _idsChorus1));
     arrGroups.push_back(new group('F', _idsChorus3));
     arrGroups.push_back(new group('H', _idsChorus5));
@@ -225,7 +237,15 @@ void ofApp::setup(){
     
     arrGroups.push_back(new group('L', _idsChorusA));
     arrGroups.push_back(new group('M', _idsChorusB));
-    
+    */
+
+    arrGroups.push_back(new group('0', {0}));
+    arrGroups.push_back(new group('1', {1}));
+    arrGroups.push_back(new group('2', {2}));
+    arrGroups.push_back(new group('3', {3}));
+    arrGroups.push_back(new group('4', {4}));
+    arrGroups.push_back(new group('5', {5}));
+
     vector<int> _clearArr = {
         0,1,2,3,4,5,6,7,8,9,10,
         11,12,13,14,15,16,17,18,19,20,
@@ -235,20 +255,16 @@ void ofApp::setup(){
         51,52,53,54,55
     };
 
-
     //Create the groups
-    /*
     bool _initGroup = true;
     for (int i=0; i<arrGroups.size(); i++) {
 
         assignGroup(arrGroups[i], _initGroup);
         _initGroup = false;
     }
-     */
 
     //Create the timeline
     mainTimeline = new timeline(ofGetWidth(), 100, scene);
-
     mainTimeline->setRange(songLength, arrCmds);
 
     //Output Log
@@ -256,11 +272,16 @@ void ofApp::setup(){
 
 }
 
+float ofApp::getSongPosition() {
+
+    return  isPlaying ? ofGetSystemTimeMillis() - tmrSong : 0;
+}
+
 //--------------------------------------------------------------
 void ofApp::resetCmdIndex() {
 
     int _curIndex = 0;
-    float _t = playerSound.getPositionMS();
+    float _t = getSongPosition(); //playerSound.getPositionMS();
     ofLog() << "* Orig Index : " << nextCmdIndex;
 
     while (_curIndex < arrCmds.size() && _t > arrCmds[_curIndex]->timecodeL) {
@@ -285,13 +306,13 @@ void ofApp::update() {
     float dt = 1.0f / 60.0f;
     animFadeOut.update(dt);
 
-    int _t = playerSound.getPositionMS() + songTweak.get();
+    int _t = getSongPosition(); // playerSound.getPositionMS() + songTweak.get();
 
     if (_t<0) _t=0;
 
     if ((state == STATE_JUKEBOX || state == STATE_PLAYBACK) && nextCmdIndex < arrCmds.size()) {
 
-        if (playerSound.isPlaying())
+        if (_t * .001 < songLength) //playerSound.isPlaying())
         {
 
             int _nextIndex = arrCmds.size() > (nextCmdIndex + 1) ? nextCmdIndex + 1 : nextCmdIndex;
@@ -329,7 +350,9 @@ void ofApp::update() {
 
                 ofLog() << _cmd.c_str();
 
-                serial.writeBytes(_cmd.c_str(), _cmd.length());
+                if (isSerial)
+                    serial.writeBytes(_cmd.c_str(), _cmd.length());
+
                 nextCmdIndex++;
             }
 
@@ -356,12 +379,12 @@ void ofApp::update() {
         }
         else
         {
-            ofLog() << "Ass";
+            state = STATE_PAUSED;
         }
 
     } else {
 
-        playerSound.setVolume(songVolume.get());
+        //playerSound.setVolume(songVolume.get());
     }
 
     if (state == STATE_PLAYBACK || state == STATE_PAUSED || state == STATE_WAIT) {
@@ -396,7 +419,7 @@ void ofApp::update() {
         }
     }
 
-    if ( serial.available() > 0) {
+    /*if ( serial.available() > 0) {
 
         char _in = serial.readByte();
         
@@ -405,8 +428,7 @@ void ofApp::update() {
             ofLog() << _in;
             buttonPress();
         }
-
-    }
+    }*/
 
     //Mute spongs
     if (bbSongMute.get() != bSongMute) {
@@ -436,8 +458,9 @@ void ofApp::update() {
             }
         }
 
-    if (showTimeline.get())
-        mainTimeline->update(playerSound.getPosition(), bbTimelineSlide.get());
+    float _p = (getSongPosition() * .001) / songLength;
+    
+    mainTimeline->update(_p, bbTimelineSlide.get());
 
 }
 
@@ -688,7 +711,9 @@ void ofApp::loadAndPlaySong(bool _allTracks) {
 
     //Clear all the fish
     string _cmd = buildCommandString(CMD_BODY_OFF, NULL);
-    serial.writeBytes(_cmd.c_str(), _cmd.length());
+    
+    if (isSerial)
+        serial.writeBytes(_cmd.c_str(), _cmd.length());
     
     //Load the each command file
     if (_allTracks)
@@ -720,7 +745,10 @@ void ofApp::loadAndPlaySong(bool _allTracks) {
     
     ofLog() << "Start Play";
 
-    playerSound.play();
+    tmrSong = ofGetSystemTimeMillis();
+
+    //playerSound.play();
+    isPlaying = true;
     playerSound.setPosition(OFFSET_POSITION);
 
     nextCmdIndex = 0;
@@ -790,7 +818,7 @@ void ofApp::draw(){
         ofPopMatrix();
     }
 
-    float _t = playerSound.getPositionMS() * .001;
+    float _t = getSongPosition() * .001; //playerSound.getPositionMS() * .001;
     ofPushStyle();
 
     if (isRecording.get()) {
@@ -905,6 +933,15 @@ void ofApp::draw(){
     }
 }
 
+string ofApp::buildFullCmdString(int _cmd, int _board, int _index)
+{
+    string _scmd = ofToString(_board) + ofToString(_index) + ofToString(_cmd);
+
+    _scmd += "\n";
+
+    return _scmd;
+}
+
 string ofApp::buildCommandString(int _cmd, char _group)
 {
     string _scmd = ofToString(_cmd);
@@ -950,7 +987,8 @@ void ofApp::testAllTails() {
             "\n";
          
             //Write the Bytes
-            serial.writeBytes(_cmd.c_str(), _cmd.length());
+            if (isSerial)
+                serial.writeBytes(_cmd.c_str(), _cmd.length());
         }
 
         if (ofGetElapsedTimef() > _nextTimeOn)
@@ -972,7 +1010,8 @@ void ofApp::testAllTails() {
             ofLog() << _cmd;
 
             //Write the Bytes
-            serial.writeBytes(_cmd.c_str(), _cmd.length());
+            if (isSerial)
+                serial.writeBytes(_cmd.c_str(), _cmd.length());
 
             isUp = true;
             currFish = fishIndex;
@@ -1025,7 +1064,8 @@ void ofApp::assignGroup(group * _group, bool _init)
             ofLog() << _cmd;
 
             //Write the Bytes
-            serial.writeBytes(_cmd.c_str(), _cmd.length());
+            if (isSerial)
+                serial.writeBytes(_cmd.c_str(), _cmd.length());
             
             _nextTime = ofGetElapsedTimef() + .5;
             fishIndex++;
@@ -1076,6 +1116,61 @@ void ofApp::playbackCommand()
     
 }
 
+void ofApp::writeCommandNew(int _cmdID, bool _record, char _groupID)
+{
+
+    int _board, _fishIndex;
+    
+    switch (_groupID) {
+            
+        case '0':
+            _board = 0;
+            _fishIndex = 0;
+            break;
+        case '1':
+            _board = 0;
+            _fishIndex = 0;
+            break;
+        case '2':
+            _board = 0;
+            _fishIndex = 0;
+            break;
+        case '3':
+            _board = 0;
+            _fishIndex = 0;
+            break;
+        case '4':
+            _board = 0;
+            _fishIndex = 0;
+            break;
+        case '5':
+            _board = 0;
+            _fishIndex = 0;
+            break;
+    }
+
+    displayCommand(_cmdID, _groupID);
+
+    //string _cmd = buildCommandString(_cmdID, _groupID);
+    string _cmd = buildFullCmdString(_cmdID, _board, _fishIndex);
+    
+    //Write to the hardware
+    if (isSerial)
+        serial.writeBytes(_cmd.c_str(), _cmd.length());
+
+    ofLog() << ">>> " << _cmd.c_str();
+
+    if (_record && isRecording.get()) { // state == STATE_RECORD)
+
+        long _l = getSongPosition(); // playerSound.getPositionMS();
+        float _t = getSongPosition() * .001; // playerSound.getPositionMS() * .001;
+        //ofLog() << _l << "," << _t;
+        
+        arrCmds.push_back(new bbcmd(_cmdID, _t, _l, _cmd, _groupID));
+    }
+
+}
+
 void ofApp::writeCommand(int _cmdID, bool _record, char _groupID)
 {
 
@@ -1084,13 +1179,15 @@ void ofApp::writeCommand(int _cmdID, bool _record, char _groupID)
     string _cmd = buildCommandString(_cmdID, _groupID);
 
     //Write to the hardware
-    serial.writeBytes(_cmd.c_str(), _cmd.length());
+    if (isSerial)
+        serial.writeBytes(_cmd.c_str(), _cmd.length());
+    
     ofLog() << ">>> " << _cmd.c_str();
 
     if (_record && isRecording.get()) { // state == STATE_RECORD)
 
-        long _l = playerSound.getPositionMS();
-        float _t = playerSound.getPositionMS() * .001;
+        long _l = getSongPosition(); //playerSound.getPositionMS();
+        float _t = getSongPosition() * .001; //playerSound.getPositionMS() * .001;
         
         //ofLog() << _l << "," << _t;
 
@@ -1202,14 +1299,12 @@ int ofApp::getKeyIndex(char _key)
 
 void ofApp::nextSong() {
 
-    //Load First Song
-    //playerSound.load(ofToDataPath(arrSongs[songIndex].songFile));
-    //songLength = getSongLength();
-
     
     if (playerSound.isPlaying()) {
     
+        isPlaying = false;
         playerSound.stop();
+
         playerSound.setPosition(0);
         playerSound.unload();
         
@@ -1228,15 +1323,11 @@ void ofApp::nextSong() {
 
         loadAndPlaySong(true);
     }
-    
-
 }
 
 void ofApp::keyPressed(int key){
 
     char _groupID = NULL;
-
-    ofLog() << "key " << key;
     
     if (_keyOff == true) {
         
@@ -1246,10 +1337,9 @@ void ofApp::keyPressed(int key){
         if (_groupIndex >= 0) {
             _groupID = arrGroups[_groupIndex]->groupID;
         }
-        
-    switch (key) {
 
-        case '4':
+        /*
+         case '4':
 
             if (state != STATE_PLAYBACK || isRecording.get()) {
                 
@@ -1258,16 +1348,6 @@ void ofApp::keyPressed(int key){
                 int _cmd = CMD_MOUTH_OPEN;
                 
                 writeCommand(_cmd, true, NULL);
-
-                /*
-                writeCommand(_cmd, true, 'N');
-                isTailUp = !isTailUp;
-                if (isTailUp) {
-                    writeCommand(CMD_TAIL_ON, true, 'N');
-                } else {
-                    writeCommand(CMD_TAIL_OFF, true, 'N');
-                }
-                 */
             }
             break;
 
@@ -1311,15 +1391,49 @@ void ofApp::keyPressed(int key){
                 writeCommand(_cmd, true, _groupID);
             }
             break;
+        */
 
-        case 'f':
+    switch (key) {
+
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+
+            if (state != STATE_PLAYBACK || isRecording.get()) {
+
+                animMouth.animateTo(1);
+
+                int _cmd = CMD_MOUTH_OPEN;
+            
+                /*if (arrGroups[_groupIndex]->bodyState != CMD_HEAD_ON)
+                {
+                    writeCommandNew(CMD_HEAD_ON, true, _groupID);
+                    arrGroups[_groupIndex]->bodyState = CMD_HEAD_ON;
+                    arrGroups[_groupIndex]->lastSpeak = ofGetElapsedTimef();
+                }*/
+
+                writeCommandNew(_cmd, true, _groupID);
+            }
+            break;
+
+
+        case 't':
+        case 'y':
+        case 'u':
+        case 'i':
+    
+            if (state != STATE_PLAYBACK || isRecording.get()) {
+
+                int _cmd = CMD_TAIL_ON;
+                writeCommandNew(_cmd, true, _groupID);
+            }
+            break;
+
         case 'g':
         case 'h':
         case 'j':
         case 'k':
-        case 'l':
-        case ';':
-        case ']':
             
             if (state != STATE_PLAYBACK || isRecording.get()) {
 
@@ -1329,52 +1443,34 @@ void ofApp::keyPressed(int key){
                     arrGroups[_groupIndex]->bodyState = CMD_HEAD_ON;
                 }
 
-                writeCommand(_cmd, true, _groupID);
+                writeCommandNew(_cmd, true, _groupID);
             }
             break;
 
-        case 'r':
-        case 't':
-        case 'y':
-        case 'u':
-        case 'i':
-        case 'o':
-        case 'p':
-        case '[':
-    
-            if (state != STATE_PLAYBACK || isRecording.get()) {
-
-                int _cmd = CMD_TAIL_ON;
-                writeCommand(_cmd, true, _groupID);
-            }
-            break;
-
-        case 'v':
         case 'b':
         case 'n':
         case 'm':
         case ',':
-        case '.':
-        case '/':
-        case '\'':
             
             if (state != STATE_PLAYBACK || isRecording.get()) {
                 
                 if (_groupIndex >= 0) {
                     arrGroups[_groupIndex]->bodyState = CMD_BODY_OFF;
                 }
-                //writeCommand(CMD_HEAD_ON, true, _groupID);
-                writeCommand(CMD_BODY_OFF, true, _groupID);
+                writeCommandNew(CMD_BODY_OFF, true, _groupID);
             }
             break;
 
         //Stop video
         case 'e':
             
+            isPlaying = false;
             playerSound.stop();
             playerSound.setPosition(0);
             playerSound.unload();
             
+            tmrSong = ofGetSystemTimeMillis();
+
             state = STATE_WAIT;
             arrCmds.clear();
             
@@ -1399,11 +1495,13 @@ void ofApp::keyPressed(int key){
             
             if (state == STATE_PLAYBACK) {
                 
+                isPlaying = false;
                 playerSound.setPaused(true);
                 state = STATE_PAUSED;
 
             } else if (state == STATE_PAUSED) {
                 
+                isPlaying = true;
                 playerSound.setPaused(false);
                 mainTimeline->setRange(songLength, arrCmds);
 
@@ -1412,11 +1510,11 @@ void ofApp::keyPressed(int key){
 
             } else if (state == STATE_WAIT) {
                 
+                isPlaying = true;
                 loadAndPlaySong(false);
             }
             break;
             
-        //Toggle flipping
         case 'd':
             arrCmds.clear();
             break;
@@ -1499,7 +1597,7 @@ void ofApp::keyReleased(int key){
             
                 animMouth.animateTo(0);
 
-                writeCommand(CMD_MOUTH_CLOSE, isRecording.get(), _groupID);
+                writeCommandNew(CMD_MOUTH_CLOSE, isRecording.get(), _groupID);
                 break;
         }
     }

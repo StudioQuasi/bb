@@ -65,8 +65,8 @@ struct group {
         vector<int> _arrFishID
     )
     {
-        groupID = _groupID;
 
+        groupID = _groupID;
         arrFishID = _arrFishID;
     }
 };
@@ -124,14 +124,14 @@ class ofApp : public ofBaseApp{
 		
         void resetCmdIndex();
     
-        string buildCommandString(int _cmd, char _type);
-    
+    string buildCommandString(int _cmd, char _type);
+    string buildFullCmdString(int _cmd, int _board, int _index);
+
     void buttonPress();
-    
     void setAllBodyState(int _mouthState, int _bodyState, int _cmdID, char _groupID=NULL);
 
     ofxInterface::Node* scene;
-    
+
     //Gui Panel
     ofxPanel panel;
     ofxPanel * panelFish;
@@ -194,12 +194,13 @@ class ofApp : public ofBaseApp{
     void playbackCommand();
     void displayCommand(int _cmdID, char _groupID);
     void writeCommand(int _cmdID, bool _record, char _groupID=NULL);
+    void writeCommandNew(int _cmdID, bool _record, char _groupID);
 
     void writeJsonFile();
-    
     void loadTrack(string _file);
     void loadAndPlaySong(bool allTracks);
     
+    float getSongPosition();
 
     void createLayoutByParam();
     void readLayoutJsonFile();
@@ -253,13 +254,16 @@ class ofApp : public ofBaseApp{
     bool isTailUp = false;
     int tailGroup = 0;
 
+    bool isSerial = false;
+
     //Background stairs image
     ofImage imgStairs;
 
     //bool bCreateGroups = false;
 
     timeline * mainTimeline;
-
     void nextSong();
     
+    float tmrSong = 0;
+    bool isPlaying = false;
 };
